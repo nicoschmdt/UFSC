@@ -14,6 +14,19 @@ public class Operacao {
 		this.resultado = 0;
 	}
 
+	void medPond(int num1, int num2, int p1, int p2) {
+		this.resultado = ((num1*p1)+(num2*p2))/(p1+p2);
+		return this.resultado;
+		}
+
+	 int calcFat(int num) {
+		int temp = num;
+		for(int i = num - 1; i > 0; i--) {
+			temp = temp * i;
+		}
+		this.resultado = temp;
+	}
+
 	void soma() {
 		this.resultado = this.num1 + this.num2;	
 	}

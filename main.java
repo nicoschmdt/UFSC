@@ -1,7 +1,8 @@
+package operacoes;
+import java.util.Scanner;
 public class Main {
-
 	public static void main(String[] args) {
-		int n1, n2, p1, p2;
+		int n1, n2;
 		double res;
 		
 		Scanner input = new Scanner(System.in);
@@ -23,6 +24,11 @@ public class Main {
 
 		res = operacao.dividir(n1, n2);
 		System.out.println("O resultado da divisão dos números é: "+ res);	
+		
+		operacao.calcFat(n1);
+		System.out.println("O resultado do fatorial é: " + operacao.getResultado());
 
+		res = operacao.medPond(n1,n2,p1,p2);
+		System.out.println("O resultado da Media Ponderada é: " + res);	
 	}
 }
