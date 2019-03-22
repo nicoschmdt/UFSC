@@ -30,5 +30,11 @@ public class Main {
 
 		res = operacao.medPond(n1,n2,p1,p2);
 		System.out.println("O resultado da Media Ponderada é: " + res);	
+
+		operacao.subtrair();
+		System.out.println("O resultado da subtração é: "+ operacao.getResultado());
+		
+		res= operacao.calcularPotencia();
+		System.out.println("O resultado da potência dos números é: "+ res);
 	}
 }

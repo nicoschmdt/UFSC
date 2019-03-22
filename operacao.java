@@ -27,6 +27,20 @@ public class Operacao {
 		this.resultado = temp;
 	}
 
+	void subtrair() {
+		this.resultado= this.num1 - this.num2;
+	}
+	
+	double calcularPotencia() {
+		int i= num2;
+		double r=1;
+		while(i>=1) {
+			r*= num1;
+			i--;
+		}
+		return this.resultado= r;
+	}
+
 	void soma() {
 		this.resultado = this.num1 + this.num2;	
 	}
