@@ -5,6 +5,7 @@ public class Camp {
 	//o bomb placement
 	//how the click thingy works, theres the 3 ifs I have to do
 	//gotta do the lose system too, maybe in another class?
+	//i think I can merge de Camp class and the Map class
 	
 	private boolean have_bomb;
 	

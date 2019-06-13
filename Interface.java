@@ -59,7 +59,7 @@ public class Interface extends JFrame{
 		about.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(Interface.this,
-						"Hello!\nIf you have never played Minesweeper before here is what you have to do!\nTry clicking the buttons bellow, you'll see that it appears a number\nthis number show the quantity of bombs near the place you just clicked\nyour objective is to clear all the area that doesn't have bombs!\n\n Good luck!",
+						"Hello!\n\nIf you have never played Minesweeper before here is what you have to do!\nTry clicking the buttons bellow, you'll see that it appears a number\nthis number show the quantity of bombs near the place you just clicked\nyour objective is to clear all the area that doesn't have bombs!\n\n Good luck!",
 						"About",JOptionPane.PLAIN_MESSAGE);
 			}
 		});
