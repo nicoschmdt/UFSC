@@ -23,13 +23,14 @@ public class Interface extends JFrame{
 	private Map map;
 	// I believe I have to add a JPanel(?)
 	private JPanel panel;
+	//trying to add the select level
+	private String selected_difficult = "Easy";
 	
 	public Interface() {
 		super("Minesweeper");
 		//PANEL
 		setLayout(new FlowLayout());
 		
-
 		panel = new JPanel(new BorderLayout());
 		panel.setPreferredSize(new Dimension(600,600));
 		//
@@ -48,7 +49,11 @@ public class Interface extends JFrame{
 		level = new JRadioButtonMenuItem[levels.length];
 		levelButtonGroup = new ButtonGroup();
 		for(int i = 0; i < levels.length; i++) {
-			level[i] = new JRadioButtonMenuItem(levels[i]);
+			if(i == 0) {
+				level[i] = new JRadioButtonMenuItem(levels[i],true);
+			}else {
+				level[i] = new JRadioButtonMenuItem(levels[i]);
+			}
 			difficult.add(level[i]);
 			levelButtonGroup.add(level[i]);
 //			level[i].addActionListener(levelHandler); // still have to do this part
@@ -73,8 +78,12 @@ public class Interface extends JFrame{
 		
 		
 	}
-	
-	
+	public void set_difficulty(String s) {
+		selected_difficult = s;
+	}
+	public String get_difficulty() {
+		return selected_difficult;
+	}
 	
 	//main
 	public static void main(String[] args) {
