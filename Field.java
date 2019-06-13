@@ -1,5 +1,5 @@
 
-public class Camp {
+public class Field {
 	//this class is for an only camp
 	//preciso implementar nessa classe o flood system
 	//o bomb placement
@@ -9,19 +9,19 @@ public class Camp {
 	
 	private boolean have_bomb;
 	
-	public Camp() {
+	public Field() {
 		
 	}
 	
-	
-	public void place_bomb() {
+	public void set_bomb() {//esse set funciona..?
 		have_bomb = true;		
+	}
+	public boolean have_bomb() {
+		return have_bomb;
 	}
 	//method that returns how much bombs are near the area clicked
 	public int bombs_near() {
 		//TODO
 		return 0;
 	}
-	
-	
 }
