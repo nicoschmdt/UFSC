@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 public class Map extends JPanel implements ActionListener{
 	
 	private Field[][] field; //this is the matrix he'll go to confirm whats going on
-	private JButton[][] buttons; //the clickable part of the minesweeper
+	private JButton[][] buttons;
 	//the next variables follow the order of easy -> medium -> hard kind of setup.
 	//still idk how to connect those two parts :(
 	private int[] quantity_of_bombs = {10,40,100};
@@ -28,8 +28,15 @@ public class Map extends JPanel implements ActionListener{
 	public Map() {
 //		super();
 		int var_size = size_of_map[0];
-		//
+		//Im gonna try initialize the field var
 		field = new Field[size_of_map[level]][size_of_map[level]];
+		for(int i = 0; i < size_of_map[level]; i ++) {
+			for(int j = 0; j < size_of_map[level]; j ++) {
+				field[i][j] = new Field();
+			}
+		}
+		//now the map has bombs
+		sort_bomb_placement(buttons,size_of_map[level]);
 		
 		buttons = new JButton[size_of_map[level]][size_of_map[level]];
 		//inicializando o objeto constraints
@@ -65,14 +72,12 @@ public class Map extends JPanel implements ActionListener{
 		
 	}
 	public void sort_bomb_placement(JButton[][] jb,int size_of_matrix) {
-		//gotta generalize this
+		
 		random = new Random();
 		//this way it'll choose an aleatory place in the matrix
-		column = random.nextInt(size_of_matrix); 
-		line = random.nextInt(size_of_matrix);
 		for(int i = 0; i < quantity_of_bombs[level]; i++) {
-			column = random.nextInt(); 
-			line = random.nextInt();
+			column = random.nextInt(size_of_matrix);
+			line = random.nextInt(size_of_matrix);
 			if(field[line][column].have_bomb()) {
 				i--;
 			}else {
@@ -97,9 +102,20 @@ public class Map extends JPanel implements ActionListener{
 //		if(buttons[pos_i][pos_j] == (JButton)e.getSource()) {
 			btn.setEnabled(false);
 			btn.setBackground(new Color(205,179,139));
+//			if(field[i_compare][j_compare].have_bomb()) {
+//				//TODO 
+//				//game finish
+//				btn.setBackground(new Color(000,178,238));
+//				
+//			}else {
+//				
+//			}
+//			else if() {//se nao tiver bomba mas for numero
+//				
+//			}else {//se nao tiver bomba nem numero
+//				
+//			}
 //		}
 		//verify if there's a bomb and then decide what is going to happen
-//		buttons[i][j].setBackground(new Color(205,179,139));
-//		buttons[i][j].setEnabled(false);
 	}
 }
