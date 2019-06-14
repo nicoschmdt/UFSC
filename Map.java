@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -5,12 +6,10 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
-
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-public class Map extends JPanel {
+public class Map extends JPanel implements ActionListener{
 	
 	private Field[][] field; //this is the matrix he'll go to confirm whats going on
 	private JButton[][] buttons; //the clickable part of the minesweeper
@@ -24,17 +23,15 @@ public class Map extends JPanel {
 	private int column;
 	private int line;
 	//the number of the position to get with the level chosen
-	private int level;
-	
+	private int level = 0;
+
 	public Map() {
 //		super();
 		int var_size = size_of_map[0];
-		 // gotta generalize this but for the test I'm letting it this way
-		//if pois o tamanho depende da dificuldade, deixarei sem o if por enquanto
-		//gotta generalize this construction using ifs
-		field = new Camp[10][10];
+		//
+		field = new Field[size_of_map[level]][size_of_map[level]];
 		
-		buttons = new JButton[10][10];
+		buttons = new JButton[size_of_map[level]][size_of_map[level]];
 		//inicializando o objeto constraints
 		
 		grid_layout = new GridBagLayout();
@@ -48,23 +45,11 @@ public class Map extends JPanel {
 				buttons[i][j] = new JButton("");
 				//
 				buttons[i][j].setPreferredSize(new Dimension(25,25));
+				buttons[i][j].setBackground(new Color(205,200,177));
 				addComponent(buttons[i][j],i+1,j,1,1);
-				
-			}
-		}
-		//ACTIONLISTENER
-		for(int i = 0; i < var_size ; i++) {
-			for(int j = 0; j < var_size; j++) {
-				buttons[i][j].addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						//TODO
-						//verify if there's a bomb and then decide what is going to happen
-						
-					}
-				});
-			
+
+				//actionListener
+				buttons[i][j].addActionListener(this);			
 			}
 		}
 		
@@ -77,8 +62,8 @@ public class Map extends JPanel {
 		}else {
 			level = 2;
 		}
+		
 	}
-
 	public void sort_bomb_placement(JButton[][] jb,int size_of_matrix) {
 		//gotta generalize this
 		random = new Random();
@@ -105,5 +90,16 @@ public class Map extends JPanel {
 		grid_layout.setConstraints(component, constraints);
 		add(component);
 		
-}
+	}
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		JButton btn = (JButton) e.getSource();
+//		if(buttons[pos_i][pos_j] == (JButton)e.getSource()) {
+			btn.setEnabled(false);
+			btn.setBackground(new Color(205,179,139));
+//		}
+		//verify if there's a bomb and then decide what is going to happen
+//		buttons[i][j].setBackground(new Color(205,179,139));
+//		buttons[i][j].setEnabled(false);
+	}
 }
