@@ -15,7 +15,7 @@ public class Map extends JPanel implements ActionListener{
 	private JButton[][] buttons;
 	//the next variables follow the order of easy -> medium -> hard kind of setup.
 	//still idk how to connect those two parts :(
-	private int[] quantity_of_bombs = {10,40,100};
+	private int[] quantity_of_bombs = {35,95,200};
 	private int[] size_of_map = {10,18,24};
 	private GridBagConstraints constraints;
 	private GridBagLayout grid_layout;
@@ -27,18 +27,18 @@ public class Map extends JPanel implements ActionListener{
 
 	public Map() {
 //		super();
-		int var_size = size_of_map[0];
-		//Im gonna try initialize the field var
-		field = new Field[size_of_map[level]][size_of_map[level]];
-		for(int i = 0; i < size_of_map[level]; i ++) {
-			for(int j = 0; j < size_of_map[level]; j ++) {
+		int var_size = size_of_map[level];
+		
+		field = new Field[var_size][var_size];
+		for(int i = 0; i < var_size; i ++) {
+			for(int j = 0; j < var_size; j ++) {
 				field[i][j] = new Field();
 			}
 		}
 		//now the map has bombs
 		sort_bomb_placement(buttons,size_of_map[level]);
-		
-		buttons = new JButton[size_of_map[level]][size_of_map[level]];
+		set_numbers(field);
+		buttons = new JButton[var_size][var_size];
 		//inicializando o objeto constraints
 		
 		grid_layout = new GridBagLayout();
@@ -54,9 +54,13 @@ public class Map extends JPanel implements ActionListener{
 				buttons[i][j].setPreferredSize(new Dimension(25,25));
 				buttons[i][j].setBackground(new Color(205,200,177));
 				addComponent(buttons[i][j],i+1,j,1,1);
-
+				//test so I can see where the bombs are
+				if(field[i][j].have_bomb()) {
+					buttons[i][j].setBackground(new Color(000,178,238));
+				}
 				//actionListener
-				buttons[i][j].addActionListener(this);			
+				buttons[i][j].addActionListener(this);	
+				
 			}
 		}
 		
@@ -100,22 +104,96 @@ public class Map extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		JButton btn = (JButton) e.getSource();
 //		if(buttons[pos_i][pos_j] == (JButton)e.getSource()) {
-			btn.setEnabled(false);
-			btn.setBackground(new Color(205,179,139));
-//			if(field[i_compare][j_compare].have_bomb()) {
-//				//TODO 
-//				//game finish
-//				btn.setBackground(new Color(000,178,238));
-//				
-//			}else {
-//				
-//			}
-//			else if() {//se nao tiver bomba mas for numero
-//				
-//			}else {//se nao tiver bomba nem numero
-//				
-//			}
-//		}
+		btn.setEnabled(false);
+		btn.setBackground(new Color(205,179,139));
+		
 		//verify if there's a bomb and then decide what is going to happen
+		//fazer metodo flood fill
+	}
+	public void flood_fill(Field f) { //heres going to be the flood fill
+		if(f.have_bomb()) {
+			
+		}else {
+			if(f.have_number()) {
+				
+			}else {
+				
+			}
+		}
+	}
+	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers, smtw it looks a little like the method above
+		int ICM;//i counter minus
+		int JCM;//j counter minus
+		int ICP;//i counter plus
+		int JCP;//j counter plus
+		int counter = 0;
+		for(int i = 0; i < f.length; i++ ) {
+			for(int j = 0; j < f.length; j++) {
+				
+				counter = 0;
+				ICM = i - 1;
+				JCM = j - 1;
+				ICP = i+1;
+				JCP = j+1;
+				System.out.println("ICM: "+ ICM + "\nJCM: " + JCM + "\nICP:"+ICP+"\nJCP:" + JCP);
+				if(!f[i][j].have_bomb()) {//this if is working
+
+					if(f[i][j].have_bomb()) {
+						counter++;
+						System.out.println("A");
+					}
+					if(ICM >= 0) {
+						if(f[ICM][j].have_bomb()) {
+							counter++;
+							System.out.println("A");
+						}
+						if(ICP< f.length ) {
+							if(f[ICP][j].have_bomb()) {
+								counter++;
+								System.out.println("A");
+							}
+						}
+					}
+					if(JCM >= 0) {
+						if(f[i][JCM].have_bomb()) {
+							counter++;
+							System.out.println("A");
+						}
+						if(JCP < f.length) {
+							if(f[i][JCP].have_bomb()) {
+								counter++;
+								System.out.println("A");
+							}
+						}
+					}
+					if(ICM >= 0 && JCM >= 0 ) {
+						if(f[ICM][JCM].have_bomb()) {
+							counter++;
+							System.out.println("A");
+						}
+					}
+					if(JCP < f.length && ICP < f.length) {
+						if(f[ICP][JCP].have_bomb()) {
+							counter++;
+							System.out.println("A");
+						}
+					}
+					if(ICM >= 0 && JCP < f.length) {
+						if(f[ICM][JCP].have_bomb()) {
+							counter++;
+							System.out.println("A");
+						}
+					}
+					if(ICP < f.length && JCM >= 0) {
+						if(f[ICP][JCM].have_bomb()) {
+							counter++;
+							System.out.println("A");
+						}
+					}
+				}
+				f[i][j].set_number(counter);
+				System.out.println("bomb position: " + i + " " + j +"\n bombs near: " + f[i][j].get_number());
+			}
+		}
 	}
 }
