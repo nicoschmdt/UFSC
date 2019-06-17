@@ -135,64 +135,53 @@ public class Map extends JPanel implements ActionListener{
 				JCM = j - 1;
 				ICP = i+1;
 				JCP = j+1;
-				System.out.println("ICM: "+ ICM + "\nJCM: " + JCM + "\nICP:"+ICP+"\nJCP:" + JCP);
 				if(!f[i][j].have_bomb()) {//this if is working
 
 					if(f[i][j].have_bomb()) {
 						counter++;
-						System.out.println("A");
 					}
 					if(ICM >= 0) {
 						if(f[ICM][j].have_bomb()) {
 							counter++;
-							System.out.println("A");
 						}
 						if(ICP< f.length ) {
 							if(f[ICP][j].have_bomb()) {
 								counter++;
-								System.out.println("A");
 							}
 						}
 					}
 					if(JCM >= 0) {
 						if(f[i][JCM].have_bomb()) {
 							counter++;
-							System.out.println("A");
 						}
 						if(JCP < f.length) {
 							if(f[i][JCP].have_bomb()) {
 								counter++;
-								System.out.println("A");
 							}
 						}
 					}
 					if(ICM >= 0 && JCM >= 0 ) {
 						if(f[ICM][JCM].have_bomb()) {
 							counter++;
-							System.out.println("A");
 						}
 					}
 					if(JCP < f.length && ICP < f.length) {
 						if(f[ICP][JCP].have_bomb()) {
 							counter++;
-							System.out.println("A");
 						}
 					}
 					if(ICM >= 0 && JCP < f.length) {
 						if(f[ICM][JCP].have_bomb()) {
 							counter++;
-							System.out.println("A");
 						}
 					}
 					if(ICP < f.length && JCM >= 0) {
 						if(f[ICP][JCM].have_bomb()) {
 							counter++;
-							System.out.println("A");
 						}
 					}
 				}
 				f[i][j].set_number(counter);
-				System.out.println("bomb position: " + i + " " + j +"\n bombs near: " + f[i][j].get_number());
 			}
 		}
 	}
