@@ -20,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 public class Interface {
 	private String[] levels = {"Easy","Medium","Hard"}; 
@@ -31,26 +32,27 @@ public class Interface {
 	private JRadioButtonMenuItem[] level; // think of a better name
 	private ButtonGroup levelButtonGroup;
 	private Map map;
-	// I believe I have to add a JPanel(?)
 	private JPanel panel,panel_two;
 	//trying to add the select level
 	private String selected_difficult = "Easy";
 	//
 	private JLabel label_bombs,label_timer;
-	//
 	private JButton restart_b;
 	private Box box;
+	private int counter = 0;
+
+	private boolean game_lost = false; //if the game is lost this'll turn true gotta use this to stop the timer
 	
 	public Interface() {
 		//PANEL
 
 		frame = new JFrame("Minesweeper");
 		frame.setLayout(new BorderLayout());
-		
+				
 		panel = new JPanel(new FlowLayout());
 		panel.setPreferredSize(new Dimension(250,200));
 		panel.setBackground(Color.DARK_GRAY);
-		//test 1506 I'm trying to add the timer panel and the bombs panel but idk how to do this
+		//test 1506 I'm trying to add the bombs panel but idk how to do this
 		//I managed to add another panel but still it remained as a wip
 		panel_two = new JPanel();
 		
@@ -58,7 +60,6 @@ public class Interface {
 		panel_two.setBackground(Color.YELLOW);
 		panel_two.setLayout(new BoxLayout(panel_two,BoxLayout.X_AXIS));
 		panel_two.setBorder(BorderFactory.createEmptyBorder(0,10,10,10));
-		//Label test
 		//it'll have to say how many undentified bombs are in the map
 		//gotta make a method for that
 		//box
@@ -67,7 +68,15 @@ public class Interface {
 		label_bombs = new JLabel();
 		label_bombs.setText("Bombs remaining: ");
 		label_timer = new JLabel();
-		label_timer.setText("Time Passed: ");
+		new Timer(1000, new ActionListener() {
+
+		      @Override
+		      public void actionPerformed(ActionEvent e) {
+		    	  
+		    	  label_timer.setText("Time Passed: " + counter);
+				  counter++;
+		      }
+		    }).start();
 		
 		box.add(label_bombs);
 		box.add(Box.createHorizontalStrut(110));
