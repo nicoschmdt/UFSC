@@ -23,12 +23,17 @@ public class Map extends JPanel implements ActionListener{
 	private int column;
 	private int line;
 	//the number of the position to get with the level chosen
-	private int level = 0;
+	private int level;
+	private int comparison;
 
-	public Map() {
-//		super();
+	public Map(int level) {
+		this.level = level;
+		resize();
+	}
+	public void resize() {
+		System.out.println("level "+level);
 		int var_size = size_of_map[level];
-		
+		System.out.println("var_size "+ var_size);
 		field = new Field[var_size][var_size];
 		for(int i = 0; i < var_size; i ++) {
 			for(int j = 0; j < var_size; j ++) {
@@ -40,17 +45,19 @@ public class Map extends JPanel implements ActionListener{
 		set_numbers(field);
 		buttons = new JButton[var_size][var_size];
 		//inicializando o objeto constraints
-		
+
 		grid_layout = new GridBagLayout();
 		setLayout(grid_layout);
-		
+
 		constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
-		
+
 		for(int i = 0; i < var_size ; i++) {
+			System.out.println("var_size 2 "+ var_size);
 			for(int j = 0; j < var_size; j++) {
+				System.out.println("var_size 3 "+ var_size);
 				buttons[i][j] = new JButton("");
-				//
+		//
 				buttons[i][j].setPreferredSize(new Dimension(25,25));
 				buttons[i][j].setBackground(new Color(205,200,177));
 				addComponent(buttons[i][j],i+1,j,1,1);
@@ -58,23 +65,13 @@ public class Map extends JPanel implements ActionListener{
 				if(field[i][j].have_bomb()) {
 					buttons[i][j].setBackground(new Color(000,178,238));
 				}
-				//actionListener
-				buttons[i][j].addActionListener(this);	
-				
+		//actionListener
+				buttons[i][j].addActionListener(this);
+
+				}
 			}
 		}
-		
-	}
-	public void get_difficulty(String s) {
-		if(s.equals("Easy")) {
-			level = 0;
-		}else if(s.equals("Medium")) {
-			level = 1;
-		}else {
-			level = 2;
-		}
-		
-	}
+
 	public void sort_bomb_placement(JButton[][] jb,int size_of_matrix) {
 		
 		random = new Random();
@@ -121,6 +118,8 @@ public class Map extends JPanel implements ActionListener{
 			}
 		}
 	}
+
+	
 	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers, smtw it looks a little like the method above
 		int ICM;//i counter minus
 		int JCM;//j counter minus
