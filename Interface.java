@@ -5,7 +5,9 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -21,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.plaf.basic.BasicComboBoxUI.ItemHandler;
 
 public class Interface {
 	private String[] levels = {"Easy","Medium","Hard"}; 
@@ -40,6 +43,7 @@ public class Interface {
 	private JButton restart_b;
 	private Box box;
 	private int counter = 0;
+	//listener menu
 
 	private boolean game_lost = false; //if the game is lost this'll turn true gotta use this to stop the timer
 	
@@ -97,7 +101,6 @@ public class Interface {
 		file_Menu.addSeparator();
 		
 		// choose if its going to be hard, medium or easy mode
-		//maybe I can add smth like Challenge thats just impossible cuz itd be fun
 		difficult = new JMenu("Difficult");
 		file_Menu.add(difficult);
 		//choosing the difficult
@@ -111,8 +114,29 @@ public class Interface {
 			}
 			difficult.add(level[i]);
 			levelButtonGroup.add(level[i]);
-//			level[i].addActionListener(levelHandler); // still have to do this part
+			level[i].addItemListener((e) -> {
+				AbstractButton btn = (AbstractButton)e.getSource();
+				String text = btn.getText();
+				if(text.equals("Easy")) {
+					map = new Map(0);
+					panel.removeAll();
+					panel.add(map,BorderLayout.CENTER);
+					panel.repaint();
+				}else if(text.equals("Medium")) {
+					map = new Map(1);
+					panel.removeAll();
+					panel.add(map,BorderLayout.CENTER);
+					panel.repaint();
+				}else {
+					map = new Map(2);
+					panel.removeAll();
+					panel.add(map,BorderLayout.CENTER);
+					panel.repaint();
+				}
+
+			});
 		}
+		level[0].setSelected(true);
 		
 		//the about actionListener
 		about.addActionListener(new ActionListener() {
@@ -127,9 +151,8 @@ public class Interface {
 		bar.add(file_Menu);
 		
 		//map
-		map = new Map();
+		map = new Map(0);
 		panel.add(map,BorderLayout.CENTER);
-		
 		//frame add
 		frame.setJMenuBar(bar);
 		frame.add(panel_two,BorderLayout.PAGE_START);
@@ -149,7 +172,7 @@ public class Interface {
 	public String get_difficulty() {
 		return selected_difficult;
 	}
-	
+
 	//main
 	public static void main(String[] args) {
 		Interface window = new Interface();
