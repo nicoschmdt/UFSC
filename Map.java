@@ -3,13 +3,17 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
-public class Map extends JPanel implements ActionListener{
+public class Map extends JPanel{
 	
 	private Field[][] field; //this is the matrix he'll go to confirm whats going on
 	private JButton[][] buttons;
@@ -25,15 +29,15 @@ public class Map extends JPanel implements ActionListener{
 	//the number of the position to get with the level chosen
 	private int level;
 	private int comparison;
+//	private boolean have_flag;
+//	private boolean is_clicked;//p
 
 	public Map(int level) {
 		this.level = level;
 		resize();
 	}
 	public void resize() {
-		System.out.println("level "+level);
 		int var_size = size_of_map[level];
-		System.out.println("var_size "+ var_size);
 		field = new Field[var_size][var_size];
 		for(int i = 0; i < var_size; i ++) {
 			for(int j = 0; j < var_size; j ++) {
@@ -53,24 +57,23 @@ public class Map extends JPanel implements ActionListener{
 		constraints.fill = GridBagConstraints.BOTH;
 
 		for(int i = 0; i < var_size ; i++) {
-			System.out.println("var_size 2 "+ var_size);
 			for(int j = 0; j < var_size; j++) {
-				System.out.println("var_size 3 "+ var_size);
 				buttons[i][j] = new JButton("");
 		//
 				buttons[i][j].setPreferredSize(new Dimension(25,25));
 				buttons[i][j].setBackground(new Color(205,200,177));
+				buttons[i][j].setMargin(new Insets(5,5,5,5)); // this way the X appears
 				addComponent(buttons[i][j],i+1,j,1,1);
 				//test so I can see where the bombs are
 				if(field[i][j].have_bomb()) {
 					buttons[i][j].setBackground(new Color(000,178,238));
 				}
-		//actionListener
-				buttons[i][j].addActionListener(this);
-
-				}
+				//actionListener
+				Mouse mouse = new Mouse(i,j,field);
+				buttons[i][j].addMouseListener(mouse);
 			}
 		}
+	}
 
 	public void sort_bomb_placement(JButton[][] jb,int size_of_matrix) {
 		
@@ -97,16 +100,8 @@ public class Map extends JPanel implements ActionListener{
 		add(component);
 		
 	}
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		JButton btn = (JButton) e.getSource();
-//		if(buttons[pos_i][pos_j] == (JButton)e.getSource()) {
-		btn.setEnabled(false);
-		btn.setBackground(new Color(205,179,139));
-		
-		//verify if there's a bomb and then decide what is going to happen
-		//fazer metodo flood fill
-	}
+	
+
 	public void flood_fill(Field f) { //heres going to be the flood fill
 		if(f.have_bomb()) {
 			
@@ -183,5 +178,6 @@ public class Map extends JPanel implements ActionListener{
 				f[i][j].set_number(counter);
 			}
 		}
+		
 	}
 }
