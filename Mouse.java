@@ -29,7 +29,13 @@ public class Mouse implements MouseListener{
 				
 				btn.setBackground(new Color(205,179,139));
 				field[i][j].set_click();
-				if(field[i][j].have_bomb()) {
+				if(!field[i][j].have_bomb()) {
+					if(field[i][j].have_number()) {
+						btn.setText(Integer.toString(field[i][j].get_number()));
+					}else { //if there's nothing
+						
+					}
+				}else {//if there's a bomb
 					
 				}
 			}

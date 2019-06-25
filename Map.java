@@ -114,7 +114,8 @@ public class Map extends JPanel{
 		}
 	}
 
-	
+	//its not working 100%
+	//probably just the part that goes down that isn't working gotta fix it
 	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers, smtw it looks a little like the method above
 		int ICM;//i counter minus
 		int JCM;//j counter minus
@@ -175,7 +176,12 @@ public class Map extends JPanel{
 						}
 					}
 				}
-				f[i][j].set_number(counter);
+				if(counter == 0) {
+					
+				}else {
+					f[i][j].set_number(counter);
+					f[i][j].set_number();
+				}
 			}
 		}
 		
