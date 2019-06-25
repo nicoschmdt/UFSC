@@ -132,29 +132,28 @@ public class Map extends JPanel{
 				JCP = j+1;
 				if(!f[i][j].have_bomb()) {//this if is working
 
-					if(f[i][j].have_bomb()) {
-						counter++;
-					}
+					
 					if(ICM >= 0) {
 						if(f[ICM][j].have_bomb()) {
 							counter++;
 						}
-						if(ICP< f.length ) {
-							if(f[ICP][j].have_bomb()) {
-								counter++;
-							}
+					}
+					if(ICP< f.length) {
+						if(f[ICP][j].have_bomb()) {
+							counter++;
 						}
 					}
 					if(JCM >= 0) {
 						if(f[i][JCM].have_bomb()) {
 							counter++;
 						}
-						if(JCP < f.length) {
-							if(f[i][JCP].have_bomb()) {
-								counter++;
-							}
+					}
+					if(JCP < f.length) {
+						if(f[i][JCP].have_bomb()) {
+							counter++;
 						}
 					}
+					
 					if(ICM >= 0 && JCM >= 0 ) {
 						if(f[ICM][JCM].have_bomb()) {
 							counter++;
