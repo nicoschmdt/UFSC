@@ -83,26 +83,21 @@ public class Mouse implements MouseListener{
 	}
 
 	public void flood_fill(int a,int b) {
-		//Im having problem when I call the method once again
-		try {
-			
-		
 		int IB = a - 1; // i before
 		int JB = b - 1; // j before
 		int JA = b + 1; // j after
 		int IA = a + 1; // i after
-		if(!field[i][j].have_number()) {
-			buttons[i][j].setEnabled(false);
-			buttons[i][j].setBackground(new Color(205,179,139));
+		if(!field[a][b].have_number()) {
+			buttons[a][b].setEnabled(false);
+			buttons[a][b].setBackground(new Color(205,179,139));
 		}
 		if(IB>=0) {
-			if(field[IB][j].have_number()) {
-				buttons[IB][j].setText(Integer.toString(field[IB][j].get_number()));
-				buttons[IB][j].setEnabled(false);
-				buttons[IB][j].setBackground(new Color(205,179,139));
-				System.out.println("i =" +IB + "j =" +j);
-			}else if(buttons[IB][j].isEnabled()){
-				flood_fill(IB,j);
+			if(field[IB][b].have_number()) {
+				buttons[IB][b].setText(Integer.toString(field[IB][j].get_number()));
+				buttons[IB][b].setEnabled(false);
+				buttons[IB][b].setBackground(new Color(205,179,139));
+			}else if(buttons[IB][b].isEnabled()){
+				flood_fill(IB,b);
 			}
 		}
 		if(IB>=0 && JB>=0) {
@@ -115,12 +110,12 @@ public class Mouse implements MouseListener{
 			}
 		}
 		if(JB>=0) {
-			if(field[i][JB].have_number()) {
-				buttons[i][JB].setText(Integer.toString(field[i][JB].get_number()));
-				buttons[i][JB].setEnabled(false);
-				buttons[i][JB].setBackground(new Color(205,179,139));
-			}else if(buttons[i][JB].isEnabled()){
-				flood_fill(i,JB);
+			if(field[a][JB].have_number()) {
+				buttons[a][JB].setText(Integer.toString(field[i][JB].get_number()));
+				buttons[a][JB].setEnabled(false);
+				buttons[a][JB].setBackground(new Color(205,179,139));
+			}else if(buttons[a][JB].isEnabled()){
+				flood_fill(a,JB);
 			}
 		}
 		if(IB>=0 && JA<buttons.length) {
@@ -134,11 +129,11 @@ public class Mouse implements MouseListener{
 		}
 		if(JA<buttons.length) {
 			if(field[i][JA].have_number()) {
-				buttons[i][JA].setText(Integer.toString(field[i][JA].get_number()));
-				buttons[i][JA].setEnabled(false);
-				buttons[i][JA].setBackground(new Color(205,179,139));
-			}else if(buttons[i][JA].isEnabled()){
-				flood_fill(i,JA);
+				buttons[a][JA].setText(Integer.toString(field[i][JA].get_number()));
+				buttons[a][JA].setEnabled(false);
+				buttons[a][JA].setBackground(new Color(205,179,139));
+			}else if(buttons[a][JA].isEnabled()){
+				flood_fill(a,JA);
 			}
 		}
 		if(JB>=0 && IA<buttons.length) {
@@ -151,12 +146,12 @@ public class Mouse implements MouseListener{
 			}
 		}
 		if(IA<buttons.length) {
-			if(field[IA][j].have_number()) {
-				buttons[IA][j].setText(Integer.toString(field[IA][j].get_number()));
-				buttons[IA][j].setEnabled(false);
-				buttons[IA][j].setBackground(new Color(205,179,139));
-			}else if(buttons[IA][j].isEnabled()){
-				flood_fill(IA,j);
+			if(field[IA][b].have_number()) {
+				buttons[IA][b].setText(Integer.toString(field[IA][j].get_number()));
+				buttons[IA][b].setEnabled(false);
+				buttons[IA][b].setBackground(new Color(205,179,139));
+			}else if(buttons[IA][b].isEnabled()){
+				flood_fill(IA,b);
 			}
 		}
 		if(IA <buttons.length && JA<buttons.length) {
@@ -167,9 +162,6 @@ public class Mouse implements MouseListener{
 			}else if(buttons[IA][JA].isEnabled()){
 				flood_fill(IA,JA);
 			}
-		}
-		}catch(Exception e) {
-			System.err.println(e);
 		}
 	}
 }
