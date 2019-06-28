@@ -17,7 +17,7 @@ public class Map extends JPanel{
 	
 	private Field[][] field; //this is the matrix he'll go to confirm whats going on
 	private JButton[][] buttons;
-	//the next variables follow the order of easy -> medium -> hard kind of setup.
+	//the next variables follow the order of easy -> medium -> hard setup.
 	private int[] quantity_of_bombs = {35,95,200};
 	private int[] size_of_map = {10,18,24};
 	private GridBagConstraints constraints;
@@ -69,7 +69,7 @@ public class Map extends JPanel{
 				}
 				//actionListener
 				
-				mouse = new Mouse(i,j,field);
+				mouse = new Mouse(i,j,field,this);
 				buttons[i][j].addMouseListener(mouse);
 			}
 		}
@@ -100,7 +100,10 @@ public class Map extends JPanel{
 		add(component);
 		
 	}
-	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers, smtw it looks a little like the method above
+	public JButton[][] get_buttons(){
+		return this.buttons;
+	}
+	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers
 		int ICM;//i counter minus
 		int JCM;//j counter minus
 		int ICP;//i counter plus
@@ -114,7 +117,7 @@ public class Map extends JPanel{
 				JCM = j - 1;
 				ICP = i+1;
 				JCP = j+1;
-				if(!f[i][j].have_bomb()) {//this if is working
+				if(!f[i][j].have_bomb()) {
 
 					
 					if(ICM >= 0) {

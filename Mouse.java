@@ -11,24 +11,23 @@ public class Mouse implements MouseListener{
 	private Field[][] field;
 	private Map map;
 	private int field_l;
-	private int IB, IA,JB,JA;
+	private JButton[][] buttons;
 	
-	public Mouse(int i,int j,Field[][] f) {
+	public Mouse(int i,int j,Field[][] f,Map map) {
 		this.i = i;
 		this.j = j;
 		this.field = f;
 		this.field_l = f.length;
-		this.IB = i - 1;
-		this.JB = j - 1;
-		this.JA = j + 1;
-		this.IA = i + 1;
+		this.map = map;
+		
 	}
 	public void mouseClicked(MouseEvent e) {
 		
 	}
 	public void mousePressed(MouseEvent e) {
 		JButton btn = (JButton) e.getSource();
-		
+		System.out.println(map);
+		buttons = map.get_buttons();
 //		System.out.println(f.get_flag());
 		if(SwingUtilities.isLeftMouseButton(e)) {
 			if(!field[i][j].get_flag()) {
@@ -41,7 +40,7 @@ public class Mouse implements MouseListener{
 						btn.setText(Integer.toString(field[i][j].get_number()));
 					}else { //if there's nothing
 						//fazer metodo floodfill aq
-						//HOW???
+						flood_fill(i,j);
 						
 					}
 				}else {//if there's a bomb
@@ -84,7 +83,83 @@ public class Mouse implements MouseListener{
 		
 	}
 
-	public void flood_fill(Field field2, JButton btn) {
-		
+	public void flood_fill(int a,int b) {
+		//Im having problem when I call the method once again
+		int IB = a - 1; // i before
+		int JB = b - 1; // j before
+		int JA = b + 1; // j after
+		int IA = a + 1; // i after
+		if(IB>=0) {
+			if(field[IB][j].have_number()) {
+				buttons[IB][j].setText(Integer.toString(field[IB][j].get_number()));
+				buttons[IB][j].setEnabled(false);
+				buttons[IB][j].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(IB,j);
+			}
+		}
+		if(IB>=0 && JB>=0) {
+			if(field[IB][JB].have_number()) {
+				buttons[IB][JB].setText(Integer.toString(field[IB][JB].get_number()));
+				buttons[IB][JB].setEnabled(false);
+				buttons[IB][JB].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(IB,JB);
+			}
+		}
+		if(JB>=0) {
+			if(field[i][JB].have_number()) {
+				buttons[i][JB].setText(Integer.toString(field[i][JB].get_number()));
+				buttons[i][JB].setEnabled(false);
+				buttons[i][JB].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(i,JB);
+			}
+		}
+		if(IB>=0 && JA<buttons.length) {
+			if(field[IB][JA].have_number()) {
+				buttons[IB][JA].setText(Integer.toString(field[IB][JA].get_number()));
+				buttons[IB][JA].setEnabled(false);
+				buttons[IB][JA].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(IB,JA);
+			}
+		}
+		if(JA<buttons.length) {
+			if(field[i][JA].have_number()) {
+				buttons[i][JA].setText(Integer.toString(field[i][JA].get_number()));
+				buttons[i][JA].setEnabled(false);
+				buttons[i][JA].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(i,JA);
+			}
+		}
+		if(JB>=0 && IA<buttons.length) {
+			if(field[IA][JB].have_number()) {
+				buttons[IA][JB].setText(Integer.toString(field[IA][JB].get_number()));
+				buttons[IA][JB].setEnabled(false);
+				buttons[IA][JB].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(IA,JB);
+			}
+		}
+		if(IA<buttons.length) {
+			if(field[IA][j].have_number()) {
+				buttons[IA][j].setText(Integer.toString(field[IA][j].get_number()));
+				buttons[IA][j].setEnabled(false);
+				buttons[IA][j].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(IA,j);
+			}
+		}
+		if(IA <buttons.length && JA<buttons.length) {
+			if(field[IA][JA].have_number()) {
+				buttons[IA][JA].setText(Integer.toString(field[IA][JA].get_number()));
+				buttons[IA][JA].setEnabled(false);
+				buttons[IA][JA].setBackground(new Color(205,179,139));
+			}else {
+				flood_fill(IA,JA);
+			}
+		}
 	}
 }
