@@ -1,10 +1,6 @@
 
 public class Field {
-	//this class is for an only camp
-	//preciso implementar nessa classe o flood system
-	//how the click thingy works, theres the 3 ifs I have to do
-	//gotta do the lose system too, maybe in another class?
-	
+	//this class is for an only camp	
 	private boolean have_bomb;
 	private boolean have_number;
 	private int number;
@@ -17,7 +13,7 @@ public class Field {
 		is_clicked = false;
 	}
 	
-	public void set_bomb() {//esse set funciona..?
+	public void set_bomb() {
 		this.have_bomb = true;	
 	}
 	public boolean have_bomb() {
@@ -46,10 +42,5 @@ public class Field {
 	}
 	public boolean get_click() {
 		return this.is_clicked;
-	}
-	//method that returns how much bombs are near the area clicked
-	public int bombs_near() {
-		//TODO
-		return 0;
 	}
 }
