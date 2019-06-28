@@ -18,7 +18,6 @@ public class Map extends JPanel{
 	private Field[][] field; //this is the matrix he'll go to confirm whats going on
 	private JButton[][] buttons;
 	//the next variables follow the order of easy -> medium -> hard kind of setup.
-	//still idk how to connect those two parts :(
 	private int[] quantity_of_bombs = {35,95,200};
 	private int[] size_of_map = {10,18,24};
 	private GridBagConstraints constraints;
@@ -26,13 +25,13 @@ public class Map extends JPanel{
 	private Random random;
 	private int column;
 	private int line;
+	private Mouse mouse;
 	//the number of the position to get with the level chosen
 	private int level;
 	private int comparison;
-//	private boolean have_flag;
-//	private boolean is_clicked;//p
 
 	public Map(int level) {
+		
 		this.level = level;
 		resize();
 	}
@@ -69,7 +68,8 @@ public class Map extends JPanel{
 					buttons[i][j].setBackground(new Color(000,178,238));
 				}
 				//actionListener
-				Mouse mouse = new Mouse(i,j,field);
+				
+				mouse = new Mouse(i,j,field);
 				buttons[i][j].addMouseListener(mouse);
 			}
 		}
@@ -100,22 +100,6 @@ public class Map extends JPanel{
 		add(component);
 		
 	}
-	
-
-	public void flood_fill(Field f) { //heres going to be the flood fill
-		if(f.have_bomb()) {
-			
-		}else {
-			if(f.have_number()) {
-				
-			}else {
-				
-			}
-		}
-	}
-
-	//its not working 100%
-	//probably just the part that goes down that isn't working gotta fix it
 	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers, smtw it looks a little like the method above
 		int ICM;//i counter minus
 		int JCM;//j counter minus

@@ -10,11 +10,18 @@ public class Mouse implements MouseListener{
 	private int j;
 	private Field[][] field;
 	private Map map;
+	private int field_l;
+	private int IB, IA,JB,JA;
 	
 	public Mouse(int i,int j,Field[][] f) {
 		this.i = i;
 		this.j = j;
 		this.field = f;
+		this.field_l = f.length;
+		this.IB = i - 1;
+		this.JB = j - 1;
+		this.JA = j + 1;
+		this.IA = i + 1;
 	}
 	public void mouseClicked(MouseEvent e) {
 		
@@ -33,10 +40,13 @@ public class Mouse implements MouseListener{
 					if(field[i][j].have_number()) {
 						btn.setText(Integer.toString(field[i][j].get_number()));
 					}else { //if there's nothing
+						//fazer metodo floodfill aq
+						//HOW???
 						
 					}
 				}else {//if there's a bomb
-					
+					System.out.println("Oh no, you lost the game! <('^')> ");
+					//JK, still working on this.
 				}
 			}
 		}else if(SwingUtilities.isMiddleMouseButton(e)) {
@@ -71,6 +81,10 @@ public class Mouse implements MouseListener{
 	@Override
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	public void flood_fill(Field field2, JButton btn) {
 		
 	}
 }
