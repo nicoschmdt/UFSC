@@ -26,7 +26,6 @@ public class Mouse implements MouseListener{
 	}
 	public void mousePressed(MouseEvent e) {
 		JButton btn = (JButton) e.getSource();
-		System.out.println(map);
 		buttons = map.get_buttons();
 //		System.out.println(f.get_flag());
 		if(SwingUtilities.isLeftMouseButton(e)) {
@@ -85,16 +84,24 @@ public class Mouse implements MouseListener{
 
 	public void flood_fill(int a,int b) {
 		//Im having problem when I call the method once again
+		try {
+			
+		
 		int IB = a - 1; // i before
 		int JB = b - 1; // j before
 		int JA = b + 1; // j after
 		int IA = a + 1; // i after
+		if(!field[i][j].have_number()) {
+			buttons[i][j].setEnabled(false);
+			buttons[i][j].setBackground(new Color(205,179,139));
+		}
 		if(IB>=0) {
 			if(field[IB][j].have_number()) {
 				buttons[IB][j].setText(Integer.toString(field[IB][j].get_number()));
 				buttons[IB][j].setEnabled(false);
 				buttons[IB][j].setBackground(new Color(205,179,139));
-			}else {
+				System.out.println("i =" +IB + "j =" +j);
+			}else if(buttons[IB][j].isEnabled()){
 				flood_fill(IB,j);
 			}
 		}
@@ -103,7 +110,7 @@ public class Mouse implements MouseListener{
 				buttons[IB][JB].setText(Integer.toString(field[IB][JB].get_number()));
 				buttons[IB][JB].setEnabled(false);
 				buttons[IB][JB].setBackground(new Color(205,179,139));
-			}else {
+			}else if(buttons[IB][JB].isEnabled()) {
 				flood_fill(IB,JB);
 			}
 		}
@@ -112,7 +119,7 @@ public class Mouse implements MouseListener{
 				buttons[i][JB].setText(Integer.toString(field[i][JB].get_number()));
 				buttons[i][JB].setEnabled(false);
 				buttons[i][JB].setBackground(new Color(205,179,139));
-			}else {
+			}else if(buttons[i][JB].isEnabled()){
 				flood_fill(i,JB);
 			}
 		}
@@ -121,7 +128,7 @@ public class Mouse implements MouseListener{
 				buttons[IB][JA].setText(Integer.toString(field[IB][JA].get_number()));
 				buttons[IB][JA].setEnabled(false);
 				buttons[IB][JA].setBackground(new Color(205,179,139));
-			}else {
+			}else if(buttons[IB][JA].isEnabled()){
 				flood_fill(IB,JA);
 			}
 		}
@@ -130,7 +137,7 @@ public class Mouse implements MouseListener{
 				buttons[i][JA].setText(Integer.toString(field[i][JA].get_number()));
 				buttons[i][JA].setEnabled(false);
 				buttons[i][JA].setBackground(new Color(205,179,139));
-			}else {
+			}else if(buttons[i][JA].isEnabled()){
 				flood_fill(i,JA);
 			}
 		}
@@ -139,7 +146,7 @@ public class Mouse implements MouseListener{
 				buttons[IA][JB].setText(Integer.toString(field[IA][JB].get_number()));
 				buttons[IA][JB].setEnabled(false);
 				buttons[IA][JB].setBackground(new Color(205,179,139));
-			}else {
+			}else if(buttons[IA][JB].isEnabled()){
 				flood_fill(IA,JB);
 			}
 		}
@@ -148,7 +155,7 @@ public class Mouse implements MouseListener{
 				buttons[IA][j].setText(Integer.toString(field[IA][j].get_number()));
 				buttons[IA][j].setEnabled(false);
 				buttons[IA][j].setBackground(new Color(205,179,139));
-			}else {
+			}else if(buttons[IA][j].isEnabled()){
 				flood_fill(IA,j);
 			}
 		}
@@ -157,9 +164,12 @@ public class Mouse implements MouseListener{
 				buttons[IA][JA].setText(Integer.toString(field[IA][JA].get_number()));
 				buttons[IA][JA].setEnabled(false);
 				buttons[IA][JA].setBackground(new Color(205,179,139));
-			}else {
+			}else if(buttons[IA][JA].isEnabled()){
 				flood_fill(IA,JA);
 			}
+		}
+		}catch(Exception e) {
+			System.err.println(e);
 		}
 	}
 }
