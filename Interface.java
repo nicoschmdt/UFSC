@@ -71,7 +71,6 @@ public class Interface {
 		box = Box.createHorizontalBox();
 		//
 		label_bombs = new JLabel();
-		label_bombs.setText("Bombs remaining: ");
 		label_timer = new JLabel();
 		new Timer(1000, new ActionListener() {
 
@@ -132,18 +131,21 @@ public class Interface {
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
 					this.stats = 0;
+					label_bombs.setText("Bombs remaining: " + map.get_qtd_bombs());
 				}else if(text.equals("Medium")) {
 					map = new Map(1);
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
 					this.stats = 1;
+					label_bombs.setText("Bombs remaining: " + map.get_qtd_bombs());
 				}else {
 					map = new Map(2);
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
 					this.stats = 2;
+					label_bombs.setText("Bombs remaining: " + map.get_qtd_bombs());
 				}
 
 			});
@@ -165,6 +167,14 @@ public class Interface {
 		//map
 		map = new Map(0);
 		panel.add(map,BorderLayout.CENTER);
+		//
+		new Timer(10, new ActionListener() {
+			@Override
+		    public void actionPerformed(ActionEvent e) {
+				label_bombs.setText("Bombs remaining: " + map.get_qtd_bombs());
+		    }
+		}).start();
+		label_bombs.setText("Bombs remaining: " + map.get_qtd_bombs());
 		//frame add
 		frame.setJMenuBar(bar);
 		frame.add(panel_two,BorderLayout.PAGE_START);

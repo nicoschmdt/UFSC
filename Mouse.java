@@ -38,12 +38,19 @@ public class Mouse implements MouseListener{
 					if(field[i][j].have_number()) {
 						btn.setText(Integer.toString(field[i][j].get_number()));
 					}else { //if there's nothing
-						//fazer metodo floodfill aq
 						flood_fill(i,j);
 						
 					}
-				}else {//if there's a bomb
-					System.out.println("Oh no, you lost the game! <('^')> ");
+				}else if(field[i][j].have_bomb()){//if there's a bomb
+//					System.out.println("Oh no, you lost the game! <('^')> ");
+					for(int a = 0; a < buttons.length; a++) {
+						for(int b = 0; b < buttons.length; b++) {
+							buttons[a][b].setEnabled(false);
+							if(field[a][b].have_bomb()) {
+								buttons[a][b].setBackground(new Color(121, 255, 77));
+							}
+						}
+					}
 					//JK, still working on this.
 				}
 			}
@@ -56,10 +63,13 @@ public class Mouse implements MouseListener{
 					btn.setEnabled(true);
 					btn.setText("");
 					field[i][j].set_have_flag(false);
+					map.plus_one();
+					
 				}else {
 					btn.setEnabled(false);
 					btn.setText("X");
 					field[i][j].set_have_flag(true);
+					map.minus_one();
 				}
 			}
 			//gotta see a way to bring that content here	

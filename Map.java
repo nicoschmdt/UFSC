@@ -18,7 +18,7 @@ public class Map extends JPanel{
 	private Field[][] field; //this is the matrix he'll go to confirm whats going on
 	private JButton[][] buttons;
 	//the next variables follow the order of easy -> medium -> hard setup.
-	private int[] quantity_of_bombs = {35,95,200};
+	private int[] quantity_of_bombs = {20,95,200};
 	private int[] size_of_map = {10,18,24};
 	private GridBagConstraints constraints;
 	private GridBagLayout grid_layout;
@@ -29,11 +29,14 @@ public class Map extends JPanel{
 	//the number of the position to get with the level chosen
 	private int level;
 	private int comparison;
+	private int bombs_map;
 
 	public Map(int level) {
 		
 		this.level = level;
 		resize();
+		bombs_map = quantity_of_bombs[level];
+		comparison = quantity_of_bombs[level];
 	}
 	public void resize() {
 		int var_size = size_of_map[level];
@@ -65,7 +68,7 @@ public class Map extends JPanel{
 				addComponent(buttons[i][j],i+1,j,1,1);
 				//test so I can see where the bombs are
 				if(field[i][j].have_bomb()) {
-					buttons[i][j].setBackground(new Color(000,178,238));
+//					buttons[i][j].setBackground(new Color(000,178,238));
 				}
 				//actionListener
 				
@@ -102,6 +105,19 @@ public class Map extends JPanel{
 	}
 	public JButton[][] get_buttons(){
 		return this.buttons;
+	}
+	public int get_qtd_bombs(){
+		return bombs_map;
+	}
+	public void minus_one() {
+		if(bombs_map>0) {
+			bombs_map = bombs_map - 1;
+		}
+	}
+	public void plus_one() {
+		if(bombs_map< comparison) {
+			bombs_map = bombs_map + 1;
+		}
 	}
 	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers
 		int ICM;//i counter minus
