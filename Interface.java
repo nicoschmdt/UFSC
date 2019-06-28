@@ -43,6 +43,7 @@ public class Interface {
 	private JButton restart_b;
 	private Box box;
 	private int counter = 0;
+	private int stats = 0;
 	//listener menu
 
 	private boolean game_lost = false; //if the game is lost this'll turn true gotta use this to stop the timer
@@ -89,6 +90,11 @@ public class Interface {
 		restart_b.setPreferredSize(new Dimension(40,40));
 		restart_b.addActionListener((e) -> {
 			this.counter = 0;
+			map = new Map(stats);
+			this.game_lost = false;
+			panel.removeAll();
+			panel.add(map,BorderLayout.CENTER);
+			panel.repaint();			
 		});
 		box.add(restart_b);
 		box.add(Box.createHorizontalStrut(110));
@@ -125,16 +131,19 @@ public class Interface {
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
+					this.stats = 0;
 				}else if(text.equals("Medium")) {
 					map = new Map(1);
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
+					this.stats = 1;
 				}else {
 					map = new Map(2);
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
+					this.stats = 2;
 				}
 
 			});
