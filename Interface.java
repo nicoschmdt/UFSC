@@ -87,6 +87,9 @@ public class Interface {
 		//gotta fix the size, cant really set this in i3 :/
 		restart_b = new JButton("Restart");
 		restart_b.setPreferredSize(new Dimension(40,40));
+		restart_b.addActionListener((e) -> {
+			this.counter = 0;
+		});
 		box.add(restart_b);
 		box.add(Box.createHorizontalStrut(110));
 		//
