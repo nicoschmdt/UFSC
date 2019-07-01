@@ -4,21 +4,16 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 public class Map extends JPanel{
 	
 	private Field[][] field; //this is the matrix he'll go to confirm whats going on
 	private JButton[][] buttons;
 	//the next variables follow the order of easy -> medium -> hard setup.
-	private int[] quantity_of_bombs = {20,95,200};
+	private int[] quantity_of_bombs = {20,70,200};
 	private int[] size_of_map = {10,18,24};
 	private GridBagConstraints constraints;
 	private GridBagLayout grid_layout;
@@ -68,7 +63,7 @@ public class Map extends JPanel{
 				addComponent(buttons[i][j],i+1,j,1,1);
 				//test so I can see where the bombs are
 				if(field[i][j].have_bomb()) {
-//					buttons[i][j].setBackground(new Color(000,178,238));
+					buttons[i][j].setBackground(new Color(000,178,238));
 				}
 				//actionListener
 				

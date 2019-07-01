@@ -1,7 +1,6 @@
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 
@@ -103,28 +102,28 @@ public class Mouse implements MouseListener{
 		}
 		if(IB>=0) {
 			if(field[IB][b].have_number()) {
-				buttons[IB][b].setText(Integer.toString(field[IB][j].get_number()));
+				buttons[IB][b].setText(Integer.toString(field[IB][b].get_number()));
 				buttons[IB][b].setEnabled(false);
 				buttons[IB][b].setBackground(new Color(205,179,139));
-			}else if(buttons[IB][b].isEnabled()){
+			}else if(buttons[IB][b].isEnabled() && !field[IB][b].have_bomb() && !field[IB][b].have_number()){
 				flood_fill(IB,b);
 			}
 		}
 		if(IB>=0 && JB>=0) {
-			if(field[IB][JB].have_number()) {
+			if(field[IB][JB].have_number() ) {
 				buttons[IB][JB].setText(Integer.toString(field[IB][JB].get_number()));
 				buttons[IB][JB].setEnabled(false);
 				buttons[IB][JB].setBackground(new Color(205,179,139));
-			}else if(buttons[IB][JB].isEnabled()) {
+			}else if(buttons[IB][JB].isEnabled() && !field[IB][JB].have_bomb() && !field[IB][JB].have_number()) {
 				flood_fill(IB,JB);
 			}
 		}
 		if(JB>=0) {
 			if(field[a][JB].have_number()) {
-				buttons[a][JB].setText(Integer.toString(field[i][JB].get_number()));
+				buttons[a][JB].setText(Integer.toString(field[a][JB].get_number()));
 				buttons[a][JB].setEnabled(false);
 				buttons[a][JB].setBackground(new Color(205,179,139));
-			}else if(buttons[a][JB].isEnabled()){
+			}else if(buttons[a][JB].isEnabled() && !field[a][JB].have_bomb() && !field[a][JB].have_number()){
 				flood_fill(a,JB);
 			}
 		}
@@ -133,16 +132,16 @@ public class Mouse implements MouseListener{
 				buttons[IB][JA].setText(Integer.toString(field[IB][JA].get_number()));
 				buttons[IB][JA].setEnabled(false);
 				buttons[IB][JA].setBackground(new Color(205,179,139));
-			}else if(buttons[IB][JA].isEnabled()){
+			}else if(buttons[IB][JA].isEnabled() && !field[IB][JA].have_bomb() && !field[IB][JA].have_number()){
 				flood_fill(IB,JA);
 			}
 		}
 		if(JA<buttons.length) {
-			if(field[i][JA].have_number()) {
-				buttons[a][JA].setText(Integer.toString(field[i][JA].get_number()));
+			if(field[a][JA].have_number()) {
+				buttons[a][JA].setText(Integer.toString(field[a][JA].get_number()));
 				buttons[a][JA].setEnabled(false);
 				buttons[a][JA].setBackground(new Color(205,179,139));
-			}else if(buttons[a][JA].isEnabled()){
+			}else if(buttons[a][JA].isEnabled() && !field[a][JA].have_bomb() && !field[a][JA].have_number()){
 				flood_fill(a,JA);
 			}
 		}
@@ -151,16 +150,16 @@ public class Mouse implements MouseListener{
 				buttons[IA][JB].setText(Integer.toString(field[IA][JB].get_number()));
 				buttons[IA][JB].setEnabled(false);
 				buttons[IA][JB].setBackground(new Color(205,179,139));
-			}else if(buttons[IA][JB].isEnabled()){
+			}else if(buttons[IA][JB].isEnabled() && !field[IA][JB].have_bomb() && !field[IA][JB].have_number()){
 				flood_fill(IA,JB);
 			}
 		}
 		if(IA<buttons.length) {
 			if(field[IA][b].have_number()) {
-				buttons[IA][b].setText(Integer.toString(field[IA][j].get_number()));
+				buttons[IA][b].setText(Integer.toString(field[IA][b].get_number()));
 				buttons[IA][b].setEnabled(false);
 				buttons[IA][b].setBackground(new Color(205,179,139));
-			}else if(buttons[IA][b].isEnabled()){
+			}else if(buttons[IA][b].isEnabled() && !field[IA][b].have_bomb() && !field[IA][b].have_number()){
 				flood_fill(IA,b);
 			}
 		}
@@ -169,7 +168,7 @@ public class Mouse implements MouseListener{
 				buttons[IA][JA].setText(Integer.toString(field[IA][JA].get_number()));
 				buttons[IA][JA].setEnabled(false);
 				buttons[IA][JA].setBackground(new Color(205,179,139));
-			}else if(buttons[IA][JA].isEnabled()){
+			}else if(buttons[IA][JA].isEnabled() && !field[IA][JA].have_bomb() && !field[IA][JA].have_number()){
 				flood_fill(IA,JA);
 			}
 		}
