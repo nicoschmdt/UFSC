@@ -42,6 +42,7 @@ public class Mouse implements MouseListener{
 					}
 				}else if(field[i][j].have_bomb()){//if there's a bomb
 //					System.out.println("Oh no, you lost the game! <('^')> ");
+					map.set_game_lost(true);
 					for(int a = 0; a < buttons.length; a++) {
 						for(int b = 0; b < buttons.length; b++) {
 							buttons[a][b].setEnabled(false);

@@ -25,7 +25,9 @@ public class Map extends JPanel{
 	private int level;
 	private int comparison;
 	private int bombs_map;
-
+	private boolean game_lost = false;
+	private boolean game_won = false;
+	
 	public Map(int level) {
 		
 		this.level = level;
@@ -63,7 +65,7 @@ public class Map extends JPanel{
 				addComponent(buttons[i][j],i+1,j,1,1);
 				//test so I can see where the bombs are
 				if(field[i][j].have_bomb()) {
-					buttons[i][j].setBackground(new Color(000,178,238));
+//					buttons[i][j].setBackground(new Color(000,178,238));
 				}
 				//actionListener
 				
@@ -113,6 +115,18 @@ public class Map extends JPanel{
 		if(bombs_map< comparison) {
 			bombs_map = bombs_map + 1;
 		}
+	}
+	public void set_game_lost(boolean b) {
+		this.game_lost = b;
+	}
+	public boolean get_game_lost() {
+		return this.game_lost;
+	}
+	public void set_game_won(boolean b) {
+		this.game_won = b;
+	}
+	public boolean get_game_won() {
+		return this.game_won;
 	}
 	public void set_numbers(Field[][] f) {// here it'll be setted the quantity of numbers
 		int ICM;//i counter minus
