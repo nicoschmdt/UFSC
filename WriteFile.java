@@ -19,9 +19,9 @@ public class WriteFile {
 	public void writeToFile(File f,String line) {
 		FileWriter write;
 		try {
-			write = new FileWriter(f);
+			write = new FileWriter(f,true);
 			PrintWriter printer = new PrintWriter(write);
-			printer.printf("%s" + "%n", line);
+			printer.printf("%s", line);
 			printer.close();
 		} catch (IOException e) {
 			System.err.println(e.getMessage());

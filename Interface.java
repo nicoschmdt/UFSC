@@ -6,8 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -95,6 +98,7 @@ public class Interface {
 					  String n = JOptionPane.showInputDialog("What is your name?"); //n = name
 					  data.set_name(n);
 					  a = 1;
+					  save_score();
 				  }
 		      }
 		    }).start();
@@ -108,6 +112,8 @@ public class Interface {
 			this.counter = 0;
 			map = new Map(stats);
 			map.set_game_lost(false);
+			map.set_game_won(false);
+			a = 0;
 			panel.removeAll();
 			panel.add(map,BorderLayout.CENTER);
 			panel.repaint();			
@@ -184,7 +190,6 @@ public class Interface {
 				
 			}
 		});
-		
 		score.addActionListener((e) -> {
 			
 			frame_score = new JFrame("Score");
@@ -192,27 +197,7 @@ public class Interface {
 			text_area = new JTextArea();
 			text_area.setEditable(false);
 			
-			//
-			ReadFile read = new ReadFile();//is it needed?
-			WriteFile write = new WriteFile();
-			//idk if this goes here tho, since its a writer and I want a reader
-			PrintWriter writer;
-			file = new File("score.txt");
-			
-			try {
-				writer = new PrintWriter(file,"UTF-8");
-				write.writeToFile(file,data.toString());//o content vai vir aqui
-				writer.append((CharSequence) write);
-				writer.close();
-			} catch (FileNotFoundException e1) {
-				System.err.println(e1.getMessage());
-				e1.printStackTrace();
-			} catch (UnsupportedEncodingException e2) {
-				System.err.println(e2.getMessage());
-				e2.printStackTrace();
-			}
-			
-			
+			text_area.setText(read_score());
 			panel_score.add(text_area);
 			frame_score.add(panel_score);
 			frame_score.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -256,6 +241,23 @@ public class Interface {
 	}
 	public String get_selected_difficult(){
 		return selected_difficult;
+	}
+	public void save_score() {
+		WriteFile write = new WriteFile();
+		file = new File("score.txt");
+		
+		write.writeToFile(file,data.toString());//o content vai vir aqui
+		
+	}
+	public String read_score() {
+		String content = "";
+		try {
+			content = new String(Files.readAllBytes(Paths.get("score.txt")));
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return content;
 	}
 
 	//main

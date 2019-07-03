@@ -31,6 +31,6 @@ public class Score {
     }
     @Override
     public String toString() {
-    	return "difficulty: "+difficulty+",name: "+name+",time: " + time;
+    	return "difficulty: "+difficulty+",name: "+name+",time: " + time + "\n";
     }
 }
