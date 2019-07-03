@@ -25,6 +25,11 @@ public class Mouse implements MouseListener{
 	}
 	public void mousePressed(MouseEvent e) {
 		JButton btn = (JButton) e.getSource();
+		
+		if(!btn.isEnabled() && !field[i][j].get_flag()) {
+			return;
+		}
+		
 		buttons = map.get_buttons();
 //		System.out.println(f.get_flag());
 		if(SwingUtilities.isLeftMouseButton(e)) {
@@ -40,8 +45,20 @@ public class Mouse implements MouseListener{
 						flood_fill(i,j);
 						
 					}
+					boolean verify_enable = false;
+					for(int i = 0; i < buttons.length; i++) {
+						for(int j = 0; j < buttons.length; j++) {
+							
+							if(buttons[i][j].isEnabled() && !field[i][j].have_bomb()) {
+								verify_enable = true;
+							}
+						}
+					}
+					if(!verify_enable) {
+						//todo
+						map.set_game_won(true);
+					}
 				}else if(field[i][j].have_bomb()){//if there's a bomb
-//					System.out.println("Oh no, you lost the game! <('^')> ");
 					map.set_game_lost(true);
 					for(int a = 0; a < buttons.length; a++) {
 						for(int b = 0; b < buttons.length; b++) {
@@ -56,7 +73,7 @@ public class Mouse implements MouseListener{
 			}
 		}else if(SwingUtilities.isMiddleMouseButton(e)) {
 			
-		}else {
+		}else {//todo
 //			btn.setBackground(new Color(205,200,177));
 			if(!field[i][j].get_click()) {
 				if(field[i][j].get_flag()) {

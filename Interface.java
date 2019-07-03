@@ -47,6 +47,7 @@ public class Interface {
 	private Score data;
 	private JTextArea text_area;
 	private File file;
+	private int a = 0;
 	 //if the game is lost this'll turn true gotta use this to stop the timer
 	
 	public Interface() {
@@ -76,6 +77,8 @@ public class Interface {
 		//
 		map = new Map(0);
 		data = new Score();
+		data.set_difficulty("Easy");
+		
 		//
 		new Timer(1000, new ActionListener() {
 
@@ -83,13 +86,14 @@ public class Interface {
 		      public void actionPerformed(ActionEvent e) {
 		    	  
 		    	  label_timer.setText("Time Passed: " + counter);
-				  if(!map.get_game_lost() || !map.get_game_won()) {
+				  if(!map.get_game_lost() && !map.get_game_won()) {
 					  counter++;  
 				  }
 				  data.set_time(counter);
-				  int a = 0; //essa variavel é so para nao permitir q isso entre mais de uma vez
+				   //essa variavel é so para nao permitir q isso entre mais de uma vez
 				  if(a == 0 && map.get_game_won()) {
-					  //pegar o nome do vencedor
+					  String n = JOptionPane.showInputDialog("What is your name?"); //n = name
+					  data.set_name(n);
 					  a = 1;
 				  }
 		      }
@@ -143,6 +147,7 @@ public class Interface {
 				String text = btn.getText();
 				if(text.equals("Easy")) {
 					map = new Map(0);
+					data.set_difficulty("Easy");
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
@@ -150,6 +155,7 @@ public class Interface {
 					label_bombs.setText("Bombs remaining: " + map.get_qtd_bombs());
 				}else if(text.equals("Medium")) {
 					map = new Map(1);
+					data.set_difficulty("Medium");
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
@@ -157,6 +163,7 @@ public class Interface {
 					label_bombs.setText("Bombs remaining: " + map.get_qtd_bombs());
 				}else {
 					map = new Map(2);
+					data.set_difficulty("Hard");
 					panel.removeAll();
 					panel.add(map,BorderLayout.CENTER);
 					panel.repaint();
@@ -185,32 +192,30 @@ public class Interface {
 			text_area = new JTextArea();
 			text_area.setEditable(false);
 			
-			
-			
-			ReadFile read = new ReadFile();
+			//
+			ReadFile read = new ReadFile();//is it needed?
 			WriteFile write = new WriteFile();
 			//idk if this goes here tho, since its a writer and I want a reader
 			PrintWriter writer;
-			if(!file.exists()) {
-				file = new File("score.txt");
-			}else {
-				try {
-					writer = new PrintWriter(file,"UTF-8");
-					write.writeToFile(file,"a");//o content vai vir aqui
-					writer.close();
-				} catch (FileNotFoundException e1) {
-					System.err.println(e1.getMessage());
-					e1.printStackTrace();
-				} catch (UnsupportedEncodingException e2) {
-					System.err.println(e2.getMessage());
-					e2.printStackTrace();
-				}
+			file = new File("score.txt");
+			
+			try {
+				writer = new PrintWriter(file,"UTF-8");
+				write.writeToFile(file,data.toString());//o content vai vir aqui
+				writer.append((CharSequence) write);
+				writer.close();
+			} catch (FileNotFoundException e1) {
+				System.err.println(e1.getMessage());
+				e1.printStackTrace();
+			} catch (UnsupportedEncodingException e2) {
+				System.err.println(e2.getMessage());
+				e2.printStackTrace();
 			}
 			
-			//
+			
 			panel_score.add(text_area);
 			frame_score.add(panel_score);
-			frame_score.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame_score.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			frame_score.setSize(300,300);
 			frame_score.setVisible(true);
 		});

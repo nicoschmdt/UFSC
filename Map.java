@@ -65,7 +65,7 @@ public class Map extends JPanel{
 				addComponent(buttons[i][j],i+1,j,1,1);
 				//test so I can see where the bombs are
 				if(field[i][j].have_bomb()) {
-//					buttons[i][j].setBackground(new Color(000,178,238));
+					buttons[i][j].setBackground(new Color(000,178,238));
 				}
 				//actionListener
 				
