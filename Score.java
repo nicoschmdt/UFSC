@@ -29,7 +29,8 @@ public class Score {
     public int get_time() {
         return this.time;
     }
-    public String data(String dif,String name,int time) {
-    	return "difficulty: "+dif+",name: "+name+",time: " + time;
+    @Override
+    public String toString() {
+    	return "difficulty: "+difficulty+",name: "+name+",time: " + time;
     }
 }
