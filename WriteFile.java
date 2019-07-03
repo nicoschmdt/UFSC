@@ -30,35 +30,5 @@ public class WriteFile {
 	}
 	
 	
-//    private Formatter output;
-//    public WriteFile() {
-//    	try {
-//			output = new Formatter("score.txt");
-//		} catch (FileNotFoundException e) {
-//			System.err.println(e.getMessage());
-//			e.printStackTrace();
-//		}catch(SecurityException e) {
-//			System.err.println(e.getMessage());
-//			e.printStackTrace();
-//			System.exit(1);
-//		}
-//    }
-//    public void addRecords(Interface i) {
-//        Score score = new Score();
-//        Scanner input = new Scanner(System.in); //get the name here
-//        int score_value = i.get_score();
-//        score.set_name(input.next());
-//        String difficulty = i.get_selected_difficult();
-//
-//        if(score.get_time() > 0) {
-//            output.format("%s %s %d\n", difficulty,score.get_name(),score_value);
-//        }else{
-//            System.out.println("Time must be greater than 0.");
-//        }
-//    }
-//    public void close_file() {
-//        if(output != null) {
-//            output.close();
-//        }
-//    }
+
 }
