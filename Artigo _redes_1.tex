@@ -1,0 +1,82 @@
+\documentclass[article]{abntex2}
+\usepackage[num]{abntex2cite}
+\usepackage{booktabs}
+
+\title{Arquitetura e Machine Learning em Seguranca de IoT}
+\date{Outubro 2019}
+\author{Nicole Schmidt - 18203344}
+\begin{document}
+\maketitle
+\textbf{Titulo:}
+
+Arquitetura e Machine Learning em Seguranca de IoT
+
+\textbf{Resumo:}
+\newline
+A Internet das Coisas (IoT) é um conceito que se refere à interconexão digital de objetos cotidianos com a internet. Percebemos, cada vez mais, dispositivos IoT adentrando a sociedade e, frequentemente, ajudando e auxiliando o dia a dia das pessoas. Entretanto, a vasta área que o IoT acaba englobando abre uma vasta possibilidades de ataques os quais visam roubar informações para, geralmente, uso maléfico. Neste artigo será discutido diversas propostas recentes sobre arquitetura de segurança e como usar machine learning para aprimorar as técnicas de segurança utilizadas atualmente.
+\section{Introdução}
+\subsection{Motivação}
+Apesar dos avanços e pesquisas em redes IoT,  no quesito de segurança ainda é um problema presente nesse campo. Não obstante, o crescente aumento do uso de dispositivos IoT e sua grande dispersão em diversos meios de nossa sociedade poe em risco diversos fatores de nosso dia a dia. Os dispositivos IoT acabam sendo vítimas de diversos ataques, como por exemplo o ataque DDoS Mirai que capturou milhões de dispositivos IoT e transformou-os em botnets, os quais poderiam ser usados em ataques DDoS. Dessa forma, para garantir a segurança, tanto dos usuários quanto das empresas.
+\subsection{Justificativas}
+O tópico de IoT vem crescendo rapidamente no mercado, e com isso também cresce a necessidade de impedir ataques à esses dispositivos, é necessário que os métodos utilizados não prejudiquem o sistema, o qual já não possui uma capacidade muito alta para lidar com programas pesados, sendo dessa forma simples e efetivo. Assim, a utilização de uma arquitetura de segurança e de métodos eficientes tornam-se essenciais para a proteção do dispositivo. Uma tática que vem sendo recentemente explorada é a utilização de machine learning para identificar ataques cibernéticos.
+\subsection{Objetivos}
+\subsubsection{Objetivos Gerais}
+Apresentar artigos que falam sobre arquitetura e machine learning em segurança de dispositivos IoT
+\subsubsection{Objetivos Específicos}
+\begin{itemize}
+    \item Discutir a proposta de implementação de algumas arquiteturas de segurança de IoT
+    \item Mostrar como o machine learning pode ser utilizado na área de segurança em IoT
+\end{itemize}
+\subsection{Organização do Artigo}
+O artigo será apresentando da seguinte forma: Na seção 2 – Conceitos Básicos: a definição e explicação de IoT e métodos de machine learning, além de uma breve explicação de oque seria uma arquitetura de segurança em IoT. Na seção 3– Trabalhos Correlatos: irá ser apresentado artigos relacionados à arquiteturas de segurança e métodos de utilização de machine learning para evitar ataques ciberneticos à dispositivos IoT.
+\section{Conceitos básicos}
+\subsection{O que é IoT}
+A IoT, ou Internet das Coisas, refere-se à interconexão de dispositivos conectados à internet que estão presentes no nosso dia-a-dia. Ela é uma rede de objetos físicos capaz de reunir e de transmitir dados e uma extensão da internet que possibilita objetos do cotidiano a conectarem-se à internet, sendo composta apenas por sensores e outros dispositivos inteligentes. A internet das coisas pode ser aplicada em diversos setores, seja para otimizar as atividades de uma indústria ou facilitar a vida dos cidadãos. Neste artigo veremos métodos e práticas de segurança utilizadas atualmente as quais possuem o intuito de proteger os dados produzidos pelos dispositivos IoT e, dessa forma, proteger a privacidade dos usuários.
+\subsection{O que é Machine Learning}
+Machine learning é um método de análise de dados que automatiza a construção de modelos analíticos, é baseado na ideia de que sistemas podem aprender com dados, identificar padrões e tomar decisões com o mínimo de intervenção humana. Existem dois tipos de machine learning, a aprendizagem supervisionada, a qual existe um conjunto prévio de dados inseridos na máquina e as sugestões que serão dadas ao usuário devem ser parecidas com os dados registrados, e a aprendizagem não supervisionada, na qual não existe um resultado específico esperado. Neste artigo daremos enfase a métodos que utilizam machine learning para a detecção de anomalias que podem ser, possivelmente, ataques ciberneticos.
+\subsection{O que seria uma arquitetura de segurança em IoT}
+Uma arquitetura descreve a estrutura da solução de IoT, incluindo os aspectos físicos (no caso, as coisas) e os aspectos virtuais (como serviços e protocolos de comunicação). Desenvolver uma solução end-to-end (E2E) segura envolve em multiplos leveis que agregam importantes caracteristicas de uma arquitetura de segurança IoT em diferentes camadas. Procura-se garantir que a informação esta seguramente criptografada enquanto está transitando, ou mesmo parada, para que assim, mesmo que ela seja interceptada não seja possível obter seu conteúdo.
+\section{Trabalhos Correlatos}
+\textbf{Revisão bibliográfica sistemática:}\\
+\begin{tabular}{l l}
+    \toprule
+    \textbf{Palavra-chave}& \textbf{Total}  \\
+    \midrule
+    \textbf{``Machine Learning''}& \textbf{ 5.360.000 }\\
+    \textbf{``IoT''}& \textbf{ 892.000 } \\
+    \textbf{``IoT'' ``Machine Learning''}& \textbf{ 67.100 }\\
+    \textbf{``IoT'' ``Machine Learning'' ``Security''}& \textbf{ 45.800 } \\
+    \textbf{``IoT'' ``Machine Learning'' ``Security Architecture''}& \textbf{ 38.600 } \\
+    \bottomrule
+\end{tabular}
+
+É notável, através da análise da tabela acima, que ao se aprofundar na área de pesquisa em segurança de IoT e no uso de machine learning para o auxíliar com tal objetivo há um decrescimo no número de artigos devido à especificidade do tema, no entanto é possível perceber que mesmo assim este tópico já possui certa importancia para a área, sendo 5\% do total de artigos de IoT pertencendo a esse tema e 57.5\% de artigos no tema de IoT e Machine Learning. Agora serão analisados alguns artigos referenciados na seção bibliográficas.
+\subsection{System Statistics Learning-Based IoT Security: Feasibility and Suitability}%Li - 2019
+O artigo possui como foco os problemas de segurança IoT em serviços fog, que são baseados em dispositivos com capacidade computacional e de comunicação limitada. Os autores propoem uma framework de detecção geral de anomalias a qual possui o intuito de detectar possíveis ataques ciberneticos ou atividades maliciosas. A tecnica utilizada consiste em ver estatisticas do simples do sistema como a utilização da CPU, memoria consumida, etc. para definir um comportamento normal. É mostrado que técnicas estatisticas e a utilização de modelos de machine learning podem ser usadas efetivamente para detectar ataques em dispositivos IoT. O emprego de modelos de machine learning é utilizado para prever o comportamento dos dispositivos, através  de metodos de analise de series temporais, e observar o desvio que eles acabam seguindo ao inves de executarem como o esperado. Esse metodo também pode ser utilizado para detectar falhas pois ele não foi modelado para detecta-las e portanto o comportamento anomalo pode ser identificado.
+\subsection{A Security Architecture for RISC-V based IoT Devices}%2019-auer
+No artigo os autores explicam que a arquitetura apresentada foca em tres areas: o secure boot (boot seguro), a autenticação watch dog e a gestão de chaves. O secure boot é utilizado devido à necessidade de verificar se o update de um software compromete o dispositivo de alguma forma. Essa funcionalidade começa a ser executada a partir da inicialização para autenticar a imagem de inicialização, atualizações são feitas durante a execução, um sistema de gerenciamento centralizado deve ser capaz de realizar essa tarefa remotamente além de monitorar esse a fim de detectar falhas. A autenticação watch dog reseta uma vez que o seu timer interno encerra. No entanto, uma vez que ativado ele só pode ser desativado por um mecanismo externo. Após isso o secure boot então é capaz de restaurar o dispositivo para uma versão confiavel, isso posibilita que os dispositivos sejam capazes de serem recuperados mesmo que eles nao estejam conectados à uma rede. Em redes muito grandes tais verificações necessitam ser feitas automaticamente. A gestão de chaves foi feita com a intenção de manter a segurança dos dados, elas vem da identidade DICE através de um algoritmo de derivação de chaves, a identidade é baseada na chave criptográfica única exitente no chip. Dessa forma, toda vez em que ocorra uma restauração de fábrica uma nova identidade seja criada, isso garante que todas as chaves criptográficas utilizadas pelo sistema também serão alteradas.
+
+\subsection{IoTChain: A blockchain security architecture for the Internet of Things}%alphand - 2018
+Os autores propoem  uma combinação entre a arquitetura OSCAR (Object Security Architecture), a qual provém uma criptografia E2E (end to end) para o transporte de informações de dispositivos IoT, e a estrutura de autorização ACE (Authentication and Authorization for Constrained Environments),aonde os tokens são fornecidos por um servidor de autorização. É proposto que a única verificação de autorização feita pela interface ACE seja substituida por uma blockchain não confiável, pois dessa forma o controle ao acesso de recursos seria robusto, flexivel e possivelmente preservaria a privacidade do usuário, isso devido ao protocolo de consenso da blockchain que faz com que o atacante precise ter um controle de 51\% dela antes que ele consiga obter tokens ilegitimos. A blockchain lida com pedidos de autorização através de smart contracts (contratos inteligentes),os quais são definidos pelo dono do recurso oferecido, adicionando um token no contrato de armazenamento para autorizar um cliente. Além disso é utilizado um grupo de distribuição de chaves self-healing que permite uma eficiente transmissão de recursos ioT para múltiplos destinatários simultaneamente. Os clientes solicitam chaves do servidos de chaves para se juntar ao grupo de distribuição de chaves associado com os recursos desejados.
+
+\subsection{SDN Enabled Secure IoT Architecture}%karmakar - 2019
+No artigo, a qual propoe uma nova arquitetura de segurança para dispositivos IoT, os autores explicam o porquê de escolherem trabalhar com Software-Defined Network(SDN) no quesito de segurança, principalmente devido à separação do plano de controle do plano de dados, ao domínio da rede e as aplicações SDN northbound. O SDN permite que apenas informações autenticadas de um dispositivo IoT legitimado seja capaz de descobrir e usar os serviços de uma rede. Para isso, foram desenvolvidas duas aplicações que controlam e gerenciam o comportamento dos dispositivos na rede, o primeiro é o policy based security application (PbSA) e o segundo o IoT Security Applications (ISA), o qual possui dois sub-módulos, o IoT Authorization Authority e o IoT Authentication Authority. Nessa arquitetura cada dispositivo possui um ID único que conecta a um IoT gateway (dispositivo que intermediará o fluxo de dados entre os sensores e o data center) através de uma rede wireless, os dispositivos são autenticados na primeira fase do protocolo de segurança, e então o dispositivo manda uma mensagem com um requerimento para um serviço de rede, no final dessa fase é estabelecido uma chave comum secreta com o aparelho a qual pode ser utilizada posteriormente para próximas comunicações. Na etapa de autorização é conferido com a chave gerada  o serviço de rede o qual o dispositivo fez o requerimento, se o dispositivo e se os seus atributos de fluxo satisfazem as expressões definidas pelo IoT Authorization Authority que então irá gerar um token para o dispositivo IoT acessar o serviço requisitado.
+
+    
+
+% Então, \cite{Auer:2019}.
+
+\bibliography{refs}
+\nocite{Auer:2019}
+\nocite{Tiburski:2019}
+\nocite{Li:2019}
+\nocite{Karmakar:2019}
+\nocite{Oliveira:2018}
+\nocite{Das:2018}
+\nocite{Alphand:2018}
+\nocite{Novo:2018}
+\nocite{Stergiou:2017}
+\nocite{Minoli:2017}
+
+
+\end{document}
