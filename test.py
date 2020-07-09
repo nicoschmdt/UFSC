@@ -1,5 +1,18 @@
 import csv
 from geopy.distance import geodesic
+from dataclass import dataclass
+
+@dataclass
+class Point:
+    user_id: str
+    venue_id: str
+    venue_category_id: str
+    venue_category: str
+    latitude: float
+    longitude: float
+    timezone_offset: str
+    utc_timestamp: str
+    duration: float
 
 def return_list(name):
     trajectories = {}
@@ -10,13 +23,18 @@ def return_list(name):
             user_id, *data = row
             if user_id not in lista:
                 trajectories[user_id] = []
-            trajectories[user_id].append(row)
+            point_created = Point(row[0],row[1],row[2],row[3],float(row[4]),float(row[5]),row[6],row[7],0.)
+            trajectories[user_id].append(point_created)
     # print(trajectories['470'])
     return trajectories
 
 #merging two spatiotemporal points
 def merge_points(point_one,point_two,diversity_criteria,closeness_criteria):
-    #preciso 
+    timestamp1 = datetime.strptime(point_one,'%a %b %d %H:%M:%S %z %Y')
+    timestamp2 = datetime.strptime(point_two,'%a %b %d %H:%M:%S %z %Y')
+    timestamp = min(timestamp1,timestamp2)
+
+
 
 #recebe uma lista de trajetorias e gera uma nova lista com a categoria de duration (quanto tempo a trajetoria permaneceu naquele lugar)
 def add_duration(trajectories):
