@@ -35,7 +35,6 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria):
     timestamp = min(timestamp1,timestamp2)
 
 
-
 #recebe uma lista de trajetorias e gera uma nova lista com a categoria de duration (quanto tempo a trajetoria permaneceu naquele lugar)
 def add_duration(trajectories):
     #iterar em cada trajetoria
@@ -43,37 +42,25 @@ def add_duration(trajectories):
     for user_id in trajectories:
         new_dict[user_id] = []
         #iterar em cada segmento da trajetoria
-        userId,venueId,venueCategoryId,venueCategory,latitude1,longitude1,timezoneOffset,utcTimestamp1 = trajectories[user_id][0] #the point that will be used as a comparison
-        duration = 0
-        new_dict[user_id].append([userId,venueId,venueCategoryId,venueCategory,latitude1,longitude1,timezoneOffset,utcTimestamp1,duration])
+        point_one = trajectories[user_id][0] #the point that will be used as a comparison
+        new_dict[user_id].append(point_one)
         for segment in trajectories[user_id][1:]:
-            userId2,venueId2,venueCategoryId2,venueCategory2,latitude2,longitude2,timezoneOffset2,utcTimestamp2 = segment
-            coordinates1 = (latitude1,longitude1)
-            coordinates2 = (latitude2,longitude2)
-            distance = geodesic(coordinates1,coordinates2).miles
+            point_two = segment
+            coordinate_one =  (point_one.latitude, point_one.longitude)
+            coordinate_two = (point_two.latitude,point_two.longitude)
+            distance = geodesic(coordinate_one,coordinate_two).miles
             #if its a different location
             if distance > 2:
-                duration = 0
-                userId,venueId,venueCategoryId,venueCategory,latitude1,longitude1,timezoneOffset,utcTimestamp1 = segment
-                new_dict[user_id].append([userId,venueId,venueCategoryId,venueCategory,latitude1,longitude1,timezoneOffset,utcTimestamp1,duration])
+                point_one = segment
+                new_dict[user_id].append(point_one)
             #if its the same location just add the duration of it
             else:
-                timestamp1 = datetime.strptime(utcTimestamp1,'%a %b %d %H:%M:%S %z %Y')
-                timestamp2 = datetime.strptime(utcTimestamp2,'%a %b %d %H:%M:%S %z %Y')
-                new_duration = timestamp2 - timestamp1
+                timestamp_one = datetime.strptime(point_one,'%a %b %d %H:%M:%S %z %Y')
+                timestamp_two = datetime.strptime(point_two,'%a %b %d %H:%M:%S %z %Y')
+                new_duration = timestamp_two - timestamp_one
                 new_duration = new_duration.total_seconds()/3600
                 duration = new_duration + duration
-                new_dict[user_id][-1][-1] = duration
-            #if the distance greater than 2 miles then the point should be taken into account
-            #now is calculated how much time a point stayed at a certain location
-            #preciso refazer esse if
-            # if distance > 2:
-            #     timestamp1 = datetime.strptime(utcTimestamp1,'%a %b %d %H:%M:%S %z %Y')
-            #     timestamp2 = datetime.strptime(utcTimestamp2,'%a %b %d %H:%M:%S %z %Y')
-            #     duration = timestamp2 - timestamp1
-            #     duration = duration.total_seconds()/3600
-            #     new_dict[user_id].append((userId,venueId,venueCategoryId,venueCategory,latitude1,longitude1,timezoneOffset,utcTimestamp1,duration))
-            #     userId,venueId,venueCategoryId,venueCategory,latitude1,longitude1,timezoneOffset,utcTimestamp1 = segment
+                new_dict[user_id][-1].duration = duration1
     return new_dict
                 
 
