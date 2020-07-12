@@ -73,8 +73,7 @@ def add_duration(trajectories):
                 timestamp_two = point_two.utc_timestamp
                 new_duration = timestamp_two - timestamp_one
                 new_duration = new_duration.total_seconds()/3600
-                duration = new_duration + point_one.duration
-                new_dict[user_id][-1].duration = duration
+                point_one.duration = new_duration + point_one.duration
     return new_dict
                 
 # def get_connected_region(point_one,point_two):
@@ -84,22 +83,31 @@ def add_duration(trajectories):
 #receives the dictionary which the add_duration method returns
 def build_neighbours_graph(trajectories):
     #use venue_id
-    print('got in build neighbours graph')
+    # print('got in build neighbours graph')
     neighbors = {}
     for trajectory in trajectories.values():
         last_visited_point = trajectory[0]
-        if trajectory[0].venue_id not in neighbors:
-                neighbors[trajectory[0].venue_id] = []
+        if last_visited_point.venue_id not in neighbors:
+                neighbors[last_visited_point.venue_id] = []
+                # if last_visited_point.venue_id == '4ec2b9768b817d2b84f1548a' or last_visited_point.venue_id == '4ec2b9768b817d2b84f1548a':
+                #     print(f'initializing empty list for {last_visited_point.venue_id}')
         for point in trajectory[1:]:
             if point.venue_id not in neighbors:
                 neighbors[point.venue_id] = []
-            if point.venue_id == '4ec2b9768b817d2b84f1548a' or last_visited_point.venue_id == '4ec2b9768b817d2b84f1548a':
-                print(f'linking {point.venue_id} with {last_visited_point.venue_id}')
+                # if point.venue_id == '4ec2b9768b817d2b84f1548a' or last_visited_point.venue_id == '4ec2b9768b817d2b84f1548a':
+                #     print(f'initializing empty list for {point.venue_id}')
+            #     print(f'linking {point.venue_id} with {last_visited_point.venue_id}')
             neighbors[point.venue_id].append(last_visited_point.venue_id)
             neighbors[last_visited_point.venue_id].append(point.venue_id)
             last_visited_point = point
-    pprint(sorted(neighbors['49bbd6c0f964a520f4531fe3']))
+    # pprint(sorted(neighbors['49bbd6c0f964a520f4531fe3']))
+    return neighbors
 
+#to know if venue 2 and venue1 are neighbours
+def is_neighbour(graph,venue1,venue2):
+    if venue2 not in graph[venue1]:
+        return False
+    return True
 
 # def trajectory_reconstruction():
 # def get_neighbors():
@@ -110,6 +118,10 @@ def build_neighbours_graph(trajectories):
 # def Dijkstra():
 
 trajectories = return_list('dataset_TSMC2014_NYC.csv')
-trajectories = add_duration(trajectories)
+# trajectories = add_duration(trajectories)
 graph = build_neighbours_graph(trajectories)
+# print(is_neighbour(graph,'4f674129e4b02cbb81861258','4e3c2d30ae6045423653c241'))
+# print(is_neighbour(graph,'49bbd6c0f964a520f4531fe3','4e08ad8cd4c03ae0b9d11f93'))
+# print(is_neighbour(graph,'3fd66200f964a52051eb1ee3','4b46b35ef964a520062726e3'))
+# print(is_neighbour(graph,'4ec2b9768b817d2b84f1548a','4539fe02f964a520de3b1fe3'))
 # print(return_list('dataset_TSMC2014_NYC.csv'))
