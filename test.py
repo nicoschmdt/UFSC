@@ -48,6 +48,10 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph
     location = get_connected_region(graph,point_one,point_two)
 
     while smth < diversity_criteria:
+
+    location_modified = location
+
+    while smth2 > closeness_criteria:
     
 #receives a trajectory list and generates a new one with the duration category updated
 def add_duration(trajectories):
@@ -124,16 +128,21 @@ def Dijkstra(graph, source):
 
 def get_connected_region(graph,source, destiny):
     distances,previous = Dijkstra(graph,source)
-    path = []
+    path = [destiny]
     while destiny != source:
         path.append(previous[destiny])
         destiny = previous[destiny]
-    return path
+    return reversed(path + [source])
 
-def get_neighbors():
+#receives a list of venue_ids and returns a list of neighbors
+def get_neighbors(locations,graph):
+    neighbors = set()
+    for location in locations:
+        neighbors.add(*graph[location])
+    for location in locations:
+        neighbors.remove(location)
 
 
-# def trajectory_reconstruction():
 # #merging trajectories
 # def merge_trajectory():
 
