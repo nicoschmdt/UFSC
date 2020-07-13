@@ -1,5 +1,5 @@
 import csv
-# from geopy.distance import geodesic
+from geopy.distance import geodesic
 from dataclasses import dataclass
 from datetime import timedelta,datetime
 from pprint import pprint
@@ -84,8 +84,9 @@ def build_neighbours_graph(trajectories):
         for point in trajectory[1:]:
             if point.venue_id not in neighbors:
                 neighbors[point.venue_id] = []
-            neighbors[point.venue_id].append(last_visited_point.venue_id)
-            neighbors[last_visited_point.venue_id].append(point.venue_id)
+            distance = calculate_distance(point,last_visited_point)
+            neighbors[point.venue_id].append((last_visited_point.venue_id,distance))
+            neighbors[last_visited_point.venue_id].append((point.venue_id,distance))
             last_visited_point = point
     # pprint(sorted(neighbors['49bbd6c0f964a520f4531fe3']))
     return neighbors
@@ -96,8 +97,10 @@ def is_neighbour(graph,venue1,venue2):
         return False
     return True
 
-
-#calcular a distancia e devolver alem do venue id tambem a distancia<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+def calculate_distance(point_one,point_two):
+    coordinate_one =  (point_one.latitude, point_one.longitude)
+    coordinate_two = (point_two.latitude,point_two.longitude)
+    return geodesic(coordinate_one,coordinate_two).miles
 
 # def trajectory_reconstruction():
 # def get_neighbors():
@@ -107,25 +110,26 @@ def is_neighbour(graph,venue1,venue2):
 
 def Dijkstra(graph, source):
     queue = set()
-    distance = {}
+    distances = {}
     previous = {}
     for vertex in graph:
-        distance[vertex] = float('inf')
+        distances[vertex] = float('inf')
         previous[vertex] = None
         queue.add(vertex)
-    distance[source] = 0
+    distances[source] = 0
 
     while queue.len() != 0:
-        u = min(queue, key=lambda k: distance[k])
+        u = min(queue, key=lambda k: distances[k])
         queue.remove(u)
 
         for neighbor in graph[u]:
-            alt = distance[u] + length(u,neighbor)
-            if alt < dist[neighbor]:
-                dist[neighbor] = alt
+            venue_id,distance = neighbor
+            alt = distances[u] + distance
+            if alt < distances[neighbor]:
+                distances[neighbor] = alt
                 previous[neighbor] = u
 
-    return distance,previous
+    return distances,previous
 
         
 
