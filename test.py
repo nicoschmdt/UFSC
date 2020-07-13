@@ -96,13 +96,39 @@ def is_neighbour(graph,venue1,venue2):
         return False
     return True
 
+
+#calcular a distancia e devolver alem do venue id tambem a distancia<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 # def trajectory_reconstruction():
 # def get_neighbors():
 
 # #merging trajectories
 # def merge_trajectory():
 
-# def Dijkstra():
+def Dijkstra(graph, source):
+    queue = set()
+    distance = {}
+    previous = {}
+    for vertex in graph:
+        distance[vertex] = float('inf')
+        previous[vertex] = None
+        queue.add(vertex)
+    distance[source] = 0
+
+    while queue.len() != 0:
+        u = min(queue, key=lambda k: distance[k])
+        queue.remove(u)
+
+        for neighbor in graph[u]:
+            alt = distance[u] + length(u,neighbor)
+            if alt < dist[neighbor]:
+                dist[neighbor] = alt
+                previous[neighbor] = u
+
+    return distance,previous
+
+        
+
 
 trajectories = return_list('dataset_TSMC2014_NYC.csv')
 trajectories = add_duration(trajectories)
