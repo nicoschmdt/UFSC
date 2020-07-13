@@ -39,14 +39,15 @@ def return_list(name):
     return trajectories
 
 #merging two spatiotemporal points
-# def merge_points(point_one,point_two,diversity_criteria,closeness_criteria):
-    # timestamp1 = point_one.utc_timestamp
-    # timestamp2 = point_two.utc_timestamp
-    # #prob gotta turn this one like the utc_timestamp format
-    # timestamp = min(timestamp1,timestamp2)
+def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph):
+    timestamp1 = point_one.utc_timestamp
+    timestamp2 = point_two.utc_timestamp
+    #prob gotta turn this one like the utc_timestamp format
+    timestamp = min(timestamp1,timestamp2)
+    duration = max(timedelta(hours=point_one.duration) + timestamp1,timedelta(hours=point_two.duration) + timestamp2)
+    location = get_connected_region(graph,point_one,point_two)
 
-    # duration = max(timedelta(hours=point_one.duration) + timestamp1,timedelta(hours=point_two.duration) + timestamp2)
-    # location = get_connected_region(point_one,point_two)
+    while smth < diversity_criteria:
     
 #receives a trajectory list and generates a new one with the duration category updated
 def add_duration(trajectories):
@@ -68,10 +69,6 @@ def add_duration(trajectories):
                 new_duration = new_duration.total_seconds()/3600
                 point_one.duration = new_duration + point_one.duration
     return new_dict
-                
-# def get_connected_region(point_one,point_two):
-#     if point_one.venue_id == point_two.venue_id:
-#         return point_one.venue_id
 
 #receives the dictionary which the add_duration method returns
 def build_neighbours_graph(trajectories):
@@ -102,12 +99,6 @@ def calculate_distance(point_one,point_two):
     coordinate_two = (point_two.latitude,point_two.longitude)
     return geodesic(coordinate_one,coordinate_two).miles
 
-# def trajectory_reconstruction():
-# def get_neighbors():
-
-# #merging trajectories
-# def merge_trajectory():
-
 def Dijkstra(graph, source):
     queue = set()
     distances = {}
@@ -131,8 +122,20 @@ def Dijkstra(graph, source):
 
     return distances,previous
 
-        
+def get_connected_region(graph,source, destiny):
+    distances,previous = Dijkstra(graph,source)
+    path = []
+    while destiny != source:
+        path.append(previous[destiny])
+        destiny = previous[destiny]
+    return path
 
+def get_neighbors():
+
+
+# def trajectory_reconstruction():
+# #merging trajectories
+# def merge_trajectory():
 
 trajectories = return_list('dataset_TSMC2014_NYC.csv')
 trajectories = add_duration(trajectories)
