@@ -3,6 +3,7 @@ from geopy.distance import geodesic
 from dataclasses import dataclass
 from datetime import timedelta,datetime
 from pprint import pprint
+from numpy import argmax,argmin
 
 @dataclass
 class Point:
@@ -47,11 +48,31 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph
     duration = max(timedelta(hours=point_one.duration) + timestamp1,timedelta(hours=point_two.duration) + timestamp2)
     location = get_connected_region(graph,point_one,point_two)
 
+    #fazer: comparar quantas regioes diferentes estão em location, se não satisfazer o criterio é preciso adicionar vizinhos ate que o threshold seja atingido
+    #smth = As  shown  in  Line  6-9,  at  every  iteration,  we add a neighboring base station X iuntil l-diversity is satisfied, so if there isn't enough neighboring
+    # base stations the while will keep its loop
+    #basicamente o smth é quantas categorias o ponto ja tem
+    #vai pegar regioes = que regioes sao essas??
+    # verificar se a regiao criada
+    diversity = get_diversity(location)
     while smth < diversity_criteria:
+        x = get_neighbors(location,graph)
+        B = []
+        for i in len(x):
+            #calcular como fica a diversity com holder = location.append(x[i])
+            # B.append() vai receber  o resultado do de cima
+        i = argmax(B)
+        location = location.append(x[i])
 
     location_modified = location
 
+    #the  KL  Divergence  between  the  poidistributions of regionlc2and the whole city, has already beensmaller than the threshold// talvez usar o KL-divergence em relação a todo o grafo??
     while smth2 > closeness_criteria:
+        x = get_neighbors(location_modified,graph)
+        for i in len(x):
+            #
+        i = argmin(B)
+        location_modified = location_modified.append(x[i])
     
 #receives a trajectory list and generates a new one with the duration category updated
 def add_duration(trajectories):
@@ -142,6 +163,25 @@ def get_neighbors(locations,graph):
     for location in locations:
         neighbors.remove(location)
 
+
+#get how many diverse venue_ids we have in a point
+def get_diversity(places):
+    count = []
+    count.append(places[0])
+    for place in places[1:]:
+        if place.venue_id not in count:
+            count.append(place)
+    return len(count)
+
+
+#get how many diverse category_ids we have in a point
+def get_closeness(places):
+    count = []
+    count.append(places[0])
+    for place in places[1:]:
+        if place.venue_category_id not in count:
+            count.append(place)
+    return len(count)
 
 # #merging trajectories
 # def merge_trajectory():
