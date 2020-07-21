@@ -9,7 +9,7 @@ def einsum(a, b):
     return np.sqrt(np.einsum('i,i->', z, z))
 
 #time dimension
-#recebe dois pontos
+#arrumar a questao do diam
 def time(a,b):
     tempo2_a = a.utc_timestamp + datetime.timedelta(hours=a.duration)
     tempo2_b = b.utc_timestamp + datetime.timedelta(hours=b.duration)
@@ -21,3 +21,10 @@ def time(a,b):
 
 def diam(a,b):
     return abs(b-a)
+
+
+#semantic dimension
+def semantics(a,b):
+    if a.venue_id == b.venue_id:
+        return 0
+    return 1
