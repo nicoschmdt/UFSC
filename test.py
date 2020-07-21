@@ -17,6 +17,14 @@ class Point:
     utc_timestamp: datetime
     duration: float
 
+def main():
+    trajectories = return_list('dataset_TSMC2014_NYC.csv')
+    trajectories = add_duration(trajectories)
+    trajectories = split(trajectories)
+    graph = build_neighbours_graph(trajectories)
+    # anonymized = merge_trajectory(trajectories,)
+    # print(return_list('dataset_TSMC2014_NYC.csv'))
+
 def return_list(name):
     trajectories = {}
     with open(name) as csvfile:
@@ -59,7 +67,6 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph
         location = location.append(x[i])
 
     closeness = get_closeness(location)
-    #the  KL  Divergence  between  the  poidistributions of regionlc2and the whole city, has already beensmaller than the threshold// talvez usar o KL-divergence em relação a todo o grafo??
     while closeness > closeness_criteria:
         x = get_neighbors(location,graph)
         for i in len(x):
@@ -67,6 +74,7 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph
             B.append(get_closeness(holder))
         i = argmin(B)
         location = location.append(x[i])
+    return location
     
 #receives a trajectory list and generates a new one with the duration category updated
 def add_duration(trajectories):
@@ -177,10 +185,32 @@ def get_closeness(places):
             count.append(place)
     return len(count)
 
-# #merging trajectories
-# def merge_trajectory():
+#merging trajectories // acho que vou precisar passar o graph tb..
+# The algorithm will iterate until all the trajectories in T have been k-anonymized.
+def merge_trajectory(dataset,merge_cost_matrix,anonymity_criteria):
+    while: #enquanto tiver duas trajetorias com o k menor que o criterio
+        i,j = argmin(merge_cost_matrix)
 
-trajectories = return_list('dataset_TSMC2014_NYC.csv')
-trajectories = add_duration(trajectories)
-graph = build_neighbours_graph(trajectories)
-# print(return_list('dataset_TSMC2014_NYC.csv'))
+#returns a list of trajectories splitted by day
+def split_trajectories(trajectories):
+    splitted_trajectories = []
+    for trajectory in trajectories:
+        compare = trajectory[0]
+        lista = [compare]
+        for point in trajectory[1:]:
+            if compare.datetime.day == point.datetime.day:
+                lista.append(point)
+            else:
+                splitted_trajectories.append(lista)
+                lista = [point]
+            compare = point
+
+
+def merge_cost(point_one,point_two):
+
+def merge(trajectory_one,trajectory_two):
+
+def  similarity():
+
+# if __name__ = '__main__':
+#     main()
