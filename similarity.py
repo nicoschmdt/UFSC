@@ -1,3 +1,4 @@
+from datetime import timedelta,datetime
 import numpy as np
 
 #space dimension
@@ -9,10 +10,9 @@ def einsum(a, b):
     return np.sqrt(np.einsum('i,i->', z, z))
 
 #time dimension
-#arrumar a questao do diam
 def time(a,b):
-    tempo2_a = a.utc_timestamp + datetime.timedelta(hours=a.duration)
-    tempo2_b = b.utc_timestamp + datetime.timedelta(hours=b.duration)
+    tempo2_a = a.utc_timestamp + timedelta(hours=a.duration)
+    tempo2_b = b.utc_timestamp + timedelta(hours=b.duration)
     if tempo2_a < b.utc_timestamp:
         return 0
     numerador = diam(max(a.utc_timestamp,tempo2_a),min(b.utc_timestamp,tempo2_b))
@@ -21,7 +21,6 @@ def time(a,b):
 
 def diam(a,b):
     return abs(b-a)
-
 
 #semantic dimension
 def semantics(a,b):
