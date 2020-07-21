@@ -1,12 +1,27 @@
 from datetime import timedelta,datetime
 import numpy as np
 
+def similarity(trajectory_a,trajectory_b):
+    results = []
+    for point_a in trajectory_a:
+        line = []
+        for point_b in trajectory_b:
+            variable = 0
+            if einsum(point_a,point_b) <= 10:
+                variable = 1
+            if time(point_a,point_b) <= 0.5:
+                variable += 1
+            if semantics(point_a,point_b) <= 0.5:
+                variable += 1
+            line.append(variable/3)
+        results.append(line)
+
 #space dimension
-#preciso passar as coordenadas certinho
+#verificar se o metodo funciona# a parte do z = a - b ta confusa#
 def einsum(a, b):
     coordinate_one = (a.latitude,a.longitude)
     coordinate_two = (b.latitude,b.longitude)
-    z = v - u
+    z = a - b
     return np.sqrt(np.einsum('i,i->', z, z))
 
 #time dimension
@@ -24,6 +39,6 @@ def diam(a,b):
 
 #semantic dimension
 def semantics(a,b):
-    if a.venue_id == b.venue_id:
+    if a.venue_category_id == b.venue_category_id:
         return 0
     return 1
