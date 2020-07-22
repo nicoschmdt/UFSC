@@ -1,7 +1,8 @@
 from datetime import timedelta,datetime
 import numpy as np
 
-def similarity(trajectory_a,trajectory_b):
+#10 and 0.5 are threasholds
+def msm(trajectory_a,trajectory_b):
     results = []
     for point_a in trajectory_a:
         line = []
@@ -15,6 +16,20 @@ def similarity(trajectory_a,trajectory_b):
                 variable += 1
             line.append(variable/3)
         results.append(line)
+    ab,ba = score(results)
+    result = (ab + ba)/(len(trajectory_a)+len(trajectory_b))
+
+def score(matrix):
+    sum_max_line = 0
+    sum_max_column = 0
+    for line in matrix:
+        sum_max_line += max(line)
+    for i in range(len(matrix[0])):
+        max_column = matrix[0][i]
+        for line in matrix[1:]:
+            max_column = max(max_column,line[i])
+        sum_max_column += max_column
+    return sum_max_line,sum_max_column
 
 #space dimension
 #verificar se o metodo funciona# a parte do z = a - b ta confusa#
