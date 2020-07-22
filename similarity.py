@@ -1,14 +1,14 @@
 from datetime import timedelta,datetime
 import numpy as np
 
-#10 and 0.5 are threasholds
+#10 and 0.5 are thresholds
 def msm(trajectory_a,trajectory_b):
     results = []
     for point_a in trajectory_a:
         line = []
         for point_b in trajectory_b:
             variable = 0
-            if einsum(point_a,point_b) <= 10:
+            if distance(point_a,point_b) <= 10:
                 variable = 1
             if time(point_a,point_b) <= 0.5:
                 variable += 1
@@ -32,12 +32,10 @@ def score(matrix):
     return sum_max_line,sum_max_column
 
 #space dimension
-#verificar se o metodo funciona# a parte do z = a - b ta confusa#
-def einsum(a, b):
+def distance(a,b):
     coordinate_one = (a.latitude,a.longitude)
     coordinate_two = (b.latitude,b.longitude)
-    z = a - b
-    return np.sqrt(np.einsum('i,i->', z, z))
+    return geodesic(coordinate_one,coordinate_two).miles
 
 #time dimension
 def time(a,b):
