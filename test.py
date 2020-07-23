@@ -1,4 +1,5 @@
 import csv
+import similarity
 from geopy.distance import geodesic
 from dataclasses import dataclass
 from datetime import timedelta,datetime
@@ -17,13 +18,13 @@ class Point:
     utc_timestamp: datetime
     duration: float
 
-def main():
-    trajectories = return_list('dataset_TSMC2014_NYC.csv')
+def main(name,anonymity_criteria):
+    trajectories = return_list(name)
     trajectories = add_duration(trajectories)
-    trajectories = split(trajectories)
+    trajectories = split_trajectories(trajectories)
     graph = build_neighbours_graph(trajectories)
-    # anonymized = merge_trajectory(trajectories,)
-    # print(return_list('dataset_TSMC2014_NYC.csv'))
+    similarity_matrix = create_similarity_matrix(trajectories)
+    # anonymized = merge_trajectory(trajectories,similarity_matrix,anonymity_criteria)
 
 def return_list(name):
     trajectories = {}
@@ -187,9 +188,9 @@ def get_closeness(places):
 
 #merging trajectories // acho que vou precisar passar o graph tb..
 # The algorithm will iterate until all the trajectories in T have been k-anonymized.
-def merge_trajectory(dataset,merge_cost_matrix,anonymity_criteria):
+def merge_trajectory(dataset,similarity_matrix,anonymity_criteria):
     while: #enquanto tiver duas trajetorias com o k menor que o criterio
-        i,j = argmin(merge_cost_matrix)
+        i,j = argmax(similarity_matrix)
 
 #returns a list of trajectories splitted by day
 def split_trajectories(trajectories):
@@ -204,13 +205,22 @@ def split_trajectories(trajectories):
                 splitted_trajectories.append(lista)
                 lista = [point]
             compare = point
+    return splitted_trajectories
 
+def create_similarity_matrix(trajectories):
+    matrix = []
+    for trajectory_one in trajectories:
+        lista = []
+        for trajectory_two in trajectories:
+            if trajectory_one == trajectory_two:
+                lista.append(float('-inf'))
+            else:
+                lista.append(similarity.msm(trajectory_one,trajectory_two))
+        matrix.append(lista)
+    return matrix
 
-def merge_cost(point_one,point_two):
 
 def merge(trajectory_one,trajectory_two):
-
-def  similarity():
 
 # if __name__ = '__main__':
 #     main()
