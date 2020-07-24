@@ -218,7 +218,7 @@ def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria):
         similarity_matrix = remove_from(i,j,similarity_matrix)
         if new_trajectory.n < anonymity_criteria:
             for trajectory in trajectories:
-                #calcular o custo dessa nova trajetoria com as já existentes e adicionar na sm
+                similarity_matrix = add_similarity(similarity_matrix,trajectories,new_trajectory)
             trajetories.append(new_trajectory)
         else:
             generalized_dataset.append(new_trajectory)
@@ -292,3 +292,15 @@ def remove_from(i,j,similarity_matrix):
         line.pop(i)
         line.pop(j-1)
     return similarity_matrix
+
+#calcular o custo dessa nova trajetoria com as já existentes e adicionar na sm
+def add_similarity(matrix,trajectories,trajectory1):
+    cost = []
+    for trajectory in trajectories:
+        cost.append(similarity.msm(trajectory,trajectory1))
+    cost.append('-inf')
+    i = 0
+    for line in matrix:
+        line.append(cost[i])
+        i += 1
+    matrix.append(cost)
