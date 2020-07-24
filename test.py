@@ -207,7 +207,8 @@ def get_closeness(places):
 # The algorithm will iterate until all the trajectories in T have been k-anonymized.
 def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria):
     generalized_dataset = []
-    while: #enquanto tiver duas trajetorias com o k menor que o criterio
+    temtrajetoriaspradarmerge = True #depois penso em um nome melhor
+    while possible_to_merge: #enquanto tiver duas trajetorias com o k menor que o criterio
         i,j = argmax(similarity_matrix)#os que tiverem a maior similaridade serão escolhidos
         new_trajectory = merge(trajectories[i],trajectories[j])
         new_trajectory.n = trajectories[i].n + trajectories[j].n
@@ -222,6 +223,8 @@ def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria):
             trajetories.append(new_trajectory)
         else:
             generalized_dataset.append(new_trajectory)
+        if len(trajetories) < 2: #preciso pensar nessa condição aqui
+            possible_to_merge = False
     return generalized_dataset
 
 #returns a list of trajectories splitted by day
