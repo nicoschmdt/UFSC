@@ -213,14 +213,16 @@ def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria):
         new_trajectory.n = trajectories[i].n + trajectories[j].n
         #tirando as trajetorias da lista de trajectories
         trajectories.pop(i)
-        trajectories.pop(j)
-        similarity_matrix
+        trajectories.pop(j-1)
+        #how do I remove things from the similarity matrix??
+        similarity_matrix = remove_from(i,j,similarity_matrix)
         if new_trajectory.n < anonymity_criteria:
             for trajectory in trajectories:
                 #calcular o custo dessa nova trajetoria com as já existentes e adicionar na sm
             trajetories.append(new_trajectory)
         else:
             generalized_dataset.append(new_trajectory)
+    return generalized_dataset
 
 #returns a list of trajectories splitted by day
 def split_trajectories(trajectories):
@@ -282,8 +284,11 @@ def merge(trajectory_one,trajectory_two,graph):
             i = argmin(cost)
             smaller_traj.append(merge_points(point,smaller_traj[i],3,3,graph))
     return Trajectory(smaller_traj)
-            
-    
 
-# if __name__ = '__main__':
-#     main()
+def remove_from(i,j,similarity_matrix):
+    similarity_matrix.pop(i)
+    similarity_matrix.pop(j-1)
+    for line in similarity_matrix:
+        line.pop(i)
+        line.pop(j-1)
+    return similarity_matrix
