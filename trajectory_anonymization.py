@@ -5,13 +5,13 @@ from dataclasses import dataclass
 from datetime import timedelta,datetime
 from pprint import pprint
 from numpy import argmax,argmin
-from typing import List
+from typing import List,Set
 
 @dataclass
 class Point:
     user_id: str
-    venue_id: List[str]
-    venue_category_id: List[str]
+    venue_id: Set[str]
+    venue_category_id: Set[str]
     latitude: float
     longitude: float
     timezone_offset: str
@@ -32,7 +32,7 @@ def main(name,anonymity_criteria):
     trajectories = add_duration(trajectories)
     graph = build_neighbours_graph(trajectories)
     similarity_matrix = create_similarity_matrix(trajectories)
-    # anonymized = merge_trajectories(trajectories,similarity_matrix,anonymity_criteria)
+    anonymized = merge_trajectories(trajectories,similarity_matrix,anonymity_criteria)
 
 def return_dict(name):
     trajectories = {}
@@ -74,6 +74,7 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph
         i = argmax(B)
         location = location.append(x[i])
 
+    #arrumar
     closeness = get_closeness(location)
     while closeness > closeness_criteria:
         x = get_neighbors(location,graph)
