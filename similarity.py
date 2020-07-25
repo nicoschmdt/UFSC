@@ -1,5 +1,6 @@
-from datetime import timedelta,datetime
 import numpy as np
+from datetime import timedelta,datetime
+from geopy.distance import geodesic
 
 #10 and 0.5 are thresholds
 def msm(trajectory_a,trajectory_b):
@@ -8,11 +9,11 @@ def msm(trajectory_a,trajectory_b):
         line = []
         for point_b in trajectory_b:
             variable = 0
-            if distance(point_a,point_b) <= 10:
+            if distance(point_a,point_b) < 10:
                 variable = 1
-            if time(point_a,point_b) <= 0.5:
+            if time(point_a,point_b) < 0.5:
                 variable += 1
-            if semantics(point_a,point_b) <= 0.5:
+            if semantics(point_a,point_b) >= 0.5:
                 variable += 1
             line.append(variable/3)
         results.append(line)
@@ -41,8 +42,8 @@ def distance(a,b):
 def time(a,b):
     tempo2_a = a.utc_timestamp + timedelta(hours=a.duration)
     tempo2_b = b.utc_timestamp + timedelta(hours=b.duration)
-    if tempo2_a < b.utc_timestamp:
-        return 0
+    if tempo2_a < b.utc_timestamp or tempo2_b < a.utc_timestamp:
+        return 1
     numerador = diam(max(a.utc_timestamp,tempo2_a),min(b.utc_timestamp,tempo2_b))
     divisor = diam(min(a.utc_timestamp,b.utc_timestamp),max(tempo2_a,tempo2_b))
     return 1 - (numerador/divisor)
@@ -52,6 +53,6 @@ def diam(a,b):
 
 #semantic dimension
 def semantics(a,b):
-    if a.venue_category_id == b.venue_category_id:
-        return 0
-    return 1
+    if a.venue_category_id.intersection(b.venue_category_id):
+        return 1
+    return 0
