@@ -14,7 +14,7 @@ class Point:
     venue_category_id: Set[str]
     latitude: float
     longitude: float
-    timezone_offset: str
+    timezone_offset: int
     utc_timestamp: datetime
     duration: float
 
@@ -24,9 +24,7 @@ class Trajectory:
     n: int = 1
 
 def main(name,anonymity_criteria):
-    #retorna um dict
     trajectories = return_dict(name)
-    #retorna uma list
     trajectories = split_trajectories(trajectories)
     #retorna uma list
     trajectories = add_duration(trajectories)
@@ -45,11 +43,11 @@ def return_dict(name):
                 trajectories[user_id] = Trajectory([])
             point_created = Point(
                 row[0],
-                [row[1]],
-                [row[2]],
+                {row[1]},
+                {row[2]},
                 float(row[4]),
                 float(row[5]),
-                row[6],
+                int(row[6]),
                 datetime.strptime(row[7],'%a %b %d %H:%M:%S %z %Y'),
                 0.)
             trajectories[user_id].trajectory.append(point_created)
@@ -236,7 +234,7 @@ def split_trajectories(trajectories):
         compare = trajectory[0]
         lista = Trajectory([compare])
         for point in trajectory[1:]:
-            if compare.datetime.day == point.datetime.day:
+            if compare.utc_timestamp.day == point.utc_timestamp.day:
                 lista.trajectory.append(point)
             else:
                 splitted_trajectories.append(lista)
