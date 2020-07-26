@@ -9,7 +9,7 @@ def msm(trajectory_a,trajectory_b):
         line = []
         for point_b in trajectory_b:
             variable = 0
-            if distance(point_a,point_b) < 10:
+            if distance(point_a,point_b) < 2:
                 variable = 1
             if time(point_a,point_b) < 0.5:
                 variable += 1
@@ -18,7 +18,7 @@ def msm(trajectory_a,trajectory_b):
             line.append(variable/3)
         results.append(line)
     ab,ba = score(results)
-    result = (ab + ba)/(len(trajectory_a)+len(trajectory_b))
+    return (ab + ba)/(len(trajectory_a)+len(trajectory_b))
 
 def score(matrix):
     sum_max_line = 0
