@@ -171,36 +171,50 @@ def Dijkstra(graph, source):
         distances[vertex] = float('inf')
         previous[vertex] = None
         queue.add(vertex)
-    distances[source] = 0
+    for venue_id in source.venue_id:
+        distances[venue_id] = 0
 
-    while queue.len() != 0:
+    while queue:
         u = min(queue, key=lambda k: distances[k])
         queue.remove(u)
 
         for neighbor in graph[u]:
-            venue_id,distance = neighbor
+            venue_id, distance = neighbor
             alt = distances[u] + distance
-            if alt < distances[neighbor]:
-                distances[neighbor] = alt
-                previous[neighbor] = u
+            if alt < distances[venue_id]:
+                distances[venue_id] = alt
+                previous[venue_id] = u
 
     return distances,previous
 
 def get_connected_region(graph,source, destiny):
     distances,previous = Dijkstra(graph,source)
     path = [destiny]
+    it = next(iter(destiny.venue_id))
     while destiny != source:
-        path.append(previous[destiny])
-        destiny = previous[destiny]
-    return reversed(path + [source])
+        print(f'destiny={destiny}')
+        destiny = previous[it]
+        if destiny is None:
+            break
+        path.append(destiny)
+        it = destiny
+    return [*reversed(path + [source])]
 
 #receives a list of venue_ids and returns a list of neighbors
 def get_neighbors(locations,graph):
     neighbors = set()
     for location in locations:
-        neighbors.add(*graph[location])
-    for location in locations:
-        neighbors.remove(location)
+        if isinstance(location, str):
+            neighbors |= {*graph[location]}
+        else:
+            for venue_id in location.venue_id:
+                neighbors |= {*graph[venue_id]}
+    # for location in locations:
+        # for venue_id in location.venue_id:
+        #     try:
+        #         neighbors.remove(venue_id)
+        #     except KeyError:
+        #         pass
     return neighbors
 
 
@@ -209,7 +223,7 @@ def get_diversity(places):
     count = []
     count.append(places[0])
     for place in places[1:]:
-        if place.venue_id not in count:
+        if place not in count:
             count.append(place)
     return len(count)
 
