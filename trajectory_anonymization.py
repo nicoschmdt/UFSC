@@ -64,32 +64,34 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph
 
     diversity = get_diversity(location)
     while diversity < diversity_criteria:
-        x = get_neighbors(location,graph)
+        x = [venue_id for venue_id, _ in get_neighbors(location,graph)]
         B = []
-        for i in len(x):
-            holder = location.append(x[i])
+        for i, _ in enumerate(x):
+            holder = location+[x[i]]
             B.append(get_diversity(holder))
         i = argmax(B)
-        location = location.append(x[i])
+        location.append(x[i])
 
     #arrumar
-    closeness = get_closeness(location)
-    while closeness > closeness_criteria:
-        x = get_neighbors(location,graph)
-        for i in len(x):
-            holder = location.append(x[i])
-            B.append(get_closeness(holder))
-        i = argmin(B)
-        location = location.append(x[i])
+    # closeness = get_closeness(location)
+    # while closeness > closeness_criteria:
+    #     x = get_neighbors(location,graph)
+    #     for i in range(len(x)):
+    #         holder = location+[x[i]]
+    #         B.append(get_closeness(holder))
+    #     i = argmin(B)
+    #     location.append(x[i])
 
     #create new point
-    new_point = Point('',
-        location,
-        point_one.latitude,#ver com a fernanda como fazer em relação a latitude
-        point_one.longitude,# e longitude dos pontos mergeados
-        point_one.timezone_offset,
-        timestamp,
-        duration)
+    new_point = Point(
+        user_id='',
+        venue_id=location,
+        venue_category_id= point_one.venue_category_id | point_two.venue_category_id,
+        latitude=point_one.latitude,#ver com a fernanda como fazer em relação a latitude
+        longitude=point_one.longitude,# e longitude dos pontos mergeados
+        timezone_offset=point_one.timezone_offset,
+        utc_timestamp=timestamp,
+        duration=duration)
 
     return new_point
     
