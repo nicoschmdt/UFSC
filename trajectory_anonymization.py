@@ -115,29 +115,48 @@ def add_duration(trajectories):
                 point_one.duration = new_duration + point_one.duration
         new_trajectory.trajectory.append(point_one)
         new_list.append(new_trajectory)
-    return new_dict
+    return new_list
+
+def build_neighbours_matrix(trajectories):
+    matrix = []
+    for trajectory in trajectories:
+        for point in trajectory.trajectory:
+            list_point = []
+            for trajectory2 in trajectories:
+                for point2 in trajectory2.trajectory:
+                    if point == point2:
+                        list_point.append(0)
+                    else:
+                        list_point.append(calculate_distance(point,point2))
+            matrix.append(list_point)
+    return matrix
 
 #receives the dictionary which the add_duration method returns
 def build_neighbours_graph(trajectories):
     neighbors = {}
-    for trajectory in trajectories.values():
+    for trajectory in trajectories:
         last_visited_point = trajectory.trajectory[0]
-        if last_visited_point.venue_id not in neighbors:
-                neighbors[last_visited_point.venue_id] = []
+        for venue_id in last_visited_point.venue_id:
+            if venue_id not in neighbors:
+                neighbors[venue_id] = []
         for point in trajectory.trajectory[1:]:
-            if point.venue_id not in neighbors:
-                neighbors[point.venue_id] = []
+            for venue_id in point.venue_id:    
+                if venue_id not in neighbors:
+                    neighbors[venue_id] = []
             distance = calculate_distance(point,last_visited_point)
-            neighbors[point.venue_id].append((last_visited_point.venue_id,distance))
-            neighbors[last_visited_point.venue_id].append((point.venue_id,distance))
+            for venue_id in point.venue_id:
+                for venue_id2 in last_visited_point.venue_id:
+                    neighbors[venue_id].append((venue_id2,distance))
+                    neighbors[venue_id2].append((venue_id,distance))
             last_visited_point = point
     return neighbors
 
 #to know if venue 2 and venue1 are neighbours
 def is_neighbour(graph,venue1,venue2):
-    if venue2 not in graph[venue1]:
-        return False
-    return True
+    for neighbor, _ in graph[venue1]:
+        if neighbor == venue2:
+            return True
+    return False
 
 def calculate_distance(point_one,point_two):
     coordinate_one =  (point_one.latitude, point_one.longitude)
