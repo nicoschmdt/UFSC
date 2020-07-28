@@ -278,6 +278,11 @@ def split_trajectories(trajectories):
                 lista = Trajectory([point])
             compare = point
         splitted_trajectories.append(lista)
+    
+    splitted_trajectories = [trajectory 
+                            for trajectory in splitted_trajectories
+                            if len(trajectory.trajectory) > 1]
+
     return splitted_trajectories
 
 def create_similarity_matrix(trajectories):
