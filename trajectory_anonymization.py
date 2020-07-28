@@ -314,9 +314,11 @@ def merge(trajectory_one,trajectory_two,graph):
         if smaller_traj[i] in haventbeenmerged:
             haventbeenmerged.remove(smaller_traj[i])
         #3,3 = respectively diversity criteria and closeness criteria
-        smaller_traj[i] = merge_points(point,smaller_traj[i],3,3,graph)
+        print(f'smallertraj = {smaller_traj[i]}')
+        print(f'point = {point}')
+        smaller_traj[i] = merge_points(point,smaller_traj[i],4,3,graph)
 
-    if haventbeenmerged != NULL:
+    if haventbeenmerged:
         for point in haventbeenmerged:
             if point in smaller_traj:
                 smaller_traj.remove(point)
@@ -326,7 +328,7 @@ def merge(trajectory_one,trajectory_two,graph):
             for point2 in smaller_traj:
                 cost.append(calculate_distance(point,point2))
             i = argmin(cost)
-            smaller_traj.append(merge_points(point,smaller_traj[i],3,3,graph))
+            smaller_traj[i] = (merge_points(point,smaller_traj[i],3,3,graph))
     return Trajectory(smaller_traj)
 
 def remove_from(i,j,similarity_matrix):
