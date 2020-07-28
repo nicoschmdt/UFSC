@@ -5,9 +5,9 @@ from geopy.distance import geodesic
 #10 and 0.5 are thresholds
 def msm(trajectory_a,trajectory_b):
     results = []
-    for point_a in trajectory_a:
+    for point_a in trajectory_a.trajectory:
         line = []
-        for point_b in trajectory_b:
+        for point_b in trajectory_b.trajectory:
             variable = 0
             if distance(point_a,point_b) < 2:
                 variable = 1
@@ -18,7 +18,7 @@ def msm(trajectory_a,trajectory_b):
             line.append(variable/3)
         results.append(line)
     ab,ba = score(results)
-    return (ab + ba)/(len(trajectory_a)+len(trajectory_b))
+    return (ab + ba)/(len(trajectory_a.trajectory)+len(trajectory_b.trajectory))
 
 def score(matrix):
     sum_max_line = 0

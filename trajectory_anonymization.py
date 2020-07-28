@@ -98,9 +98,9 @@ def add_duration(trajectories):
     new_list = []
     for trajectory in trajectories:
         #iterate in each segment of the trajectory
-        point_one = trajectory[0] #the point that will be used as a comparison
+        point_one = trajectory.trajectory[0] #the point that will be used as a comparison
         new_trajectory = Trajectory([])
-        for segment in trajectory[1:]:
+        for segment in trajectory.trajectory[1:]:
             if point_one.venue_id != segment.venue_id:
                 new_trajectory.trajectory.append(point_one)
                 point_one = segment
@@ -257,12 +257,12 @@ def create_similarity_matrix(trajectories):
 
 #I plan on organizing a lil better this method
 def merge(trajectory_one,trajectory_two,graph):
-    bigger_traj = trajectory_two
-    smaller_traj = trajectory_one
-    if len(trajectory_two) < len(trajectory_one):
-        bigger_traj = trajectory_one
-        smaller_traj = trajectory_two
-    haventbeenmerged = smaller_traj
+    bigger_traj = trajectory_two.trajectory
+    smaller_traj = trajectory_one.trajectory
+    if len(trajectory_two.trajectory) < len(trajectory_one.trajectory):
+        bigger_traj = trajectory_one.trajectory
+        smaller_traj = trajectory_two.trajectory
+    haventbeenmerged = smaller_traj.copy()
     for point in bigger_traj:
         #search for the cheapest merge for this point
         cost = []
