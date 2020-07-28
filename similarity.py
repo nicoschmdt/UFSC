@@ -46,6 +46,8 @@ def time(a,b):
         return 1
     numerador = diam(max(a.utc_timestamp,tempo2_a),min(b.utc_timestamp,tempo2_b))
     divisor = diam(min(a.utc_timestamp,b.utc_timestamp),max(tempo2_a,tempo2_b))
+    if divisor == timedelta(hours=0):
+        return 1
     return 1 - (numerador/divisor)
 
 def diam(a,b):
