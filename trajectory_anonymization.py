@@ -243,7 +243,9 @@ def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria):
     generalized_dataset = []
     temtrajetoriaspradarmerge = True #depois penso em um nome melhor
     while possible_to_merge: #enquanto tiver duas trajetorias com o k menor que o criterio
-        i,j = argmax(similarity_matrix)#os que tiverem a maior similaridade serão escolhidos
+        k = argmax(similarity_matrix)#os que tiverem a maior similaridade serão escolhidos
+        i = k % len(similarity_matrix)
+        j = k // len(similarity_matrix)
         new_trajectory = merge(trajectories[i],trajectories[j])
         new_trajectory.n = trajectories[i].n + trajectories[j].n
         #tirando as trajetorias da lista de trajectories
