@@ -1,4 +1,5 @@
 import csv
+import math
 import similarity
 from geopy.distance import geodesic
 from dataclasses import dataclass
@@ -29,12 +30,8 @@ def main(name,anonymity_criteria):
     trajectories = return_dict(name)
     trajectories = split_trajectories(trajectories)
     trajectories = add_duration(trajectories)
-    graph = generate_distance_graph([point
-                                     for tr in trajectories
-                                     for point in tr.trajectory])
     similarity_matrix = create_similarity_matrix(trajectories)
-    #testing
-    anonymized = merge_trajectories(trajectories,similarity_matrix,anonymity_criteria, graphmatrix)
+    anonymized = merge_trajectories(trajectories,similarity_matrix,anonymity_criteria)
 
 def return_dict(name):
     trajectories = {}
@@ -54,54 +51,65 @@ def return_dict(name):
                 float(row[5]),
                 int(row[6]),
                 datetime.strptime(row[7],'%a %b %d %H:%M:%S %z %Y'),
-                0.)
+                timedelta(hours=0))
             trajectories[user_id].trajectory.append(point_created)
     return trajectories
 
 #merging two spatiotemporal points, returns a new Point of the merged locations
-def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,graph):
+def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,trajectories):
     timestamp1 = point_one.utc_timestamp
     timestamp2 = point_two.utc_timestamp
     #prob gotta turn this one like the utc_timestamp format
     timestamp = min(timestamp1,timestamp2)
-    duration = max(timedelta(hours=point_one.duration) + timestamp1,
-                   timedelta(hours=point_two.duration) + timestamp2)
+    duration = max(point_one.duration + timestamp1,
+                   point_two.duration + timestamp2)
     # location = get_connected_region(graph,point_one,point_two)
     duration -= timestamp
     location = point_one.venue_id | point_two.venue_id
     categories = point_one.venue_category_id | point_two.venue_category_id
 
+    graph = generate_distance_graph([point
+                                 for tr in trajectories
+                                 for point in tr.trajectory])
+
+    points = [point_one,point_two]
+    all_points = [graph.nodes[node]['point'] for node in graph.nodes]
     diversity = get_diversity(location)
+
     while diversity < diversity_criteria:
         x = nearest_points(point_one,graph)
         B = []
         for x_i, _ in x:
-            holder = location | {x_i.venue_id}
+            holder = location | x_i.venue_id
             B.append(get_diversity(holder))
         i = argmax(B)
-        location |= {x[i].venue_id}
-        categories |= {x[i].venue_category_id}
+        x_i, _ = x[i]
+        location |= x_i.venue_id
+        categories |= x_i.venue_category_id
+        points.append(x_i)
         diversity = get_diversity(location)
 
     #arrumar
-    closeness = get_closeness(categories)
+    closeness = get_closeness(points,all_points)
     while closeness > closeness_criteria:
         x = nearest_points(point_one,graph)
         B = []
         for x_i, _ in x:
-            holder = categories | {x_i.venue_category_id}
+            holder = categories | x_i.venue_category_id
             B.append(get_closeness(holder))
         i = argmin(B)
-        location |= {x[i].venue_id}
-        categories |= {x[i].venue_category_id}
-        closeness = get_closeness(categories)
+        x_i, _ = x[i]
+        location |= x_i.venue_id
+        categories |= x_i.venue_category_id
+        points.append(x_i)
+        closeness = get_closeness(points,all_points)
 
     #create new point
     new_point = Point(
         name=point_one.name,
         user_id='',
         venue_id=location,
-        venue_category_id= categories,
+        venue_category_id=categories,
         latitude=point_one.latitude,#ver com a fernanda como fazer em relação a latitude
         longitude=point_one.longitude,# e longitude dos pontos mergeados
         timezone_offset=point_one.timezone_offset,
@@ -136,7 +144,6 @@ def add_duration(trajectories):
                 timestamp_one = point_one.utc_timestamp
                 timestamp_two = segment.utc_timestamp
                 new_duration = timestamp_two - timestamp_one
-                new_duration = new_duration.total_seconds()/3600
                 point_one.duration = new_duration + point_one.duration
         new_trajectory.trajectory.append(point_one)
         new_list.append(new_trajectory)
@@ -212,7 +219,6 @@ def get_connected_region(graph,source, destiny):
     path = [destiny]
     it = next(iter(destiny.venue_id))
     while destiny != source:
-        print(f'destiny={destiny}')
         destiny = previous[it]
         if destiny is None:
             break
@@ -229,12 +235,6 @@ def get_neighbors(locations,graph):
         else:
             for venue_id in location.venue_id:
                 neighbors |= {*graph[venue_id]}
-    # for location in locations:
-        # for venue_id in location.venue_id:
-        #     try:
-        #         neighbors.remove(venue_id)
-        #     except KeyError:
-        #         pass
     return neighbors
 
 #get how many diverse venue_ids we have in a point
@@ -256,18 +256,18 @@ def poi_distribution(points):
 def get_closeness(r, R):
     x = poi_distribution(r)
     y = poi_distribution(R)
-
+    return sum(x[u]*math.log(x[u]/y[u]) for u in x)
 
 #merging trajectories // acho que vou precisar passar o graph tb..
 # The algorithm will iterate until all the trajectories in T have been k-anonymized.
-def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria, graph):
+def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria):
     generalized_dataset = []
-    temtrajetoriaspradarmerge = True #depois penso em um nome melhor
+    possible_to_merge = True #depois penso em um nome melhor
     while possible_to_merge: #enquanto tiver duas trajetorias com o k menor que o criterio
         k = argmax(similarity_matrix)#os que tiverem a maior similaridade serão escolhidos
         i = k % len(similarity_matrix)
         j = k // len(similarity_matrix)
-        new_trajectory = merge(trajectories[i],trajectories[j], graph)
+        new_trajectory = merge(trajectories[i],trajectories[j], trajectories)
         new_trajectory.n = trajectories[i].n + trajectories[j].n
         #tirando as trajetorias da lista de trajectories
         trajectories.pop(i)
@@ -302,7 +302,7 @@ def split_trajectories(trajectories):
 
     splitted_trajectories = [trajectory
                             for trajectory in splitted_trajectories
-                            if len(trajectory.trajectory) > 1]
+                            if len(trajectory.trajectory) > 6]
 
     return splitted_trajectories
 
@@ -319,12 +319,13 @@ def create_similarity_matrix(trajectories):
     return matrix
 
 #I plan on organizing a lil better this method
-def merge(trajectory_one,trajectory_two,graph):
-    bigger_traj = trajectory_two.trajectory
-    smaller_traj = trajectory_one.trajectory
+def merge(trajectory_one,trajectory_two,trajectories):
+    bigger_traj = trajectory_two.trajectory.copy()
+    smaller_traj = trajectory_one.trajectory.copy()
+
     if len(trajectory_two.trajectory) < len(trajectory_one.trajectory):
-        bigger_traj = trajectory_one.trajectory
-        smaller_traj = trajectory_two.trajectory
+        smaller_traj, bigger_traj = bigger_traj, smaller_traj
+
     haventbeenmerged = smaller_traj.copy()
     for point in bigger_traj:
         #search for the cheapest merge for this point
@@ -335,21 +336,24 @@ def merge(trajectory_one,trajectory_two,graph):
         if smaller_traj[i] in haventbeenmerged:
             haventbeenmerged.remove(smaller_traj[i])
         #3,3 = respectively diversity criteria and closeness criteria
-        # print(f'smallertraj = {smaller_traj[i]}')
-        # print(f'point = {point}')
-        smaller_traj[i] = merge_points(point,smaller_traj[i],4,3,graph)
+        new_point = merge_points(point,smaller_traj[i],4,2,trajectories)
+
+        smaller_traj[i] = new_point
 
     if haventbeenmerged:
-        for point in haventbeenmerged:
-            if point in smaller_traj:
-                smaller_traj.remove(point)
+        # for point in haventbeenmerged:
+        #     if point in smaller_traj:
+        #         smaller_traj.remove(point)
 
         for point in haventbeenmerged:
             cost = []
             for point2 in smaller_traj:
                 cost.append(calculate_distance(point,point2))
             i = argmin(cost)
-            smaller_traj[i] = (merge_points(point,smaller_traj[i],3,3,graph))
+            new_point = (merge_points(point,smaller_traj[i],4,2,trajectories))
+
+            smaller_traj[i] = new_point
+
     return Trajectory(smaller_traj)
 
 def remove_from(i,j,similarity_matrix):

@@ -40,8 +40,8 @@ def distance(a,b):
 
 #time dimension
 def time(a,b):
-    tempo2_a = a.utc_timestamp + timedelta(hours=a.duration)
-    tempo2_b = b.utc_timestamp + timedelta(hours=b.duration)
+    tempo2_a = a.utc_timestamp + a.duration
+    tempo2_b = b.utc_timestamp + b.duration
     if tempo2_a < b.utc_timestamp or tempo2_b < a.utc_timestamp:
         return 1
     numerador = diam(max(a.utc_timestamp,tempo2_a),min(b.utc_timestamp,tempo2_b))
