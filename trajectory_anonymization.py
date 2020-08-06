@@ -73,7 +73,6 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,traje
                                  for point in tr.trajectory])
 
     points = [point_one,point_two]
-    all_points = [graph.nodes[node]['point'] for node in graph.nodes]
     diversity = get_diversity(location)
 
     while diversity < diversity_criteria:
@@ -89,20 +88,24 @@ def merge_points(point_one,point_two,diversity_criteria,closeness_criteria,traje
         points.append(x_i)
         diversity = get_diversity(location)
 
+    all_points = [graph.nodes[node]['point'] for node in graph.nodes] + points
+
     #arrumar
     closeness = get_closeness(points,all_points)
-    while closeness > closeness_criteria:
+    tries = 0
+    while closeness > closeness_criteria and tries < 100:
         x = nearest_points(point_one,graph)
         B = []
         for x_i, _ in x:
-            holder = categories | x_i.venue_category_id
-            B.append(get_closeness(holder))
+            holder_point = points + [x_i]
+            B.append(get_closeness(holder_point,all_points))
         i = argmin(B)
         x_i, _ = x[i]
         location |= x_i.venue_id
         categories |= x_i.venue_category_id
         points.append(x_i)
         closeness = get_closeness(points,all_points)
+        tries += 1
 
     #create new point
     new_point = Point(
@@ -273,14 +276,14 @@ def merge_trajectories(trajectories,similarity_matrix,anonymity_criteria):
         trajectories.pop(i)
         trajectories.pop(j-1)
         #how do I remove things from the similarity matrix??
-        similarity_matrix = remove_from(i,j,similarity_matrix)
+        remove_from(i,j,similarity_matrix)
         if new_trajectory.n < anonymity_criteria:
-            for trajectory in trajectories:
-                similarity_matrix = add_similarity(similarity_matrix,trajectories,new_trajectory)
-            trajetories.append(new_trajectory)
+            # for trajectory in trajectories:
+            add_similarity(similarity_matrix,trajectories,new_trajectory)
+            trajectories.append(new_trajectory)
         else:
             generalized_dataset.append(new_trajectory)
-        if len(trajetories) < 2: #preciso pensar nessa condição aqui
+        if len(trajectories) < 2: #preciso pensar nessa condição aqui
             possible_to_merge = False
     return generalized_dataset
 
@@ -336,7 +339,7 @@ def merge(trajectory_one,trajectory_two,trajectories):
         if smaller_traj[i] in haventbeenmerged:
             haventbeenmerged.remove(smaller_traj[i])
         #3,3 = respectively diversity criteria and closeness criteria
-        new_point = merge_points(point,smaller_traj[i],4,2,trajectories)
+        new_point = merge_points(point,smaller_traj[i],3,1,trajectories)
 
         smaller_traj[i] = new_point
 
@@ -362,7 +365,6 @@ def remove_from(i,j,similarity_matrix):
     for line in similarity_matrix:
         line.pop(i)
         line.pop(j-1)
-    return similarity_matrix
 
 #calcular o custo dessa nova trajetoria com as já existentes e adicionar na sm
 def add_similarity(matrix,trajectories,trajectory1):
@@ -375,3 +377,6 @@ def add_similarity(matrix,trajectories,trajectory1):
         line.append(cost[i])
         i += 1
     matrix.append(cost)
+
+if __name__ == '__main__':
+    main('dataset_TSMC2014_TKY.csv', 3)
