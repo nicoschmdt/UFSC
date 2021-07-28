@@ -44,6 +44,7 @@ def concat(automata_one, automata_two):
         n_states=automata_one.n_states + automata_two.n_states - 1
     )
 
+# used in concat
 def change_initial_transitions(automata,new_initial_state):
     return Automata(
         initial_state=new_initial_state,
@@ -60,6 +61,7 @@ def change_initial_transitions(automata,new_initial_state):
     # (0,a),1 -> (2,a),3
     # -> ((0,a),1),((1,a),3)
 
+# used in concat
 def increment_states_by(automata,quantity):
     return Automata(
         initial_state=automata.initial_state+quantity,
@@ -68,8 +70,32 @@ def increment_states_by(automata,quantity):
         n_states = automata.n_states
     )
 
-def union():
-    pass
+def fecho(automata):
+    automata = increment_states_by(automata,2)
+    return Automata(
+        initial_state=0,
+        final_state=1,
+        transitions= automata.transitions |
+        {(automata.final_state,EPSILON):automata.initial_state} |
+        {(0,EPSILON):automata.initial_state} |
+        {(automata.final_state,EPSILON):1} |
+        {(0,EPSILON):1},
+        n_states = automata.n_states + 2
+    )
+
+def union(automata_one, automata_two):
+    automata_one = increment_states_by(automata_one,2)
+    automata_two = increment_states_by(automata_two,automata_one.n_states + 2)
+    return Automata(
+        initial_state=0,
+        final_state=1,
+        transitions= automata_one.transitions | automata_two.transitions |
+        {(0,EPSILON):automata_one.initial_state} |
+        {(0,EPSILON):automata_two.initial_state} |
+        {(automata_one.final_state,EPSILON):1} |
+        {(automata_two.final_state,EPSILON):1},
+        n_states= automata_one.n_states + automata_two.n_states + 2
+    )
 
 def parse(expr :str):
     # ['a','a','a','b*','(a|b)']
