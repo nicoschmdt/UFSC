@@ -10,21 +10,6 @@ class Automata:
     n_states: int
 
 #[expr#]
-def make_automata(expr: str):
-
-    n_states = 2
-    state_number = 2
-
-    expressions = parse(expr)
-
-
-def epsilon_automata():
-    return Automata(
-        initial_state=0,
-        final_state=1,
-        transitions={(0, EPSILON): 1},
-        n_states=2
-    )
 
 def single_char_automata(char):
     return Automata(
@@ -70,7 +55,7 @@ def increment_states_by(automata,quantity):
         n_states = automata.n_states
     )
 
-def fecho(automata):
+def fecho(automata): # *
     automata = increment_states_by(automata,2)
     return Automata(
         initial_state=0,
@@ -83,7 +68,7 @@ def fecho(automata):
         n_states = automata.n_states + 2
     )
 
-def union(automata_one, automata_two):
+def union(automata_one, automata_two): # é o |
     automata_one = increment_states_by(automata_one,2)
     automata_two = increment_states_by(automata_two,automata_one.n_states + 2)
     return Automata(
@@ -92,60 +77,43 @@ def union(automata_one, automata_two):
         transitions= automata_one.transitions | automata_two.transitions |
         {(0,EPSILON):automata_one.initial_state} |
         {(0,EPSILON):automata_two.initial_state} |
-        {(automata_one.final_state,EPSILON):1} |
-        {(automata_two.final_state,EPSILON):1},
-        n_states= automata_one.n_states + automata_two.n_states + 2
+        {(automata_one.final_state,EPSILON): 1} |
+        {(automata_two.final_state,EPSILON): 1},
+        n_states=automata_one.n_states + automata_two.n_states + 2
     )
 
-def parse(expr :str):
-    # ['a','a','a','b*','(a|b)']
-    # (aab* | (aba)*) -> ['aab*' '|' '(aba)*'] -> ['a','b','a']
-    expressions = []
-    concat = ''
-    # parenteses_to_close = 0
-    for letter, next_letter in zip(expr[:-1], expr[1:]):
+def parse(expr: str):
+    automata = single_char_automata(EPSILON)
 
-        if letter == '(' or concat:
-            concat += letter
+    i = 0
+    while i < len(expr):
+        letter = expr[i]
+        if letter == '(':
+            sub_automata, j = parse(expr[i+1:])
+            i += j
+            automata = concat(automata,sub_automata)
+            # metodo de determinização
+        elif letter == '*':
+            automata = fecho(automata)
+            # metodo de determinização
+        elif letter == ')':
+            return automata, i+1
+        elif letter == '|':
+            sub_automata, j = parse(expr[i+1])
+            i += j
+            automata = union(automata,sub_automata)
+            # metodo de determinização
+        else:
+            new_automata = single_char_automata(letter)
+            automata = concat(automata,new_automata)
+        i += 1
+    return automata, i
 
-            if letter == '(':
-                parenteses_to_close += 1
-            elif letter == ')':
-                parenteses_to_close -= 1
-
-            if next_letter == ')':
-                expressions.append(concat+next_letter)
-                concat = ''
-
-        elif letter not in ['|', '*'] and next_letter not in ['*']:
-            expressions.append(letter)
-        elif letter not in ['|', '*'] and next_letter == '*':
-            expressions.append(letter+next_letter)
-    print(expressions)
-
-
-
-
-
-# aaab*(a|b)
-# a a a b* (a|b)
-
-# def tree(expr):
-
-
-# def nullable():
-#     pass
-# def first_pos():
-#     pass
-# def last_pos():
-#     pass
-# def follow_pos():
-#     pass
-
-def verify(automato,entrada):
+# o verify não está funcionando ok
+def verify(automata,entrada):
     # b(a|b)* -> a
-    estado_atual = automato.initial_state
-    aceitacao = automato.final_state
+    estado_atual = automata.initial_state
+    aceitacao = automata.final_state
     for char in entrada:
         estado_atual = automata.transitions[(estado_atual,char)]
         if not estado_atual:
@@ -154,6 +122,9 @@ def verify(automato,entrada):
 
 
 if __name__ == '__main__':
-    # parse('aaab*(a|b)')
-    a = concat(single_char_automata('a'),single_char_automata('b'))
-    print(concat(single_char_automata('a'),a))
+    # print(parse('aaab*(a|b)*'))
+    print(parse('(a|b)'))
+    # print(verify(parse('(a|b)')[0],'ab'))
+    # *b((a|b)|aa)a*')
+    # a = concat(single_char_automata('a'),single_char_automata('b'))
+    # print(concat(single_char_automata('a'),a))
