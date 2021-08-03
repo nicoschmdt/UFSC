@@ -13,42 +13,52 @@ from typing import NamedTuple
 # a | b -> a b |
 # a.b*.a.a -> ab*.a.a.
 
-class TreeNode(NamedTuple):
-    left: TreeNode
-    right: TreeNode
-    value: str
+# class TreeNode(NamedTuple):
+#     left: TreeNode
+#     right: TreeNode
+#     value: str
+
 
 def rpn(expr):
-    operands = ['|','.']
-    result = []
-    wait = False
-    waiting = ''
+    # stack = []
+    # result = []
+    operators = ['|','.','*','?','+']
+    binary_operators = ['|','.']
+    unary_operators = ['*','?','+'] # mais precedencia
+    # wait = False
+    # waiting = ''
+    output = []
+    operator_stack = []
     for letter in expr:
-        if letter not in operands and letter != '*':
-            result.append(letter)
-            if wait:
-                wait = False
-                result.append(waiting)
-        elif letter == '*':
-            if result[-1] == '.':
-                result.insert(len(result)-1,letter)
-            else:
-                result.append(letter)
+        if letter in binary_operators:
+            if operator_stack:
+                if operator_stack[-1] in binary_operators and letter in binary_operators:
+                    output.append(operator_stack.pop())
+            operator_stack.append(letter)
+        elif letter == '(':
+            operator_stack.append(letter)
+        elif letter == ')':
+            while operator_stack[-1] != '(':
+                output.append(operator_stack.pop())
+            operator_stack.pop()
         else:
-            wait = True
-            waiting = letter
-    return result
+            output.append(letter)
+    while operator_stack:
+        output.append(operator_stack.pop())
+
+    return output
+
 
 
 # ['a','a','.','b','*','.','#','.']
-def tree(rpn_list):
-    *head,symbol = rpn_list
-    if symbol in ['.','|']:
-        return TreeNode(
-            left=tree(head[:-1]),
-            right=head[-1],
-            value=symbol,
-        )
+# def tree(rpn_list):
+#     *head,symbol = rpn_list
+#     if symbol in ['.','|']:
+#         return TreeNode(
+#             left=tree(head[:-1]),
+#             right=head[-1],
+#             value=symbol,
+#         )
     # elif symbol == '*':
     #     return TreeNode(
     #         left=,
@@ -58,5 +68,5 @@ def tree(rpn_list):
 
 
 if __name__ == '__main__':
-    print(rpn('a.a.b*.c|d'))
+    print(rpn('a.(a|b)*.a.a.#'))
     # aa.b*.
