@@ -1,32 +1,15 @@
-from dataclasses import dataclass
+from dataclasses import dataclass,field
 from typing import NamedTuple
 
-# metodos para fazer
-# construir arvore sintatica a partir da entrada
-# para isso precisa por as fun de concat os '.' (trazer função para ca)
-# por fim a construção da arvore (nicole)
-# fazer as funções:
-# -anulavel (marcos)
-# -primeira_pos
-# -ultima_pos
-# -pos_seguinte
-# a | b -> a b |
-# a.b*.a.a -> ab*.a.a.
-
-# class TreeNode(NamedTuple):
-#     left: TreeNode
-#     right: TreeNode
-#     value: str
-
+class TreeNode(NamedTuple):
+    value: str
+    left_node: 'TreeNode'
+    right_node: 'TreeNode'
+    first_pos: list = field(default_factory=list)
+    last_pos: list = field(default_factory=list)
 
 def rpn(expr):
-    # stack = []
-    # result = []
-    operators = ['|','.','*','?','+']
     binary_operators = ['|','.']
-    unary_operators = ['*','?','+'] # mais precedencia
-    # wait = False
-    # waiting = ''
     output = []
     operator_stack = []
     for letter in expr:
@@ -48,25 +31,40 @@ def rpn(expr):
 
     return output
 
-
-
 # ['a','a','.','b','*','.','#','.']
-# def tree(rpn_list):
-#     *head,symbol = rpn_list
-#     if symbol in ['.','|']:
-#         return TreeNode(
-#             left=tree(head[:-1]),
-#             right=head[-1],
-#             value=symbol,
-#         )
-    # elif symbol == '*':
-    #     return TreeNode(
-    #         left=,
-    #         right=,
-    #         value=symbol,
-        # )
+def tree(rpn_list):
+    *head, symbol = rpn_list
+    if symbol in ['.','|']:
+        right, right_end = tree(head)
+        left, left_end = tree(right_end)
+        return TreeNode(
+            right_node=right,
+            left_node=left,
+            value=symbol,
+        ), left_end
+    elif symbol in ['*','?','+']:
+        right, right_end = tree(head)
+        return TreeNode(
+            right_node=right,
+            left_node=None,
+            value=symbol,
+        ), right_end
+    else:
+        return TreeNode(
+            right_node=None,
+            left_node=None,
+            value=symbol,
+        ), head
 
+
+def tree_to_tuple(tree):
+    if tree is None:
+        return None
+    return (tree.value,tree_to_tuple(tree.left_node),tree_to_tuple(tree.right_node))
 
 if __name__ == '__main__':
-    print(rpn('a.(a|b)*.a.a.#'))
-    # aa.b*.
+    test = rpn('a.(a|b)*.#')
+    # print(tree(test))
+    tree, _ = tree(test)
+    print(tree_to_tuple(tree))
+    # a.a.(a|b)*.#
