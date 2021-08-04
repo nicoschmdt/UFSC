@@ -1,12 +1,13 @@
 from dataclasses import dataclass,field
-from typing import NamedTuple
+# from typing import NamedTuple
 
-class TreeNode(NamedTuple):
+@dataclass
+class TreeNode:
     value: str
     left_node: 'TreeNode'
     right_node: 'TreeNode'
-    first_pos: list = field(default_factory=list)
-    last_pos: list = field(default_factory=list)
+    first_pos: set = field(default_factory=set)
+    last_pos: set = field(default_factory=set)
 
 def rpn(expr):
     binary_operators = ['|','.']
@@ -56,6 +57,17 @@ def tree(rpn_list):
             value=symbol,
         ), head
 
+def enumerate_tree_leaf(tree,number):
+    if tree.left_node == None and tree.right_node == None:
+        tree.first_pos = {number}
+        tree.last_pos = {number}
+        return number + 1
+    else:
+        if tree.left_node != None:
+            number = enumerate_tree_leaf(tree.left_node,number)
+        if tree.right_node != None:
+            number = enumerate_tree_leaf(tree.right_node,number)
+    return number
 
 def tree_to_tuple(tree):
     if tree is None:
@@ -66,5 +78,6 @@ if __name__ == '__main__':
     test = rpn('a.(a|b)*.#')
     # print(tree(test))
     tree, _ = tree(test)
-    print(tree_to_tuple(tree))
+    print(enumerate_tree_leaf(tree,1))
+    # print(tree_to_tuple(tree))
     # a.a.(a|b)*.#
