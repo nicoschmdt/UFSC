@@ -9,6 +9,7 @@ class TreeNode:
     nullable: bool
     first_pos: set = field(default_factory=set)
     last_pos: set = field(default_factory=set)
+    follow_pos: set = field(default_factory=set)
 
 def rpn(expr):
     binary_operators = ['|','.']
@@ -94,8 +95,21 @@ def first_pos_last_pos_and_nullable(tree):
         tree.first_pos = tree.right_node.first_pos
         tree.last_pos = tree.right_node.last_pos
 
-def follow_pos():
-    pass
+def follow_pos(tree, lista):
+    if tree.right_node == None and tree.left_node == None:
+        tree.follow_pos = lista
+    
+    elif tree.value in '*+':
+        follow_pos(tree.left_node, tree.first_pos.union(lista))
+
+    elif tree.value == '.':
+        follow_pos(tree.right_node, lista)
+        follow_pos(tree.left_node, tree.right_node.first_pos)
+
+    elif tree.value == '|':
+        follow_pos(tree.left_node, lista)
+        follow_pos(tree.right_node, lista)
+
 
 def tree_to_tuple(tree):
     if tree is None:
