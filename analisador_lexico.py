@@ -6,6 +6,7 @@ class TreeNode:
     value: str
     left_node: 'TreeNode'
     right_node: 'TreeNode'
+    nullable: bool
     first_pos: set = field(default_factory=set)
     last_pos: set = field(default_factory=set)
 
@@ -59,6 +60,7 @@ def tree(rpn_list):
 
 def enumerate_tree_leaf(tree,number):
     if tree.left_node == None and tree.right_node == None:
+        tree.nullable = False
         tree.first_pos = {number}
         tree.last_pos = {number}
         return number + 1
@@ -67,7 +69,33 @@ def enumerate_tree_leaf(tree,number):
             number = enumerate_tree_leaf(tree.left_node,number)
         if tree.right_node != None:
             number = enumerate_tree_leaf(tree.right_node,number)
+        first_pos_last_pos_and_nullable(tree)
     return number
+
+def first_pos_last_pos_and_nullable(tree):
+    if tree.value == '|':
+        tree.first_pos = tree.left_node.first_pos | tree.right_node.first_pos
+        tree.last_pos = tree.left_node.last_pos | tree.right_node.last_pos
+        tree.nullable = tree.left_node.nullable or tree.right_node.nullable
+
+    elif tree.value == '.':
+        tree.nullable = tree.left_node.nullable and tree.right_node.nullable
+        if tree.left_node.nullable:
+            tree.first_pos = tree.left_node.first_pos | tree.right_node.first_pos
+        else:
+            tree.first_pos = tree.left_node.first_pos
+        if tree.right_node.nullable:
+            tree.last_pos = tree.left_node.last_pos | tree.right_node.last_pos
+        else:
+            tree.last_pos = tree.right_node.last_pos
+
+    elif tree.value == '*':
+        tree.nullable = True
+        tree.first_pos = tree.right_node.first_pos
+        tree.last_pos = tree.right_node.last_pos
+
+def follow_pos():
+    pass
 
 def tree_to_tuple(tree):
     if tree is None:
