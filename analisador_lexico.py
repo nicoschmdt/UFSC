@@ -6,7 +6,7 @@ class TreeNode:
     value: str
     left_node: 'TreeNode'
     right_node: 'TreeNode'
-    nullable: bool
+    nullable: bool = False
     first_pos: set = field(default_factory=set)
     last_pos: set = field(default_factory=set)
     follow_pos: set = field(default_factory=set)
@@ -112,6 +112,7 @@ def first_pos_last_pos_and_nullable(tree):
         tree.last_pos = tree.right_node.last_pos
 
 def follow_pos(tree, lista):
+
     if tree.right_node == None and tree.left_node == None:
         if tree.value == '#':
             tree.follow_pos = set()
@@ -119,7 +120,7 @@ def follow_pos(tree, lista):
             tree.follow_pos = lista
 
     elif tree.value in '*+':
-        follow_pos(tree.left_node, tree.first_pos.union(lista))
+        follow_pos(tree.right_node, tree.first_pos.union(lista))
 
     elif tree.value == '.':
         follow_pos(tree.right_node, lista)
@@ -128,6 +129,7 @@ def follow_pos(tree, lista):
     elif tree.value == '|':
         follow_pos(tree.left_node, lista)
         follow_pos(tree.right_node, lista)
+
 
 def get_follow_pos_table(tree):
     table = {}
@@ -139,7 +141,7 @@ def get_follow_pos_table(tree):
             stack.append(node.left_node)
             stack.append(node.right_node)
         elif node.right_node != None:
-            stack.append(right_node)
+            stack.append(node.right_node)
         else:
             input_symbols |= {node.value}
             if node.value != '#':
@@ -148,12 +150,15 @@ def get_follow_pos_table(tree):
 
 def construct_AFD(tree,expr,number):
     follow_pos_table, input_symbols = get_follow_pos_table(tree)
-    d_states = tree.first_pos
+    # print("FOLLOW POS")
+    # print(follow_pos_table)
+    d_states = tree.last_pos
+    # print(d_states)
     d_transitions = {}
     symbols = set(follow_pos_table)
 
     # not_marked = set(follow_pos_table.keys())
-    not_marked = tree.first_pos
+    not_marked = tree.last_pos
 
     while not_marked:
         T = not_marked.pop()
@@ -181,7 +186,7 @@ def ER_to_AFD(expr):
     expr = insert_concat(expr+'#')
     rpn = rpn(expr)
     tree = tree(rpn)
-    last_leaf = enumerate_tree_leaf(tree) - 1
+    last_leaf = enumerate_tree_leaf(tree,1) - 1
     follow_pos(tree,set())
     automata = construct_AFD(tree,expr,last_leaf)
 
@@ -191,9 +196,14 @@ def tree_to_tuple(tree):
     return (tree.value,tree_to_tuple(tree.left_node),tree_to_tuple(tree.right_node))
 
 if __name__ == '__main__':
-    test = rpn('a.(a|b)*.#')
-    # print(tree(test))
+    expr = 'a(a|b)*#'
+    concat = insert_concat(expr)
+    test = rpn(concat)
     tree, _ = tree(test)
-    print(enumerate_tree_leaf(tree,1))
-    # print(tree_to_tuple(tree))
+    last_leaf = enumerate_tree_leaf(tree,1)-1
+    follow_pos(tree,set())
+    # print(enumerate_tree_leaf(tree,1))
+    # print(tree)
+    automata = construct_AFD(tree,expr,last_leaf)
+    # print(automata)
     # a.a.(a|b)*.#
