@@ -7,7 +7,7 @@ class TreeNode:
     left_node: 'TreeNode'
     right_node: 'TreeNode'
     nullable: bool = False
-    first_pos: set = field(default_factory=set)
+    first_pos: frozenset = field(default_factory=frozenset)
     last_pos: set = field(default_factory=set)
     follow_pos: set = field(default_factory=set)
 
@@ -78,8 +78,8 @@ def tree(rpn_list):
 def enumerate_tree_leaf(tree,number):
     if tree.left_node == None and tree.right_node == None:
         tree.nullable = False
-        tree.first_pos = {number}
-        tree.last_pos = {number}
+        tree.first_pos = frozenset({number})
+        tree.last_pos = frozenset({number})
         return number + 1
     else:
         if tree.left_node != None:
@@ -130,54 +130,57 @@ def follow_pos(tree, lista):
         follow_pos(tree.left_node, lista)
         follow_pos(tree.right_node, lista)
 
-
 def get_follow_pos_table(tree):
     table = {}
     input_symbols = set()
     stack = [tree]
     while stack:
         node = stack.pop()
-        if node.left_node != None and node.right_node != None:
+        if node.left_node is not None and node.right_node is not None:
             stack.append(node.left_node)
             stack.append(node.right_node)
-        elif node.right_node != None:
+        elif node.right_node is not None:
             stack.append(node.right_node)
         else:
-            input_symbols |= {node.value}
             if node.value != '#':
-                table[node.first_pos.pop()] = (node.follow_pos,node.value)
+                input_symbols |= {node.value}
+                node_number = next(iter(node.first_pos))
+                table[node_number] = (node.follow_pos,node.value)
+            else:
+                node_number = next(iter(node.first_pos))
+                table[node_number] = (None,None)
+
     return table, input_symbols
 
 def construct_AFD(tree,expr,number):
     follow_pos_table, input_symbols = get_follow_pos_table(tree)
-    # print("FOLLOW POS")
-    # print(follow_pos_table)
-    d_states = tree.last_pos
-    # print(d_states)
+    d_states = [tree.first_pos]
     d_transitions = {}
     symbols = set(follow_pos_table)
-
-    # not_marked = set(follow_pos_table.keys())
-    not_marked = tree.last_pos
-
-    while not_marked:
-        T = not_marked.pop()
+    marked = [tree.first_pos]
+    while d_states:
+        T = d_states.pop()
+        marked.append(T)
         for symbol in input_symbols:
             U = set()
             for state in T:
-                if state == follow_pos_table[state][1]:
-                    U |= follow_pos_table
-                if U and U not in d_states:
-                    not_marked.append(U)
-                d_transitions[(T,state)] = U
+                if symbol == follow_pos_table[state][1]:
+                    if symbol == '#':
+                        U = {}
+                    else:
+                        U |= follow_pos_table[state][0]
+                if U and U not in marked:
+                    d_states.append(frozenset(U))
+                d_transitions[(T,symbol)] = U
 
+    #fix acceptance list
     acceptance_list = set()
     for state in d_states:
         if number in state:
             acceptance_list |= {state}
 
     return Automata(
-        inital_state=tree.follow_pos,
+        inital_state=tree.first_pos,
         acceptance=acceptance_list,
         transitions=d_transitions,
     )
@@ -196,7 +199,7 @@ def tree_to_tuple(tree):
     return (tree.value,tree_to_tuple(tree.left_node),tree_to_tuple(tree.right_node))
 
 if __name__ == '__main__':
-    expr = 'a(a|b)*#'
+    expr = '(a|b)*abb#'
     concat = insert_concat(expr)
     test = rpn(concat)
     tree, _ = tree(test)
@@ -205,5 +208,16 @@ if __name__ == '__main__':
     # print(enumerate_tree_leaf(tree,1))
     # print(tree)
     automata = construct_AFD(tree,expr,last_leaf)
-    # print(automata)
-    # a.a.(a|b)*.#
+    # print(automata.transitions)
+    for transition in automata.transitions.items():
+        print(transition)
+    # ESPERADO
+    # --- estado atual ---> transição -> estado resultante
+    # -> 123 -> b -> 123
+    # -> 123 -> a -> 1234
+    # -> 1234 -> a -> 1234
+    # -> 1234 -> b -> 1235
+    # -> 1235 -> a -> 1234
+    # -> 1235 -> b -> 1236
+    # -> 1236 -> a -> 1234
+    # -> 1236 -> b -> 123
