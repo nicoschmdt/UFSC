@@ -173,9 +173,8 @@ def construct_AFD(tree,expr,number):
                     d_states.append(frozenset(U))
                 d_transitions[(T,symbol)] = U
 
-    #fix acceptance list
     acceptance_list = set()
-    for state in d_states:
+    for state in marked:
         if number in state:
             acceptance_list |= {state}
 
@@ -205,19 +204,8 @@ if __name__ == '__main__':
     tree, _ = tree(test)
     last_leaf = enumerate_tree_leaf(tree,1)-1
     follow_pos(tree,set())
-    # print(enumerate_tree_leaf(tree,1))
-    # print(tree)
     automata = construct_AFD(tree,expr,last_leaf)
-    # print(automata.transitions)
-    for transition in automata.transitions.items():
-        print(transition)
-    # ESPERADO
-    # --- estado atual ---> transição -> estado resultante
-    # -> 123 -> b -> 123
-    # -> 123 -> a -> 1234
-    # -> 1234 -> a -> 1234
-    # -> 1234 -> b -> 1235
-    # -> 1235 -> a -> 1234
-    # -> 1235 -> b -> 1236
-    # -> 1236 -> a -> 1234
-    # -> 1236 -> b -> 123
+    print(automata)
+    # caso queira ver as transições do automato
+    # for transition in automata.transitions.items():
+        # print(transition)
