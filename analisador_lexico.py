@@ -1,4 +1,6 @@
 from dataclasses import dataclass,field
+import toml
+import sys
 # from typing import NamedTuple
 
 @dataclass
@@ -13,8 +15,8 @@ class TreeNode:
 
 @dataclass
 class Automata:
-    inital_state: set()
-    acceptance: set()
+    inital_state: set
+    acceptance: set
     transitions: dict[tuple[set, str], set]
 
 # metodo que explicita a concatenacao em uma expressao regular,
@@ -196,14 +198,14 @@ def ER_to_AFD(expr):
     tree = tree(rpn)
     last_leaf = enumerate_tree_leaf(tree,1) - 1
     follow_pos(tree,set())
-    automata = construct_AFD(tree,expr,last_leaf)
+    return construct_AFD(tree,expr,last_leaf)
 
 def tree_to_tuple(tree):
     if tree is None:
         return None
     return (tree.value,tree_to_tuple(tree.left_node),tree_to_tuple(tree.right_node))
 
-# metodo auxiliar que calcula o fecho de um estado do AFND 
+# metodo auxiliar que calcula o fecho de um estado do AFND
 # que sera utilizado na determinizacao do mesmo
 def computarFecho(estados, automata):
     pilha = []
@@ -248,17 +250,51 @@ def determinizarAutomato(automata, alfabeto):
             AFN.transitions[(novoEstado, simbolo)] = U
     return AFN
 
+def read_specs_file(path):
+    with open(path) as f:
+        return toml.load(f)
+
+# melhorar como pegar os lexemas
+def get_lexemas(string):
+    return string.split()
+
+def make_automata(specs):
+    automata = None
+    for regex in specs['tokens'].values():
+        if automata is None:
+            automata = ER_to_AFD(regex)
+        else:
+            # automata = # uniao de automato
+            pass
+    # determinizar automato
+    return automata
+
+def tokenize(automata, lexema):
+    # tenta rodar o automato no lexema para gerar um token
+    # se funcionar retorna lexema + tipo dele
+
+def analyze(specs, string):
+    automata = make_automata(specs)
+    symbol_table = []
+    lexemas = get_lexemas(string)
+    for word in lexemas:
+        lexema, lexema_type = tokenize(automata, word)
+        symbol_table.append((lexema,lexema_type))
+    return symbol_table
+
+def main(args):
+    symbol_table = analyze() # arrumar como passar os args
+    # dar um jeito de escrever em um arquivo
+
+
+
+# saber qual estado de aceitação parou para saber qual token foi reconhecido -> duvida
 
 if __name__ == '__main__':
-    expr = '(a|b)*abb#'
-    concat = insert_concat(expr)
-    test = rpn(concat)
-    tree, _ = tree(test)
-    last_leaf = enumerate_tree_leaf(tree,1)-1
-    follow_pos(tree,set())
+    result = ER_to_AFD('a')
     automata = construct_AFD(tree,expr,last_leaf)
     print(automata)
-    print(determinizarAutomato(automata, obterAlfabeto(automata)))
+    # print(determinizarAutomato(automata, obterAlfabeto(automata)))
     #print(computarFecho({1}, automata))
     #caso queira ver as transições do automato
     # for transition in automata.transitions.items():
