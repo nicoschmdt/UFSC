@@ -13,10 +13,12 @@ class TreeNode:
 
 @dataclass
 class Automata:
-    inital_state: set
-    acceptance: set
+    inital_state: set()
+    acceptance: set()
     transitions: dict[tuple[set, str], set]
 
+# metodo que explicita a concatenacao em uma expressao regular,
+# para facilitar a conversao em AFD
 def insert_concat(expr):
     palavra = '().+*|'
     for i in range(len(expr)-1):
@@ -89,6 +91,8 @@ def enumerate_tree_leaf(tree,number):
         first_pos_last_pos_and_nullable(tree)
     return number
 
+# metodo que calcula os conjuntos firstpos, lastpos e nullable
+# de cada no da arvore gerada a partir da ER
 def first_pos_last_pos_and_nullable(tree):
     if tree.value == '|':
         tree.first_pos = tree.left_node.first_pos | tree.right_node.first_pos
@@ -111,6 +115,8 @@ def first_pos_last_pos_and_nullable(tree):
         tree.first_pos = tree.right_node.first_pos
         tree.last_pos = tree.right_node.last_pos
 
+# metodo que calcula o conjunto followpos de cada no-folha da arvore
+# gerada a partir da ER
 def follow_pos(tree, lista):
 
     if tree.right_node == None and tree.left_node == None:
@@ -197,6 +203,52 @@ def tree_to_tuple(tree):
         return None
     return (tree.value,tree_to_tuple(tree.left_node),tree_to_tuple(tree.right_node))
 
+# metodo auxiliar que calcula o fecho de um estado do AFND 
+# que sera utilizado na determinizacao do mesmo
+def computarFecho(estados, automata):
+    pilha = []
+    fechamento = set()
+    for estado in estados:
+        pilha.append(estado)
+        fechamento.add(estado)
+    while pilha != []:
+        elemento = pilha.pop()
+        for transicao in automata.transitions.items():
+            if elemento in transicao[0][0] and transicao[0][1] == '':
+                if elemento not in fechamento:
+                    fechamento.add(elemento)
+                    pilha.append(elemento)
+    return frozenset(fechamento)
+
+# metodo auxiliar que obtem todo o alfabeto da linguagem
+def obterAlfabeto(automata):
+    alfabeto = set()
+    for transition in automata.transitions.items():
+        alfabeto.add(transition[0][1])
+    return alfabeto
+
+
+# metodo que recebe o automato unido por transicoes epsilon
+# e retorna o AFD equivalente
+def determinizarAutomato(automata, alfabeto):
+
+    AFN = Automata({},{},{})
+    estados_marcados = []
+    estados_nao_marcados = []
+    estados_nao_marcados.append(computarFecho(automata.inital_state, automata))
+
+    while estados_nao_marcados != []:
+        novoEstado = estados_nao_marcados.pop()
+        estados_marcados.append(novoEstado)
+        for simbolo in alfabeto:
+            movimentacao = automata.transitions.get((novoEstado, simbolo))
+            U = computarFecho(movimentacao, automata)
+            if U not in estados_nao_marcados and U not in estados_marcados:
+                estados_nao_marcados.append(U)
+            AFN.transitions[(novoEstado, simbolo)] = U
+    return AFN
+
+
 if __name__ == '__main__':
     expr = '(a|b)*abb#'
     concat = insert_concat(expr)
@@ -206,6 +258,8 @@ if __name__ == '__main__':
     follow_pos(tree,set())
     automata = construct_AFD(tree,expr,last_leaf)
     print(automata)
-    # caso queira ver as transições do automato
+    print(determinizarAutomato(automata, obterAlfabeto(automata)))
+    #print(computarFecho({1}, automata))
+    #caso queira ver as transições do automato
     # for transition in automata.transitions.items():
-        # print(transition)
+    #     print(transition)
