@@ -120,8 +120,7 @@ def first_pos_last_pos_and_nullable(tree):
 # metodo que calcula o conjunto followpos de cada no-folha da arvore
 # gerada a partir da ER
 def follow_pos(tree, lista):
-
-    if tree.right_node == None and tree.left_node == None:
+    if tree.right_node is None and tree.left_node is None:
         if tree.value == '#':
             tree.follow_pos = set()
         else:
@@ -191,14 +190,21 @@ def construct_AFD(tree,expr,number):
         acceptance=acceptance_list,
         transitions=d_transitions,
     )
-
+# expr = '(a|b)*abb#'
+#     concat = insert_concat(expr)
+#     test = rpn(concat)
+#     tree, _ = tree(test)
+#     last_leaf = enumerate_tree_leaf(tree,1)-1
+#     follow_pos(tree,set())
+#     automata = construct_AFD(tree,expr,last_leaf)
+#     print(automata)
 def ER_to_AFD(expr):
     expr = insert_concat(expr+'#')
-    rpn = rpn(expr)
-    tree = tree(rpn)
-    last_leaf = enumerate_tree_leaf(tree,1) - 1
-    follow_pos(tree,set())
-    return construct_AFD(tree,expr,last_leaf)
+    rpn_list = rpn(expr)
+    tree_list, _ = tree(rpn_list)
+    last_leaf = enumerate_tree_leaf(tree_list,1) - 1
+    follow_pos(tree_list,set())
+    return construct_AFD(tree_list,expr,last_leaf)
 
 def tree_to_tuple(tree):
     if tree is None:
@@ -270,6 +276,7 @@ def make_automata(specs):
     return automata
 
 def tokenize(automata, lexema):
+    pass
     # tenta rodar o automato no lexema para gerar um token
     # se funcionar retorna lexema + tipo dele
 
@@ -283,7 +290,7 @@ def analyze(specs, string):
     return symbol_table
 
 def main(args):
-    symbol_table = analyze() # arrumar como passar os args
+    symbol_table = analyze() #arrumar como passar os args
     # dar um jeito de escrever em um arquivo
 
 
@@ -291,9 +298,9 @@ def main(args):
 # saber qual estado de aceitação parou para saber qual token foi reconhecido -> duvida
 
 if __name__ == '__main__':
-    result = ER_to_AFD('a')
-    automata = construct_AFD(tree,expr,last_leaf)
-    print(automata)
+    result = ER_to_AFD('ab')
+    # automata = construct_AFD(tree,expr,last_leaf)
+    print(result)
     # print(determinizarAutomato(automata, obterAlfabeto(automata)))
     #print(computarFecho({1}, automata))
     #caso queira ver as transições do automato
