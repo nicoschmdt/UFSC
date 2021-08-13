@@ -357,7 +357,7 @@ def join_n_with_epsilon(autom_list: list):
 # e retorna o AFD equivalente
 def determinizarAutomato(automata, alfabeto):
 
-    AFN = Automata({},{},{})
+    AFD = Automata({},{},{})
     estados_marcados = []
     estados_nao_marcados = []
     estados_nao_marcados.append(computarFecho(automata.initial_state, automata))
@@ -370,8 +370,16 @@ def determinizarAutomato(automata, alfabeto):
             U = computarFecho(movimentacao, automata)
             if U not in estados_nao_marcados and U not in estados_marcados:
                 estados_nao_marcados.append(U)
-            AFN.transitions[(novoEstado, simbolo)] = U
-    return AFN
+            AFD.transitions[(novoEstado, simbolo)] = U
+    for estado in automata.acceptance():
+        for transicao in AFD.transitions.items():
+            if estado in transicao[1]:
+                AFD.acceptance.add(estado)
+    for estado in automata.inital_state():
+        for transicao in AFD.transitions.items():
+            if estado in transicao[0][0]:
+                AFD.acceptance.add(estado)
+    return AFD
 
 def expand_regexes(specs):
     return {token: expand_regex(regex) for token, regex in specs['tokens'].items()}
