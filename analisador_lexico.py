@@ -378,7 +378,7 @@ def determinizarAutomato(automata, alfabeto):
     for estado in automata.inital_state():
         for transicao in AFD.transitions.items():
             if estado in transicao[0][0]:
-                AFD.acceptance.add(estado)
+                AFD.inital_state.add(estado)
     return AFD
 
 def expand_regexes(specs):
@@ -430,7 +430,6 @@ def read_specs_file(path):
     with open(path) as f:
         return toml.load(f)
 
-# melhorar como pegar os lexemas
 def get_lexemas(path):
     content = ''
     with open(path) as f:
@@ -443,7 +442,8 @@ def make_automata(specs):
     for regex in tokens.values():
         automata_list.append(ER_to_AFD(regex))
     joined_automata = join_n_with_epsilon(automata_list)
-    # determinizar automato
+    # alfabeto = obterAlfabeto(joined_automata) - {'&'}
+    # resulted_automata = determinizarAutomato(joined_automata, alfabeto)
     return joined_automata
 
 def verify(automata, lexema):
@@ -486,6 +486,9 @@ def main(args):
     specs = read_specs_file(specs_path)
     lexemas = get_lexemas(file)
     symbol_table = analyze(specs, lexemas)
+    with open('result.txt','w') as f:
+        for item in symbol_table:
+            f.write(f'{item}\n')
     # dar um jeito de escrever em um arquivo
 
 
