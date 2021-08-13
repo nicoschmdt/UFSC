@@ -190,14 +190,7 @@ def construct_AFD(tree,expr,number):
         acceptance=acceptance_list,
         transitions=d_transitions,
     )
-# expr = '(a|b)*abb#'
-#     concat = insert_concat(expr)
-#     test = rpn(concat)
-#     tree, _ = tree(test)
-#     last_leaf = enumerate_tree_leaf(tree,1)-1
-#     follow_pos(tree,set())
-#     automata = construct_AFD(tree,expr,last_leaf)
-#     print(automata)
+
 def ER_to_AFD(expr):
     expr = insert_concat(expr+'#')
     rpn_list = rpn(expr)
@@ -256,6 +249,51 @@ def determinizarAutomato(automata, alfabeto):
             AFN.transitions[(novoEstado, simbolo)] = U
     return AFN
 
+def expand_regexes(specs):
+    return {token: expand_regex(regex) for token, regex in specs['tokens'].items()}
+
+class InvalidRegexError(Exception):
+    pass
+
+def expand_regex(regex):
+    result = ''
+    option_range = []
+    options = []
+    bracket = False
+    DIGITS_REGEX = '0123456789'
+    WORDS_REGEX = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    for symbol in regex:
+        if symbol == ']':
+            result += '|'.join(options) + ')'
+            options = []
+            bracket = False
+        elif symbol == '[':
+            result += '('
+            bracket = True
+        elif options or bracket:
+            if not option_range or symbol == '-':
+                option_range.append(symbol)
+            elif option_range[-1] == '-':
+                range_start_symbol = option_range[0]
+                if range_start_symbol in DIGITS_REGEX and symbol in DIGITS_REGEX:
+                    start = DIGITS_REGEX.find(range_start_symbol)
+                    end = DIGITS_REGEX.find(symbol) + 1
+                    options.extend(DIGITS_REGEX[start:end])
+                elif range_start_symbol in WORDS_REGEX and symbol in WORDS_REGEX:
+                    start = WORDS_REGEX.find(range_start_symbol)
+                    end = WORDS_REGEX.find(symbol) + 1
+                    options.extend(WORDS_REGEX[start:end])
+                else:
+                    raise InvalidRegexError(f'Unexpected regex range {range_start_symbol}-{symbol}')
+                option_range = []
+            else:
+                options.extend(option_range)
+                options.append(symbol)
+                option_range = []
+        else:
+            result += symbol
+    return result
+
 def read_specs_file(path):
     with open(path) as f:
         return toml.load(f)
@@ -266,11 +304,12 @@ def get_lexemas(string):
 
 def make_automata(specs):
     automata = None
-    for regex in specs['tokens'].values():
+    for regex in expand_regexes(specs['tokens']).values():
         if automata is None:
             automata = ER_to_AFD(regex)
         else:
-            # automata = # uniao de automato
+            another_aut = ER_to_AFD(regex)
+            # automata = union(automata,another_aut)
             pass
     # determinizar automato
     return automata
@@ -298,9 +337,19 @@ def main(args):
 # saber qual estado de aceitação parou para saber qual token foi reconhecido -> duvida
 
 if __name__ == '__main__':
-    result = ER_to_AFD('ab')
+    _, specs_path = sys.argv
+    specs = read_specs_file(specs_path)
+    from pprint import pprint
+    pprint(expand_regexes(specs))
+    # main(args)
+    # result = ER_to_AFD('(a|b)*')
     # automata = construct_AFD(tree,expr,last_leaf)
-    print(result)
+    # print(expand_regex('a'))
+    # print(expand_regex('ab'))
+    # print(expand_regex('a(b|c)'))
+    # print(expand_regex('[0-9]'))
+    # print(expand_regex('a[0-9]'))
+    # print(expand_regex('[0-5a-B]'))
     # print(determinizarAutomato(automata, obterAlfabeto(automata)))
     #print(computarFecho({1}, automata))
     #caso queira ver as transições do automato
