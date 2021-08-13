@@ -1,6 +1,6 @@
 program exemplo ;
-var A , B : integer ;
+var Aa , Bb : integer ;
 begin
-    read A ;
-    B := A + 25 ;
-end .
+    read Aa ;
+    Bb := Aa / 25 ;
+end

@@ -1,6 +1,5 @@
 from dataclasses import dataclass,field
 import toml
-import re
 import sys
 # from typing import NamedTuple
 
@@ -16,9 +15,9 @@ class TreeNode:
 
 @dataclass
 class Automata:
-    inital_state: set
-    acceptance: set
-    transitions: dict[tuple[set, str], set]
+    initial_state: frozenset
+    acceptance: frozenset
+    transitions: dict[tuple[frozenset, str], frozenset]
 
 # metodo que explicita a concatenacao em uma expressao regular,
 # para facilitar a conversao em AFD
@@ -58,7 +57,7 @@ def rpn(expr):
 
 def tree(rpn_list):
     *head, symbol = rpn_list
-    if symbol in ['.','|']:
+    if symbol in ['.', '|']:
         right, right_end = tree(head)
         left, left_end = tree(right_end)
         return TreeNode(
@@ -66,7 +65,7 @@ def tree(rpn_list):
             left_node=left,
             value=symbol,
         ), left_end
-    elif symbol in ['*','?','+']:
+    elif symbol in ['*', '?', '+']:
         right, right_end = tree(head)
         return TreeNode(
             right_node=right,
@@ -187,7 +186,7 @@ def construct_AFD(tree,expr,number):
             acceptance_list |= {state}
 
     return Automata(
-        inital_state=tree.first_pos,
+        initial_state=tree.first_pos,
         acceptance=acceptance_list,
         transitions=d_transitions,
     )
@@ -233,8 +232,8 @@ def get_states_list(autom: Automata):
     states_list = []
 
     # adiciona o estado inicial a lista
-    if autom.inital_state not in states_list:
-        states_list.append(frozenset(autom.inital_state))
+    if autom.initial_state not in states_list:
+        states_list.append(frozenset(autom.initial_state))
     # adiciona os estados finais a lista
     for final_state in autom.acceptance:
         if final_state not in states_list:
@@ -262,8 +261,8 @@ def rename_states(autom: Automata, shift: int):
         else:
             state_conversion_dic[state] = frozenset()
 
-    new_inicial_state = state_conversion_dic[autom.inital_state]
-    
+    new_inicial_state = state_conversion_dic[autom.initial_state]
+
     new_acceptance_states = {""}
     for estado_aceitacao in autom.acceptance:
         new_acceptance_states.add(state_conversion_dic[estado_aceitacao])
@@ -276,7 +275,7 @@ def rename_states(autom: Automata, shift: int):
         new_transitions[(state_conversion_dic[estado_origem],caractere)] = state_conversion_dic[frozenset(autom.transitions[transicao])]
 
     renamed_automata = Automata(
-        inital_state=new_inicial_state,
+        initial_state=new_inicial_state,
         acceptance=new_acceptance_states,
         transitions=new_transitions,
     )
@@ -304,15 +303,15 @@ def join_with_epsilon(autom1: Automata, autom2: Automata):
 
 
     estadosFinais = []
-    for former_initial_state1 in renamed_autom1.inital_state:
+    for former_initial_state1 in renamed_autom1.initial_state:
         estadosFinais.append(former_initial_state1)
-    for former_initial_state2 in renamed_autom2.inital_state:
+    for former_initial_state2 in renamed_autom2.initial_state:
         estadosFinais.append(former_initial_state2)
     join_transitions[(join_initial_state, "&")] = frozenset(estadosFinais)
 
 
     return Automata(
-        inital_state=join_initial_state,
+        initial_state=join_initial_state,
         acceptance=join_acceptance_states,
         transitions=join_transitions,
     )
@@ -322,7 +321,7 @@ def join_n_with_epsilon(autom_list: list):
     total_states = 0
     for autom in autom_list:
         total_states += len(get_states_list(autom))-1
-    
+
     # define os novos estados iniciais e finais como a indice e indice+
     join_initial_state = frozenset([total_states])
     join_acceptance_states = frozenset([total_states+1])
@@ -343,13 +342,13 @@ def join_n_with_epsilon(autom_list: list):
 
     estadosFinais = []
     for x in renamed_autom_list:
-        for former_initial_state in x.inital_state:
+        for former_initial_state in x.initial_state:
             estadosFinais.append(former_initial_state)
     join_transitions[(join_initial_state, "&")] = frozenset(estadosFinais)
 
 
     return Automata(
-        inital_state=join_initial_state,
+        initial_state=join_initial_state,
         acceptance=join_acceptance_states,
         transitions=join_transitions,
     )
@@ -361,7 +360,7 @@ def determinizarAutomato(automata, alfabeto):
     AFN = Automata({},{},{})
     estados_marcados = []
     estados_nao_marcados = []
-    estados_nao_marcados.append(computarFecho(automata.inital_state, automata))
+    estados_nao_marcados.append(computarFecho(automata.initial_state, automata))
 
     while estados_nao_marcados != []:
         novoEstado = estados_nao_marcados.pop()
@@ -432,39 +431,51 @@ def get_lexemas(path):
 
 def make_automata(specs):
     automata_list = []
-    for regex in specs['tokens'].values():
+    tokens = expand_regexes(specs)
+    for regex in tokens.values():
         automata_list.append(ER_to_AFD(regex))
-        # if automata is None:
-        #     automata = ER_to_AFD(regex)
-        # else:
-        #     # automata = # uniao de automato
-        #     pass
     joined_automata = join_n_with_epsilon(automata_list)
     # determinizar automato
-    return automata
+    return joined_automata
+
+def verify(automata, lexema):
+    state = frozenset(automata.initial_state)
+    for char in lexema:
+        try:
+            state = frozenset(automata.transitions[(state, char)])
+        except KeyError:
+            return False
+        if not state:
+            return False
+    return state in automata.acceptance
+
+class UnknownToken(Exception):
+    pass
 
 def tokenize(automata, lexema, tokens):
-    estadoAtual = automata.inital_state
-    for caractere in lexema:
-        estadoAtual = automata.transitions.get((estadoAtual, caractere))
-    if estadoAtual in automata.acceptance:
-        key_list = list(tokens.keys())
-        val_list = list(tokens.values())
-        for n in range(len(key_list)):
-            if re.match(val_list[n], lexema):
-                return lexema, key_list[n]
-    
+    for token, regex in tokens.items():
+        afd = ER_to_AFD(regex)
+        print(f'testing {lexema} with {token}: {regex}')
+        if verify(afd, lexema):
+            print(f'Works as a {token}!')
+            return lexema, token
+        print(f'Not a {token}!')
+
+    raise UnknownToken(lexema)
+
 
 def analyze(specs, lexemas):
     automata = make_automata(specs)
     symbol_table = []
+    tokens = expand_regexes(specs)
     for word in lexemas:
-        lexema, lexema_type = tokenize(automata, word)
+        lexema, lexema_type = tokenize(automata, word, tokens)
         symbol_table.append((lexema,lexema_type))
     return symbol_table
 
 def main(args):
-    _, file, specs = args
+    _, file, specs_path = args
+    specs = read_specs_file(specs_path)
     lexemas = get_lexemas(file)
     symbol_table = analyze(specs, lexemas)
     # dar um jeito de escrever em um arquivo
@@ -476,4 +487,3 @@ if __name__ == '__main__':
     main(sys.argv)
     # _, path = sys.argv
     # print(get_lexemas(path))
-    # specs = read_specs_file(specs_path)
