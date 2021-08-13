@@ -1,5 +1,6 @@
 from dataclasses import dataclass,field
 import toml
+import re
 import sys
 # from typing import NamedTuple
 
@@ -442,10 +443,17 @@ def make_automata(specs):
     # determinizar automato
     return automata
 
-def tokenize(automata, lexema):
-    pass
-    # tenta rodar o automato no lexema para gerar um token
-    # se funcionar retorna lexema + tipo dele
+def tokenize(automata, lexema, tokens):
+    estadoAtual = automata.inital_state
+    for caractere in lexema:
+        estadoAtual = automata.transitions.get((estadoAtual, caractere))
+    if estadoAtual in automata.acceptance:
+        key_list = list(tokens.keys())
+        val_list = list(tokens.values())
+        for n in range(len(key_list)):
+            if re.match(val_list[n], lexema):
+                return lexema, key_list[n]
+    
 
 def analyze(specs, lexemas):
     automata = make_automata(specs)
