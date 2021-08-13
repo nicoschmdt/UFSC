@@ -299,8 +299,11 @@ def read_specs_file(path):
         return toml.load(f)
 
 # melhorar como pegar os lexemas
-def get_lexemas(string):
-    return string.split()
+def get_lexemas(path):
+    content = ''
+    with open(path) as f:
+        content = f.read()
+    return content.split()
 
 def make_automata(specs):
     automata = None
@@ -319,39 +322,25 @@ def tokenize(automata, lexema):
     # tenta rodar o automato no lexema para gerar um token
     # se funcionar retorna lexema + tipo dele
 
-def analyze(specs, string):
+def analyze(specs, lexemas):
     automata = make_automata(specs)
     symbol_table = []
-    lexemas = get_lexemas(string)
     for word in lexemas:
         lexema, lexema_type = tokenize(automata, word)
         symbol_table.append((lexema,lexema_type))
     return symbol_table
 
 def main(args):
-    symbol_table = analyze() #arrumar como passar os args
+    _, file, specs = args
+    lexemas = get_lexemas(file)
+    symbol_table = analyze(specs, lexemas)
     # dar um jeito de escrever em um arquivo
-
 
 
 # saber qual estado de aceitação parou para saber qual token foi reconhecido -> duvida
 
 if __name__ == '__main__':
-    _, specs_path = sys.argv
-    specs = read_specs_file(specs_path)
-    from pprint import pprint
-    pprint(expand_regexes(specs))
-    # main(args)
-    # result = ER_to_AFD('(a|b)*')
-    # automata = construct_AFD(tree,expr,last_leaf)
-    # print(expand_regex('a'))
-    # print(expand_regex('ab'))
-    # print(expand_regex('a(b|c)'))
-    # print(expand_regex('[0-9]'))
-    # print(expand_regex('a[0-9]'))
-    # print(expand_regex('[0-5a-B]'))
-    # print(determinizarAutomato(automata, obterAlfabeto(automata)))
-    #print(computarFecho({1}, automata))
-    #caso queira ver as transições do automato
-    # for transition in automata.transitions.items():
-    #     print(transition)
+    main(sys.argv)
+    # _, path = sys.argv
+    # print(get_lexemas(path))
+    # specs = read_specs_file(specs_path)
