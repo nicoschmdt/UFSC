@@ -228,6 +228,130 @@ def obterAlfabeto(automata):
         alfabeto.add(transition[0][1])
     return alfabeto
 
+def get_states_list(autom: Automata):
+    states_list = []
+
+    # adiciona o estado inicial a lista
+    if autom.inital_state not in states_list:
+        states_list.append(frozenset(autom.inital_state))
+    # adiciona os estados finais a lista
+    for final_state in autom.acceptance:
+        if final_state not in states_list:
+            states_list.append(frozenset(final_state))
+    # adiciona os estados que aparecem nas transicoes
+    for x in autom.transitions:
+        if x[0] not in states_list:
+            states_list.append(frozenset(x[0]))
+        if autom.transitions[x] not in states_list:
+            states_list.append(frozenset(autom.transitions[x]))
+    #remove estado morto
+    # if set() in states_list:
+    #     states_list.remove(set())
+    return states_list
+
+def rename_states(autom: Automata, shift: int):
+    states = get_states_list(autom)
+    state_conversion_dic = {}
+
+    index = 0
+    for state in states:
+        if (state != set()):
+            state_conversion_dic[state] = frozenset([index + shift])
+            index += 1
+        else:
+            state_conversion_dic[state] = frozenset()
+
+    new_inicial_state = state_conversion_dic[autom.inital_state]
+    
+    new_acceptance_states = {""}
+    for estado_aceitacao in autom.acceptance:
+        new_acceptance_states.add(state_conversion_dic[estado_aceitacao])
+    new_acceptance_states.discard("")
+
+    new_transitions = {}
+    for transicao in autom.transitions:
+        estado_origem = transicao[0]
+        caractere = transicao[1]
+        new_transitions[(state_conversion_dic[estado_origem],caractere)] = state_conversion_dic[frozenset(autom.transitions[transicao])]
+
+    renamed_automata = Automata(
+        inital_state=new_inicial_state,
+        acceptance=new_acceptance_states,
+        transitions=new_transitions,
+    )
+    return renamed_automata
+
+def join_with_epsilon(autom1: Automata, autom2: Automata):
+    # armazena os tamanhos dos automatos para renomear os estados por indice
+    tamanho_automato1 = len(get_states_list(autom1))-1
+    tamanho_automato2 = len(get_states_list(autom2))-1
+
+    # define os novos estados iniciais e finais como a indice e indice+
+    join_initial_state = frozenset([tamanho_automato1+tamanho_automato2])
+    join_acceptance_states = frozenset([tamanho_automato1+tamanho_automato2+1])
+
+    renamed_autom1 = rename_states(autom1,0)
+    renamed_autom2 = rename_states(autom2,tamanho_automato1)
+
+    join_transitions = renamed_autom1.transitions
+    join_transitions.update(renamed_autom2.transitions)
+
+    for former_acceptance_state1 in renamed_autom1.acceptance:
+        join_transitions[(former_acceptance_state1, "&")] = join_acceptance_states
+    for former_acceptance_state2 in renamed_autom2.acceptance:
+        join_transitions[(former_acceptance_state2, "&")] = join_acceptance_states
+
+
+    estadosFinais = []
+    for former_initial_state1 in renamed_autom1.inital_state:
+        estadosFinais.append(former_initial_state1)
+    for former_initial_state2 in renamed_autom2.inital_state:
+        estadosFinais.append(former_initial_state2)
+    join_transitions[(join_initial_state, "&")] = frozenset(estadosFinais)
+
+
+    return Automata(
+        inital_state=join_initial_state,
+        acceptance=join_acceptance_states,
+        transitions=join_transitions,
+    )
+
+def join_n_with_epsilon(autom_list: list):
+    # armazena os tamanhos dos automatos para renomear os estados por indice
+    total_states = 0
+    for autom in autom_list:
+        total_states += len(get_states_list(autom))-1
+    
+    # define os novos estados iniciais e finais como a indice e indice+
+    join_initial_state = frozenset([total_states])
+    join_acceptance_states = frozenset([total_states+1])
+
+    renamed_autom_list = []
+    total_states_until_x = 0
+    for x in autom_list:
+        renamed_autom_list.append(rename_states(x,total_states_until_x))
+        total_states_until_x += len(get_states_list(x))-1
+
+    join_transitions = {}
+    for x in renamed_autom_list:
+        join_transitions.update(x.transitions)
+
+    for x in renamed_autom_list:
+        for former_acceptance_state in x.acceptance:
+            join_transitions[(former_acceptance_state, "&")] = join_acceptance_states
+
+    estadosFinais = []
+    for x in renamed_autom_list:
+        for former_initial_state in x.inital_state:
+            estadosFinais.append(former_initial_state)
+    join_transitions[(join_initial_state, "&")] = frozenset(estadosFinais)
+
+
+    return Automata(
+        inital_state=join_initial_state,
+        acceptance=join_acceptance_states,
+        transitions=join_transitions,
+    )
 
 # metodo que recebe o automato unido por transicoes epsilon
 # e retorna o AFD equivalente
@@ -306,14 +430,15 @@ def get_lexemas(path):
     return content.split()
 
 def make_automata(specs):
-    automata = None
-    for regex in expand_regexes(specs['tokens']).values():
-        if automata is None:
-            automata = ER_to_AFD(regex)
-        else:
-            another_aut = ER_to_AFD(regex)
-            # automata = union(automata,another_aut)
-            pass
+    automata_list = []
+    for regex in specs['tokens'].values():
+        automata_list.append(ER_to_AFD(regex))
+        # if automata is None:
+        #     automata = ER_to_AFD(regex)
+        # else:
+        #     # automata = # uniao de automato
+        #     pass
+    joined_automata = join_n_with_epsilon(automata_list)
     # determinizar automato
     return automata
 
