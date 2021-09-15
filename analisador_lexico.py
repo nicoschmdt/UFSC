@@ -34,12 +34,13 @@ def insert_concat(expr):
 
 def rpn(expr):
     binary_operators = ['|','.']
+    precedence = {'|':0, '.':1}
     output = []
     operator_stack = []
-    for letter in expr:
+    for i, letter in enumerate(expr):
         if letter in binary_operators:
             if operator_stack:
-                if operator_stack[-1] in binary_operators and letter in binary_operators:
+                while operator_stack[-1] != '(' and precedence[operator_stack[-1]] >= precedence[letter]:
                     output.append(operator_stack.pop())
             operator_stack.append(letter)
         elif letter == '(':
@@ -159,7 +160,7 @@ def get_follow_pos_table(tree):
 
     return table, input_symbols
 
-def construct_AFD(tree,expr,number):
+def construct_AFD(tree,number):
     follow_pos_table, input_symbols = get_follow_pos_table(tree)
     d_states = [tree.first_pos]
     d_transitions = {}
@@ -192,12 +193,12 @@ def construct_AFD(tree,expr,number):
     )
 
 def ER_to_AFD(expr):
-    expr = insert_concat(expr+'#')
+    expr = insert_concat(f'({expr})#')
     rpn_list = rpn(expr)
     tree_list, _ = tree(rpn_list)
     last_leaf = enumerate_tree_leaf(tree_list,1) - 1
     follow_pos(tree_list,set())
-    return construct_AFD(tree_list,expr,last_leaf)
+    return construct_AFD(tree_list,last_leaf)
 
 def tree_to_tuple(tree):
     if tree is None:
@@ -424,6 +425,9 @@ def expand_regex(regex):
                 option_range = []
         else:
             result += symbol
+    print(f'''
+    -- expanded {regex}
+       --    to {result}''')
     return result
 
 def read_specs_file(path):
@@ -431,10 +435,10 @@ def read_specs_file(path):
         return toml.load(f)
 
 def get_lexemas(path):
-    content = ''
     with open(path) as f:
         content = f.read()
-    return content.split()
+        print(f'    -- content: {content}')
+        return content.split()
 
 def make_automata(specs):
     automata_list = []
@@ -474,17 +478,21 @@ def tokenize(automata, lexema, tokens):
 
 def analyze(specs, lexemas):
     automata = make_automata(specs)
+    print(f'automata: {automata}')
+    print(f'automata.acceptance_list: {automata.acceptance_list}')
     symbol_table = []
     tokens = expand_regexes(specs)
     for word in lexemas:
+        print(f'    -- word: {word}')
         lexema, lexema_type = tokenize(automata, word, tokens)
-        symbol_table.append((lexema,lexema_type))
+        symbol_table.append((lexema, lexema_type))
     return symbol_table
 
 def main(args):
     _, file, specs_path = args
     specs = read_specs_file(specs_path)
     lexemas = get_lexemas(file)
+    print(f'    -- lexemas: {lexemas}')
     symbol_table = analyze(specs, lexemas)
     with open('result.txt','w') as f:
         for item in symbol_table:
