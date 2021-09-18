@@ -347,40 +347,83 @@ def join_n_with_epsilon(autom_list: list):
             estadosFinais.append(former_initial_state)
     join_transitions[(join_initial_state, "&")] = frozenset(estadosFinais)
 
-
     return Automata(
         initial_state=join_initial_state,
         acceptance=join_acceptance_states,
         transitions=join_transitions,
     )
 
+# metodo que recebe o automato e retorna lista de estados
+def getListaEstados(automata: Automata):
+    listaEstados = []
+    for x in automata.transitions:
+        for singleState in list(x[0]):
+            if singleState not in listaEstados:
+                listaEstados.append(singleState)
+    for singleState in list(automata.acceptance):
+        if singleState not in listaEstados:
+            listaEstados.append(singleState)
+    for singleState in list(automata.initial_state):
+        if singleState not in listaEstados:
+            listaEstados.append(singleState)
+    return listaEstados
+
+def getEFecho(automata: Automata):
+    eFecho = {}
+    for estado in getListaEstados(automata):
+        eFecho[str(estado)] = [str(estado)]
+        # eFecho[str(list(transicao[0])[0])] = [str(list(transicao[0])[0])]
+    for transicao in automata.transitions:
+        if transicao[1] == "&":
+            for estadoDestino in list(automata.transitions[transicao]):
+                eFecho[str(list(transicao[0])[0])].append(str(estadoDestino))
+    return (eFecho)
+
+def frozenSetToString(fz: frozenset):
+    lista = list(fz)
+    ret = ""
+    for x in lista:
+        ret += str(x) + " "
+    return ret[:-1]
+     
+
 # metodo que recebe o automato unido por transicoes epsilon
 # e retorna o AFD equivalente
-def determinizarAutomato(automata, alfabeto):
+def determinizarAutomato(automata: Automata, alfabeto):
+    efecho = getEFecho(automata)
 
-    AFD = Automata({},{},{})
-    estados_marcados = []
-    estados_nao_marcados = []
-    estados_nao_marcados.append(computarFecho(automata.initial_state, automata))
+    newInitialState = frozenset(efecho[frozenSetToString(automata.initial_state)])
+    newAcceptanceState = frozenset(efecho[frozenSetToString(automata.acceptance)])
 
-    while estados_nao_marcados != []:
-        novoEstado = estados_nao_marcados.pop()
-        estados_marcados.append(novoEstado)
-        for simbolo in alfabeto:
-            movimentacao = automata.transitions.get((novoEstado, simbolo))
-            U = computarFecho(movimentacao, automata)
-            if U not in estados_nao_marcados and U not in estados_marcados:
-                estados_nao_marcados.append(U)
-            AFD.transitions[(novoEstado, simbolo)] = U
-    for estado in automata.acceptance():
-        for transicao in AFD.transitions.items():
-            if estado in transicao[1]:
-                AFD.acceptance.add(estado)
-    for estado in automata.inital_state():
-        for transicao in AFD.transitions.items():
-            if estado in transicao[0][0]:
-                AFD.inital_state.add(estado)
-    return AFD
+    
+    newTransitions = {}
+
+    listaTransicoesPendentes = [newInitialState]
+    listaTransicoesFeitas = []
+
+    while(len(listaTransicoesPendentes) != 0):
+        print(len(listaTransicoesPendentes))
+        workingState = listaTransicoesPendentes.pop()
+        listaTransicoesFeitas.append(workingState)
+        print("poppei " + str(workingState))
+        for caractere in alfabeto:
+            for estado in list(workingState):
+                if (frozenset([int(estado)]), caractere) in automata.transitions:
+                    if automata.transitions[(frozenset([int(estado)]), caractere)] != frozenset():
+                        newTransitions[
+                            (
+                                workingState,
+                                caractere
+                            )
+                        ] = frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])])
+                        if frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])]) not in listaTransicoesPendentes:
+                            if frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])]) not in listaTransicoesFeitas:
+                                print("appendei " + str(frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])])))
+                                listaTransicoesPendentes.append(frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])]))
+
+
+    detAutomata = Automata(newInitialState, newAcceptanceState, newTransitions)
+    return detAutomata
 
 def expand_regexes(specs):
     return {token: expand_regex(regex) for token, regex in specs['tokens'].items()}
@@ -446,9 +489,10 @@ def make_automata(specs):
     for regex in tokens.values():
         automata_list.append(ER_to_AFD(regex))
     joined_automata = join_n_with_epsilon(automata_list)
-    # alfabeto = obterAlfabeto(joined_automata) - {'&'}
-    # resulted_automata = determinizarAutomato(joined_automata, alfabeto)
-    return joined_automata
+    
+    alfabeto = obterAlfabeto(joined_automata) - {'&'}
+    resulted_automata = determinizarAutomato(joined_automata, alfabeto)
+    return resulted_automata
 
 def verify(automata, lexema):
     state = frozenset(automata.initial_state)
@@ -479,7 +523,7 @@ def tokenize(automata, lexema, tokens):
 def analyze(specs, lexemas):
     automata = make_automata(specs)
     print(f'automata: {automata}')
-    print(f'automata.acceptance_list: {automata.acceptance_list}')
+    print(f'automata.acceptanceState: {automata.acceptance}')
     symbol_table = []
     tokens = expand_regexes(specs)
     for word in lexemas:
