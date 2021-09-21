@@ -2,17 +2,38 @@
 pr = "(program|end|var|begin|read)"
 id = "[a-zA-Z][a-zA-Z0-9]*"
 se = "(:=|,|;|:)"
-op = "(-|/|+|*)"
+op = "(-|/)"
 number = "[0-9][0-9]*"
 
 [syntax]
-PROGRAM = [["program", ["ID"], ";", ["VARS"], ["SCOPE"]]]
-VARS = [[["VAR"], ["VARS"]], [["VAR"]]]
-STATEMENTS = [[["STATEMENT"], ["STATEMENTS"]], [["STATEMENT"]]]
-STATEMENT = [[["READ"]], [["ASSIGN"]]]
-VAR = [["var", ["ID_LIST"], ":", ["ID"], ";"]]
-ID_LIST = [[["ID"], ",", ["ID_LIST"]], [["ID"]]]
-SCOPE = [["begin", ["STATEMENTS"], "end"]]
-READ = [["read", ["ID"], ";"]]
-ASSIGN = [[["ID"], ":=", ["ID"], ["OP"], ["NUMBER"], ";"]]
-OP = [["-"], ["/"], ["+"], ["*"]]
+PROGRAM = [
+    ["program", "/ID", ";", "\VARS", "\SCOPE"]
+    ]
+VARS = [
+    ["\VAR", "\VARS"],
+    ["\VAR"]
+    ]
+STATEMENTS = [
+    ["\STATEMENT", "\STATEMENTS"],
+    ["\STATEMENT"]
+    ]
+STATEMENT = [
+    ["/READ"],
+    ["\ASSIGN"]
+    ]
+VAR = [
+    ["var", "\ID_LIST", ":", "/ID", ";"]
+    ]
+ID_LIST = [
+    ["/ID", ",", "\ID_LIST"],
+    ["/ID"]
+    ]
+SCOPE = [
+    ["begin", "\STATEMENTS", "end"]
+    ]
+READ = [
+    ["read", "/ID", ";"]
+    ]
+ASSIGN = [
+    ["/ID", ":=", "/ID", "/OP", "/NUMBER", ";"]
+    ]
