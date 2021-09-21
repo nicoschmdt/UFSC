@@ -15,9 +15,9 @@ class TreeNode:
 
 @dataclass
 class Automata:
-    initial_state: frozenset
-    acceptance: frozenset
-    transitions: dict[tuple[frozenset, str], frozenset]
+    initial_state: frozenset[str]
+    acceptance: frozenset[str]
+    transitions: dict[tuple[frozenset[str], str], frozenset]
 
 # metodo que explicita a concatenacao em uma expressao regular,
 # para facilitar a conversao em AFD
@@ -33,14 +33,21 @@ def insert_concat(expr):
     return expr
 
 def rpn(expr):
-    binary_operators = ['|','.']
-    precedence = {'|':0, '.':1}
+    binary_operators = ['|', '.']
+    precedence = {
+        '|': 0,
+        '.': 1,
+    }
     output = []
     operator_stack = []
     for i, letter in enumerate(expr):
         if letter in binary_operators:
             if operator_stack:
-                while operator_stack[-1] != '(' and precedence[operator_stack[-1]] >= precedence[letter]:
+                while (
+                    operator_stack and
+                    operator_stack[-1] != '(' and
+                    precedence[operator_stack[-1]] >= precedence[letter]
+                ):
                     output.append(operator_stack.pop())
             operator_stack.append(letter)
         elif letter == '(':
@@ -118,25 +125,32 @@ def first_pos_last_pos_and_nullable(tree):
         tree.first_pos = tree.right_node.first_pos
         tree.last_pos = tree.right_node.last_pos
 
+    elif tree.value == '+':
+        tree.nullable = False
+        tree.first_pos = tree.right_node.first_pos
+        tree.last_pos = tree.right_node.last_pos
+
 # metodo que calcula o conjunto followpos de cada no-folha da arvore
 # gerada a partir da ER
-def follow_pos(tree, lista):
+def follow_pos(tree, terminals):
     if tree.right_node is None and tree.left_node is None:
-        if tree.value == '#':
-            tree.follow_pos = set()
-        else:
-            tree.follow_pos = lista
+        # print(f'follow_pos[{tree.value}] = {terminals}')
+        tree.follow_pos = terminals
 
-    elif tree.value in '*+':
-        follow_pos(tree.right_node, tree.first_pos.union(lista))
+    elif tree.nullable:
+        # print(f'{tree.value} is nullable, terminals: {tree.first_pos} | {terminals}')
+        follow_pos(tree.right_node, tree.first_pos | terminals)
 
     elif tree.value == '.':
-        follow_pos(tree.right_node, lista)
-        follow_pos(tree.left_node, tree.right_node.first_pos)
+        follow_pos(tree.right_node, terminals)
+        if tree.right_node.nullable:
+            follow_pos(tree.left_node, tree.right_node.first_pos | terminals)
+        else:
+            follow_pos(tree.left_node, tree.right_node.first_pos)
 
     elif tree.value == '|':
-        follow_pos(tree.left_node, lista)
-        follow_pos(tree.right_node, lista)
+        follow_pos(tree.left_node, terminals)
+        follow_pos(tree.right_node, terminals)
 
 def get_follow_pos_table(tree):
     table = {}
@@ -153,18 +167,19 @@ def get_follow_pos_table(tree):
             if node.value != '#':
                 input_symbols |= {node.value}
                 node_number = next(iter(node.first_pos))
-                table[node_number] = (node.follow_pos,node.value)
+                table[node_number] = (node.follow_pos, node.value)
             else:
                 node_number = next(iter(node.first_pos))
-                table[node_number] = (None,None)
+                table[node_number] = (frozenset(), node.value)
 
     return table, input_symbols
 
-def construct_AFD(tree,number):
+def construct_AFD(tree, number):
     follow_pos_table, input_symbols = get_follow_pos_table(tree)
-    d_states = [tree.first_pos]
+    # from pprint import pprint
+    # pprint(follow_pos_table)
+    d_states = {tree.first_pos}
     d_transitions = {}
-    symbols = set(follow_pos_table)
     marked = [tree.first_pos]
     while d_states:
         T = d_states.pop()
@@ -172,23 +187,25 @@ def construct_AFD(tree,number):
         for symbol in input_symbols:
             U = set()
             for state in T:
-                if symbol == follow_pos_table[state][1]:
-                    if symbol == '#':
-                        U = {}
-                    else:
-                        U |= follow_pos_table[state][0]
+                follow_pos, value = follow_pos_table[state]
+                if symbol == value:
+                    U |= follow_pos
+                U = frozenset(U)
                 if U and U not in marked:
-                    d_states.append(frozenset(U))
-                d_transitions[(T,symbol)] = U
+                    d_states |= {U}
+                d_transitions[(T, symbol)] = U
 
-    acceptance_list = set()
+    acceptance = set()
     for state in marked:
+        # print(f'{number} in {state} ? {number in state}')
         if number in state:
-            acceptance_list |= {state}
+            acceptance |= {state}
+    # print(acceptance)
 
+    acceptance = frozenset(acceptance)
     return Automata(
         initial_state=tree.first_pos,
-        acceptance=acceptance_list,
+        acceptance=acceptance,
         transitions=d_transitions,
     )
 
@@ -196,234 +213,216 @@ def ER_to_AFD(expr):
     expr = insert_concat(f'({expr})#')
     rpn_list = rpn(expr)
     tree_list, _ = tree(rpn_list)
-    last_leaf = enumerate_tree_leaf(tree_list,1) - 1
-    follow_pos(tree_list,set())
-    return construct_AFD(tree_list,last_leaf)
+    last_leaf = enumerate_tree_leaf(tree_list, 1) - 1
+    follow_pos(tree_list, set())
+    return construct_AFD(tree_list, last_leaf)
 
 def tree_to_tuple(tree):
     if tree is None:
         return None
     return (tree.value,tree_to_tuple(tree.left_node),tree_to_tuple(tree.right_node))
 
-# metodo auxiliar que calcula o fecho de um estado do AFND
-# que sera utilizado na determinizacao do mesmo
-def computarFecho(estados, automata):
-    pilha = []
-    fechamento = set()
-    for estado in estados:
-        pilha.append(estado)
-        fechamento.add(estado)
-    while pilha != []:
-        elemento = pilha.pop()
-        for transicao in automata.transitions.items():
-            if elemento in transicao[0][0] and transicao[0][1] == '':
-                if elemento not in fechamento:
-                    fechamento.add(elemento)
-                    pilha.append(elemento)
-    return frozenset(fechamento)
-
 # metodo auxiliar que obtem todo o alfabeto da linguagem
-def obterAlfabeto(automata):
-    alfabeto = set()
-    for transition in automata.transitions.items():
-        alfabeto.add(transition[0][1])
-    return alfabeto
+def alphabet(automata):
+    return {char for _, char in automata.transitions}
 
-def get_states_list(autom: Automata):
-    states_list = []
-
-    # adiciona o estado inicial a lista
-    if autom.initial_state not in states_list:
-        states_list.append(frozenset(autom.initial_state))
-    # adiciona os estados finais a lista
-    for final_state in autom.acceptance:
-        if final_state not in states_list:
-            states_list.append(frozenset(final_state))
-    # adiciona os estados que aparecem nas transicoes
-    for x in autom.transitions:
-        if x[0] not in states_list:
-            states_list.append(frozenset(x[0]))
-        if autom.transitions[x] not in states_list:
-            states_list.append(frozenset(autom.transitions[x]))
-    #remove estado morto
-    # if set() in states_list:
-    #     states_list.remove(set())
-    return states_list
 
 def rename_states(autom: Automata, shift: int):
-    states = get_states_list(autom)
+    states = all_states(autom)
     state_conversion_dic = {}
 
     index = 0
     for state in states:
-        if (state != set()):
+        if state:
             state_conversion_dic[state] = frozenset([index + shift])
             index += 1
         else:
             state_conversion_dic[state] = frozenset()
 
-    new_inicial_state = state_conversion_dic[autom.initial_state]
+    new_initial_state = state_conversion_dic[autom.initial_state]
 
-    new_acceptance_states = {""}
+    new_acceptance_states = set()
     for estado_aceitacao in autom.acceptance:
         new_acceptance_states.add(state_conversion_dic[estado_aceitacao])
-    new_acceptance_states.discard("")
 
     new_transitions = {}
     for transicao in autom.transitions:
-        estado_origem = transicao[0]
-        caractere = transicao[1]
-        new_transitions[(state_conversion_dic[estado_origem],caractere)] = state_conversion_dic[frozenset(autom.transitions[transicao])]
+        estado_origem, caractere = transicao
+        original_trans = frozenset(autom.transitions[transicao])
+        new_transitions[(state_conversion_dic[estado_origem],caractere)] = state_conversion_dic[original_trans]
 
     renamed_automata = Automata(
-        initial_state=new_inicial_state,
-        acceptance=new_acceptance_states,
+        initial_state=new_initial_state,
+        acceptance=frozenset(new_acceptance_states),
         transitions=new_transitions,
     )
     return renamed_automata
 
-def join_with_epsilon(autom1: Automata, autom2: Automata):
-    # armazena os tamanhos dos automatos para renomear os estados por indice
-    tamanho_automato1 = len(get_states_list(autom1))-1
-    tamanho_automato2 = len(get_states_list(autom2))-1
 
-    # define os novos estados iniciais e finais como a indice e indice+
-    join_initial_state = frozenset([tamanho_automato1+tamanho_automato2])
-    join_acceptance_states = frozenset([tamanho_automato1+tamanho_automato2+1])
-
-    renamed_autom1 = rename_states(autom1,0)
-    renamed_autom2 = rename_states(autom2,tamanho_automato1)
-
-    join_transitions = renamed_autom1.transitions
-    join_transitions.update(renamed_autom2.transitions)
-
-    for former_acceptance_state1 in renamed_autom1.acceptance:
-        join_transitions[(former_acceptance_state1, "&")] = join_acceptance_states
-    for former_acceptance_state2 in renamed_autom2.acceptance:
-        join_transitions[(former_acceptance_state2, "&")] = join_acceptance_states
-
-
-    estadosFinais = []
-    for former_initial_state1 in renamed_autom1.initial_state:
-        estadosFinais.append(former_initial_state1)
-    for former_initial_state2 in renamed_autom2.initial_state:
-        estadosFinais.append(former_initial_state2)
-    join_transitions[(join_initial_state, "&")] = frozenset(estadosFinais)
-
-
-    return Automata(
-        initial_state=join_initial_state,
-        acceptance=join_acceptance_states,
-        transitions=join_transitions,
-    )
-
-def join_n_with_epsilon(autom_list: list):
+def join_n_with_epsilon(autom_dic: dict):
     # armazena os tamanhos dos automatos para renomear os estados por indice
     total_states = 0
-    for autom in autom_list:
-        total_states += len(get_states_list(autom))-1
+    for token in autom_dic.keys():
+        total_states += len(all_states(autom_dic[token]))-1
 
     # define os novos estados iniciais e finais como a indice e indice+
-    join_initial_state = frozenset([total_states])
-    join_acceptance_states = frozenset([total_states+1])
+    join_initial_state = frozenset([total_states + 1])
+    join_acceptance_states = []
 
+    dicAFD_Token = {}
     renamed_autom_list = []
     total_states_until_x = 0
-    for x in autom_list:
-        renamed_autom_list.append(rename_states(x,total_states_until_x))
-        total_states_until_x += len(get_states_list(x))-1
+    for key in autom_dic.keys():
+        renamed = rename_states(autom_dic[key], total_states_until_x)
+        renamed_autom_list.append(renamed)
+
+        for possibility in renamed.acceptance:
+            dicAFD_Token[possibility] = key
+        total_states_until_x += len(all_states(autom_dic[key]))-1
 
     join_transitions = {}
     for x in renamed_autom_list:
         join_transitions.update(x.transitions)
 
+    acceptance_state =[]
     for x in renamed_autom_list:
         for former_acceptance_state in x.acceptance:
-            join_transitions[(former_acceptance_state, "&")] = join_acceptance_states
+            acceptance_state.append(former_acceptance_state)
+    join_acceptance_states = frozenset(acceptance_state)
 
-    estadosFinais = []
-    for x in renamed_autom_list:
-        for former_initial_state in x.initial_state:
-            estadosFinais.append(former_initial_state)
-    join_transitions[(join_initial_state, "&")] = frozenset(estadosFinais)
+    join_transitions[(join_initial_state, "&")] = frozenset({autom.initial_state for autom in renamed_autom_list})
 
-    return Automata(
-        initial_state=join_initial_state,
-        acceptance=join_acceptance_states,
-        transitions=join_transitions,
+    return (
+        Automata(
+            initial_state=join_initial_state,
+            acceptance=join_acceptance_states,
+            transitions=join_transitions,
+        ),
+        dicAFD_Token
     )
 
-# metodo que recebe o automato e retorna lista de estados
-def getListaEstados(automata: Automata):
-    listaEstados = []
-    for x in automata.transitions:
-        for singleState in list(x[0]):
-            if singleState not in listaEstados:
-                listaEstados.append(singleState)
-    for singleState in list(automata.acceptance):
-        if singleState not in listaEstados:
-            listaEstados.append(singleState)
-    for singleState in list(automata.initial_state):
-        if singleState not in listaEstados:
-            listaEstados.append(singleState)
-    return listaEstados
+# metodo que recebe o automato e retorna todos os estados
+def all_states(automata: Automata):
+    states = {automata.acceptance} | {automata.initial_state}
+    for (source, _), destiny in automata.transitions.items():
+        states |= {source, destiny}
+    return frozenset(states)
 
-def getEFecho(automata: Automata):
-    eFecho = {}
-    for estado in getListaEstados(automata):
-        eFecho[str(estado)] = [str(estado)]
-        # eFecho[str(list(transicao[0])[0])] = [str(list(transicao[0])[0])]
-    for transicao in automata.transitions:
-        if transicao[1] == "&":
-            for estadoDestino in list(automata.transitions[transicao]):
-                eFecho[str(list(transicao[0])[0])].append(str(estadoDestino))
-    return (eFecho)
 
-def frozenSetToString(fz: frozenset):
-    lista = list(fz)
-    ret = ""
-    for x in lista:
-        ret += str(x) + " "
-    return ret[:-1]
-     
+def e_fecho_remover(automata: Automata, state_tokens):
+    def join_transitions(transition_table, sources, letter):
+        # print(f'novo join pra {letter}')
+        destinies = set()
+        for source in sources:
+            source = source if isinstance(source, frozenset) else frozenset({source})
+            destinies |= transition_table.get((source, letter), frozenset())
+            # print(f'source: {source}, destinies: {destinies}')
+
+        new_destiny = frozenset(destinies)
+
+        return new_destiny
+
+    def e_fecho(source):
+        fecho = set()
+        for src in source:
+            x = src if isinstance(src, frozenset) else frozenset({src})
+            try:
+                destiny = automata.transitions[x, '&']
+                fecho |= x | e_fecho(destiny)
+            except KeyError:
+                destiny = frozenset({})
+                fecho |= x
+        fecho = frozenset(fecho)
+        return fecho
+
+    states = all_states(automata)
+    new_states = set()
+    _alphabet = alphabet(automata) - {'&'}
+    new_transitions = {}
+    acceptance = set() | automata.acceptance
+    for (source, char), destiny in automata.transitions.items():
+        if char == '&':
+            destiny = destiny | e_fecho(destiny)
+            if any(frozenset({state}) in acceptance for state in destiny):
+                acceptance |= frozenset({source})
+            for letter in _alphabet:
+                new_destiny = join_transitions(automata.transitions, {*source, *destiny}, letter)
+
+                if not new_destiny:
+                    continue
+
+                new_transitions[source, letter] = new_destiny
+
+                if new_destiny not in states:
+                    new_states |= {new_destiny}
+        else:
+            new_transitions[source, char] = destiny
+
+    while new_states:
+        new_state = new_states.pop()
+        states |= {new_state}
+        for letter in _alphabet:
+            for state in new_state:
+                if frozenset({state}) in acceptance:
+                    acceptance |= frozenset({new_state})
+                    # considera o novo estado como aceitação para o token
+                    state_token = frozenset({state})
+                    if state_token in state_tokens and new_state not in state_tokens:
+                        state_tokens[new_state] = state_tokens[state_token]
+            destiny = join_transitions(new_transitions, new_state, letter)
+
+            if not destiny:
+                continue
+
+            new_transitions[new_state, letter] = destiny
+            if destiny not in states:
+                new_states |= {destiny}
+
+    return Automata(
+        initial_state=automata.initial_state,
+        acceptance=frozenset(acceptance),
+        transitions=new_transitions,
+    )
 
 # metodo que recebe o automato unido por transicoes epsilon
 # e retorna o AFD equivalente
-def determinizarAutomato(automata: Automata, alfabeto):
-    efecho = getEFecho(automata)
+def determinize(automata: Automata, alfabeto, state_tokens):
+    automata = e_fecho_remover(automata, state_tokens)
+    show_automata(automata, state_tokens)
 
-    newInitialState = frozenset(efecho[frozenSetToString(automata.initial_state)])
-    newAcceptanceState = frozenset(efecho[frozenSetToString(automata.acceptance)])
+    new_transitions = {}
 
-    
-    newTransitions = {}
+    states_pendentes = {automata.initial_state}
+    states_feitos = set()
 
-    listaTransicoesPendentes = [newInitialState]
-    listaTransicoesFeitas = []
+    old_all_states = all_states(automata)
 
-    while(len(listaTransicoesPendentes) != 0):
-        print(len(listaTransicoesPendentes))
-        workingState = listaTransicoesPendentes.pop()
-        listaTransicoesFeitas.append(workingState)
-        print("poppei " + str(workingState))
+    while states_pendentes:
+        state = states_pendentes.pop()
+        states_feitos |= {state}
         for caractere in alfabeto:
-            for estado in list(workingState):
-                if (frozenset([int(estado)]), caractere) in automata.transitions:
-                    if automata.transitions[(frozenset([int(estado)]), caractere)] != frozenset():
-                        newTransitions[
-                            (
-                                workingState,
-                                caractere
-                            )
-                        ] = frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])])
-                        if frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])]) not in listaTransicoesPendentes:
-                            if frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])]) not in listaTransicoesFeitas:
-                                print("appendei " + str(frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])])))
-                                listaTransicoesPendentes.append(frozenset(efecho[frozenSetToString(automata.transitions[(frozenset([int(estado)]), caractere)])]))
+            # tira transições vazias
+            if automata.transitions.get((state, caractere), set()):
+                target = automata.transitions[(state, caractere)]
+                new_transitions[state, caractere] = target
+                if target not in states_feitos:
+                    states_pendentes |= {target}
 
+    new_automata = Automata(
+        initial_state=automata.initial_state,
+        acceptance=automata.acceptance,
+        transitions=new_transitions,
+    )
 
-    detAutomata = Automata(newInitialState, newAcceptanceState, newTransitions)
-    return detAutomata
+    new_all_states = all_states(new_automata)
+    dead_states = old_all_states - new_all_states
+
+    return Automata(
+        initial_state=automata.initial_state,
+        acceptance=automata.acceptance - dead_states,
+        transitions=new_transitions,
+    )
+
 
 def expand_regexes(specs):
     return {token: expand_regex(regex) for token, regex in specs['tokens'].items()}
@@ -468,9 +467,9 @@ def expand_regex(regex):
                 option_range = []
         else:
             result += symbol
-    print(f'''
-    -- expanded {regex}
-       --    to {result}''')
+    # print(f'''
+    # -- expanded {regex}
+    #    --    to {result}''')
     return result
 
 def read_specs_file(path):
@@ -480,73 +479,98 @@ def read_specs_file(path):
 def get_lexemas(path):
     with open(path) as f:
         content = f.read()
-        print(f'    -- content: {content}')
+        # print(f'    -- content: {content}')3
         return content.split()
 
-def make_automata(specs):
-    automata_list = []
-    tokens = expand_regexes(specs)
-    for regex in tokens.values():
-        automata_list.append(ER_to_AFD(regex))
-    joined_automata = join_n_with_epsilon(automata_list)
-    
-    alfabeto = obterAlfabeto(joined_automata) - {'&'}
-    resulted_automata = determinizarAutomato(joined_automata, alfabeto)
-    return resulted_automata
 
-def verify(automata, lexema):
+def show_automata(automata, state_tokens):
+    from pprint import pprint
+    from dataclasses import asdict
+    pprint(asdict(automata), width=80, indent=4)
+    print(f'    -- state_tokens:')
+    pprint(state_tokens, indent=4)
+
+
+def make_automata(specs):
+    automatas = {}
+    tokens = expand_regexes(specs)
+    for token, regex in tokens.items():
+        # print(f'Criando autômato para {token}')
+        automatas[token] = ER_to_AFD(regex)
+        # print(f'    === Autômato para {token}')
+        show_automata(automatas[token], {})
+
+    joined_automata, state_tokens = join_n_with_epsilon(automatas)
+    # print('    === Pré-deteminização:')
+    # show_automata(joined_automata, state_tokens)
+    alfabeto = alphabet(joined_automata) - {'&'}
+    resulted_automata = determinize(joined_automata, alfabeto, state_tokens)
+    state_tokens = {k: v for k, v in state_tokens.items() if k in resulted_automata.acceptance}
+
+    print('    ===|=================')
+    show_automata(resulted_automata, state_tokens)
+
+    return resulted_automata, state_tokens
+
+
+class UnknownToken(Exception):
+    pass
+
+# verify precisa conseguir reconhecer que tal estado de aceitação é referente a tal token
+# mudar automata acceptance -> para relacionar
+
+def execute(automata, lexema):
     state = frozenset(automata.initial_state)
     for char in lexema:
         try:
             state = frozenset(automata.transitions[(state, char)])
         except KeyError:
-            return False
+            return None
         if not state:
-            return False
-    return state in automata.acceptance
+            return None
+    return state
 
-class UnknownToken(Exception):
-    pass
+def tokenize(automata, lexema, state_tokens):
+    def token_for(lexema):
+        state = execute(automata, lexema)
+        # print(f'=== {lexema} stopped at {state}')
 
-def tokenize(automata, lexema, tokens):
-    for token, regex in tokens.items():
-        afd = ER_to_AFD(regex)
-        print(f'testing {lexema} with {token}: {regex}')
-        if verify(afd, lexema):
-            print(f'Works as a {token}!')
-            return lexema, token
-        print(f'Not a {token}!')
+        if state not in automata.acceptance:
+            # print(f'  xx {state} not in {automata.acceptance}')
+            return None
 
-    raise UnknownToken(lexema)
+        return state_tokens[state]
+
+    token = token_for(lexema)
+    if not token:
+        raise UnknownToken(lexema)
+
+    # print(f'=== {lexema} works as a {token}!')
+    return token
+
 
 
 def analyze(specs, lexemas):
-    automata = make_automata(specs)
-    print(f'automata: {automata}')
-    print(f'automata.acceptanceState: {automata.acceptance}')
+    automata, state_tokens = make_automata(specs)
     symbol_table = []
-    tokens = expand_regexes(specs)
-    for word in lexemas:
-        print(f'    -- word: {word}')
-        lexema, lexema_type = tokenize(automata, word, tokens)
-        symbol_table.append((lexema, lexema_type))
+    for lexema in lexemas:
+        token = tokenize(automata, lexema, state_tokens)
+        symbol_table.append((lexema, token))
     return symbol_table
 
 def main(args):
+    if len(args) == 1:
+        print(f'usage: {args[0]} input-file specs-file')
+        return
     _, file, specs_path = args
     specs = read_specs_file(specs_path)
     lexemas = get_lexemas(file)
-    print(f'    -- lexemas: {lexemas}')
+    # print(f'    -- lexemas: {lexemas}')
     symbol_table = analyze(specs, lexemas)
     with open('result.txt','w') as f:
         for item in symbol_table:
             f.write(f'{item}\n')
-    # dar um jeito de escrever em um arquivo
 
-
-# saber qual estado de aceitação parou para saber qual token foi reconhecido -> duvida
 
 if __name__ == '__main__':
     main(sys.argv)
-    # _, path = sys.argv
-    # print(get_lexemas(path))
