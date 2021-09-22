@@ -60,17 +60,7 @@ def dictInsertAppend(dicionarioDict, chave, valor):
         dicionarioDict[chave].append(valor)
     return dicionarioDict
 
-# insere lista na chave se vazio, append se ja existe nao adiciona valores repetidos a lista
-def dictExclusiveInsertAppend(dicionarioDict, chave, valor):
-    inserted = False
-    if chave not in dicionarioDict:
-        dicionarioDict[chave] = [valor]
-        inserted = True
-    else:
-        if valor not in dicionarioDict[chave]:
-            dicionarioDict[chave].append(valor)
-            inserted = True
-    return dicionarioDict, inserted;
+
 
 
 def direct_indeterminant_productions(grammar: dict):
@@ -123,75 +113,88 @@ def remove_direct_indetermination(grammar: dict):
 
     return new_grammar
 
-def getFirst(grammar: dict):
+def remove_indirect_indetermination():
+    pass
+
+
+# insere lista na chave se vazio, append se ja existe nao adiciona valores repetidos a lista
+def dictExclusiveInsertAppend(dicionarioDict, chave, valor):
+    # inserted = False
+    if chave not in dicionarioDict:
+        dicionarioDict[chave] = {valor}
+        # inserted = True
+    else:
+        dicionarioDict[chave] |= {valor}
+        # inserted = True
+    # return dicionarioDict, inserted;
+    return dicionarioDict
+
+
+def is_terminal(symbol):
+    return not symbol.startswith('\\')
+
+
+def is_non_terminal(symbol):
+    return symbol.startswith('\\')
+
+
+def get_first(grammar: dict):
+
+    # S->ABC
+    # A->aA | &
+    # B->bB | ACd
+    # C->cC | &
+
+    def add_firsts(production, first):
+        print(f'add_firsts[{production}]')
+        if not production:
+            return set()
+
+        # se o first da producao ainda não foi calculado
+        head, *tail = production
+        if is_terminal(head):
+            return {head}
+        head = head[1:]
+
+        firsts = set()
+        for symbol in production:
+            if is_terminal(symbol):
+                symbol_first = {symbol}
+            elif symbol[1:] in first:
+                symbol_first = first[head]
+            else:
+                symbol_productions = grammar[symbol[1:]]
+                symbol_first = set()
+                for symbol_production in symbol_productions:
+                    symbol_first |= add_firsts(symbol_production, first)
+                    if 'epsilon' in symbol_first:
+                        has_epsilon = True
+
+                first[symbol[1:]] = symbol_first
+            firsts |= symbol_first - {'epsilon'}
+            if 'epsilon' not in symbol_first:
+                break
+
+        return firsts
+
     first = {}
-    adicionei = True
-    while adicionei:
-        print(f'            rodando while')
-        adicionei = False
-        for cabeca in grammar:
-            for producao in grammar[cabeca]:
-                # epsilon
-                if producao == ['epsilon']:
-                    first, inserido = dictExclusiveInsertAppend(first, cabeca, producao)
-                    adicionei = (adicionei | inserido)
-                    print(f'adicionando epsilon a first de {cabeca}')
-                    # print('continue')
-                    continue
+    for head, productions in grammar.items():
+        if head not in first:
+            head_first = set()
+            for production in productions:
+                head_first |= add_firsts(production, first)
+            first[head] = head_first
 
-                # terminal
-                if type(producao) == str:
-                    first, inserido = dictExclusiveInsertAppend(first, cabeca, producao)
-                    adicionei = (adicionei | inserido)
-                    print(f'adicionando terminal sozinho {producao} a first de {cabeca}')
-                    # print('continue')
-                    continue
-
-                # terminal
-                if type(producao[0]) == str:
-                    first, inserido = dictExclusiveInsertAppend(first, cabeca, producao[0])
-                    adicionei = (adicionei | inserido)
-                    print(f'adicionando terminal {producao[0]} em first de {cabeca}')
-                    # print('continue')
-                    continue
-                print(f'passei reto com {producao}')
-
-                # n terminal
-                if type(producao[0]) == list:
-                    if producao[0][0] in first:
-                        print(f'a producao que eu to olhando é {producao[0][0]}, cabeca {cabeca}')
-                        print(first)
-                        espandir = False
-                        tryExtend = copy.deepcopy(first)
-                        if cabeca not in tryExtend:
-                            tryExtend[cabeca] = first[producao[0][0][0]]
-                        else:
-                            tryExtend[cabeca].extend(first[producao[0][0][0]])
-                        print(tryExtend)
-                        print(first)
-                        first, inserido = dictExclusiveInsertAppend(first, cabeca, first[producao[0][0]])
-                        adicionei = (adicionei | inserido)
-                        print(f'expandindo por nao terminal {producao[0]} em first de {cabeca} com {first[producao[0][0]]}')
-                        # print('continue')
-                        continue
-                print(f'passei reto com {producao}')
-
-    for cabeca in grammar:
-        for producao in grammar[cabeca]:
-            # nterminal
-            for x in producao[0]:
-                pass
-    for x in first:
-        print(f'first[{x}] = {first[x]}')
     return first
 
-
+def follow():
+    pass
 
 
 def fatoracao(grammar: dict):
     if len(direct_indeterminant_productions(grammar)) > 0:
         grammar = remove_direct_indetermination(grammar)
-    getFirst(grammar)
+    get_first(grammar)
         # for x in ndd:
         #     print(f'{x}->{ndd[x]}')
     # print(f'ndd {ndd}')

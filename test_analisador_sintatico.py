@@ -3,6 +3,8 @@ from analisador_sintatico import (
     fatoracao,
     remove_direct_indetermination,
     direct_indeterminant_productions,
+    remove_indirect_indetermination,
+    get_first,
     )
 
 
@@ -28,7 +30,7 @@ def test_remove_left_recursion():
     }
     assert remove_left_recursion(grammar) == expected
 
-def test_fatoracao():
+def test_remove_indirect_indetermination_jerusa_example():
 
     # S -> AC | BC
     # A -> aD | cC
@@ -62,7 +64,7 @@ def test_fatoracao():
         "D": [["f", r"\D"], [r"\C", r"\B"]],
     }
 
-    # assert fatoracao(grammar) == expected
+    # assert remove_indirect_indetermination(grammar) == expected
 
 
 def test_do_seis():
@@ -217,3 +219,65 @@ def test_remove_direct_indetermination_multiple_on_same_nonterminal():
     }
 
     assert remove_direct_indetermination(grammar) == expected
+
+def test_simple_get_first():
+    grammar = {
+        'S':[
+            ['a', r'\A'],
+            ['a', r'\B'],
+            ['b', r'\C'],
+            ['b', r'\D'],
+        ],
+        'A':[
+            ['c'],
+        ],
+        'B':[
+            ['d'],
+        ],
+        'C':[
+            ['e'],
+        ],
+        'D':[
+            ['f'],
+        ],
+    }
+    expected = {
+        'S':{'a', 'b'},
+        'A':{'c'},
+        'B':{'d'},
+        'C':{'e'},
+        'D':{'f'},
+    }
+
+    assert get_first(grammar) == expected
+
+def test_nonterminal_get_first():
+    grammar = {
+        'S':[
+            [r'\A', r'\B', r'\C'],
+        ],
+        'A':[
+            ['a',r'\A'],
+            ['epsilon']
+        ],
+        'B':[
+            ['b',r'\B'],
+            [r'\A',r'\C','d']
+        ],
+        'C':[
+            ['c', r'\C'],
+            ['epsilon'],
+        ],
+    }
+    expected = {
+        'S':{'a', 'b', 'c', 'd'},
+        'A':{'a', 'epsilon'},
+        'B':{'b', 'a', 'c', 'd'},
+        'C':{'c','epsilon'},
+    }
+
+
+    assert get_first(grammar) == expected
+
+
+# def test_follow():
