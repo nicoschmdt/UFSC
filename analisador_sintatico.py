@@ -73,7 +73,6 @@ def direct_indeterminant_productions(grammar: dict):
                 repetitions[head] += [production]
             except KeyError:
                 repetitions[head] = [production]
-        print(f'repetitions: {repetitions}')
         for head, productions in repetitions.items():
             if len(productions) > 1:
                 try:
@@ -117,17 +116,13 @@ def remove_indirect_indetermination():
     pass
 
 
-# insere lista na chave se vazio, append se ja existe nao adiciona valores repetidos a lista
-def dictExclusiveInsertAppend(dicionarioDict, chave, valor):
-    # inserted = False
-    if chave not in dicionarioDict:
-        dicionarioDict[chave] = {valor}
-        # inserted = True
+# insere set na chave se vazio, append se ja existe nao adiciona valores repetidos a set
+def insert_or_union(_dict, key, value):
+    if key not in _dict:
+        _dict[key] = value
     else:
-        dicionarioDict[chave] |= {valor}
-        # inserted = True
-    # return dicionarioDict, inserted;
-    return dicionarioDict
+        _dict[key] |= value
+    return _dict
 
 
 def is_terminal(symbol):
@@ -139,14 +134,7 @@ def is_non_terminal(symbol):
 
 
 def get_first(grammar: dict):
-
-    # S->ABC
-    # A->aA | &
-    # B->bB | ACd
-    # C->cC | &
-
     def add_firsts(production, first):
-        print(f'add_firsts[{production}]')
         if not production:
             return set()
 
@@ -187,8 +175,54 @@ def get_first(grammar: dict):
 
     return first
 
-def follow():
-    pass
+def get_follow(grammar: dict):
+    def set_follow(production, follows, firsts, symbol):
+        while production:
+            head, *production = production
+            if is_terminal(head):
+                continue
+
+            head = head[1:]
+
+            head_follow = set()
+            if not production:
+                head_follow |= follows[symbol]
+
+            for _next, has_more in zip(production, [*production[1:], None]):
+                if is_terminal(_next):
+                    head_follow |= {_next}
+                else:
+                    _next = _next[1:]
+                    head_follow |= {first for first in firsts[_next] if first != 'epsilon'}
+                    if 'epsilon' not in firsts[_next]:
+                        break
+                    if not has_more:
+                        head_follow |= follows[symbol]
+            insert_or_union(follows, head, head_follow)
+
+    # S -> ABC | A
+    # A -> aA | &
+    # B -> bB | ACd
+    # C -> cC | &
+
+    firsts = get_first(grammar)
+    follows, new_follows = None, {}
+    initial_symbol = next(iter(grammar))
+
+    while follows != new_follows:
+        follows = copy.deepcopy(new_follows)
+        for head, productions in grammar.items():
+            # adicionar $ no follow da cabeça inicial da gramatica
+            for production in productions:
+                if head == initial_symbol:
+                    new_follows[head] = {'$'}
+                symbol, *tail = production
+                if is_terminal(symbol):
+                    set_follow(tail, new_follows, firsts, head)
+                elif is_non_terminal(symbol):
+                    set_follow(production, new_follows, firsts, head)
+
+    return follows
 
 
 def fatoracao(grammar: dict):

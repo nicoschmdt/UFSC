@@ -5,6 +5,7 @@ from analisador_sintatico import (
     direct_indeterminant_productions,
     remove_indirect_indetermination,
     get_first,
+    get_follow,
     )
 
 
@@ -280,4 +281,30 @@ def test_nonterminal_get_first():
     assert get_first(grammar) == expected
 
 
-# def test_follow():
+def test_follow():
+    grammar = {
+        'S':[
+            [r'\A', r'\B', r'\C'],
+        ],
+        'A':[
+            ['a',r'\A'],
+            ['epsilon']
+        ],
+        'B':[
+            ['b',r'\B'],
+            [r'\A',r'\C','d']
+        ],
+        'C':[
+            ['c', r'\C'],
+            ['epsilon'],
+        ],
+    }
+    expected = {
+        'S':{'$'},
+        'A':{'a', 'b', 'c', 'd'},
+        'B':{'c', '$'},
+        'C':{'d', '$'},
+    }
+
+
+    assert get_follow(grammar) == expected
