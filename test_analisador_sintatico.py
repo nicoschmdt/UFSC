@@ -1,12 +1,13 @@
 from analisador_sintatico import (
-    remove_left_recursion,
-    fatoracao,
-    remove_direct_indetermination,
     direct_indeterminant_productions,
-    remove_indirect_indetermination,
+    fatoracao,
     get_first,
     get_follow,
-    )
+    remove_direct_indetermination,
+    remove_direct_indetermination,
+    remove_indirect_indetermination,
+    remove_left_recursion,
+)
 
 
 
@@ -32,14 +33,20 @@ def test_remove_left_recursion():
     assert remove_left_recursion(grammar) == expected
 
 def test_remove_indirect_indetermination_jerusa_example():
-
     # S -> AC | BC
     # A -> aD | cC
     # B -> aB | dD
     # C -> eC | eA
     # D -> fD | CB
 
-    # S -> AS'| cCC | dDC
+    # S -> aDC | cCC | aBC | dDC
+    # A -> aD | cC
+    # B -> aB | dD
+    # C -> eC | eA
+    # D -> fD | CB
+
+
+    # S -> aS'| cCC | dDC
     # S'-> DC | BC
     # A -> aD | cC
     # B -> aB | dD
@@ -56,7 +63,7 @@ def test_remove_indirect_indetermination_jerusa_example():
 
     }
     expected = {
-        "S": [[r"\A", r"\S'"], ["c", r"\C", r"\C"], ["d", r"\D", r"\C"]],
+        "S": [["a", r"\S'"], ["c", r"\C", r"\C"], ["d", r"\D", r"\C"]],
         "S'":[[r"\D", r"\C"], [r"\B", r"\C"]],
         "A": [["a", r"\D"], ["c", r"\C"]],
         "B": [["a", r"\B"], ["d", r"\D"]],
@@ -65,6 +72,7 @@ def test_remove_indirect_indetermination_jerusa_example():
         "D": [["f", r"\D"], [r"\C", r"\B"]],
     }
 
+    # TODO: Transformar produções em sets
     # assert remove_indirect_indetermination(grammar) == expected
 
 
@@ -139,11 +147,57 @@ def test_producoes_indeterminantes_multiple_from_same_nonterminal():
     assert direct_indeterminant_productions(grammar) == expected
 
 
+def test_producoes_indeterminantes_a_few_more():
+    # S -> aDC | cCC | aBC | dDC
+    # A -> aD | cC
+    # B -> aB | dD
+    # C -> eC | eA
+    # D -> fD | CB
+    grammar = {
+        'S':[
+            ['a', r'\D', r'\C'],
+            ['c', r'\C', r'\C'],
+            ['a', r'\B', r'\C'],
+            ['d', r'\D', r'\C'],
+        ],
+        'A':[
+            ['a', r'\D'],
+            ['c', r'\C'],
+        ],
+        'B':[
+            ['a', r'\B'],
+            ['d', r'\D'],
+        ],
+        'C':[
+            ['e', r'\C'],
+            ['e', r'\A'],
+        ],
+        'D':[
+            ['f', r'\D'],
+            [r'\C', r'\B'],
+        ],
+    }
+
+    expected = {
+        'S':[
+            ['a', r'\D', r'\C'],
+            ['a', r'\B', r'\C'],
+        ],
+        'C':[
+            ['e', r'\C'],
+            ['e', r'\A'],
+        ],
+    }
+
+    assert direct_indeterminant_productions(grammar) == expected
+
+
 def test_remove_direct_indetermination_simple():
     grammar = {
         'S':[
             ['a',r'\A'],
-            ['a',r'\B']
+            ['a',r'\B',r'\C'],
+            ['a',r'\D',r'\C'],
         ],
         'A':[
             ['c'],
@@ -158,7 +212,8 @@ def test_remove_direct_indetermination_simple():
         ],
         "S'":[
             [r"\A"],
-            [r"\B"]
+            [r"\B",r"\C"],
+            [r"\D",r"\C"],
         ],
         'A':[
             ['c'],
@@ -169,6 +224,71 @@ def test_remove_direct_indetermination_simple():
     }
 
     assert remove_direct_indetermination(grammar) == expected
+
+def test_remove_direct_indetermination_slightly_complex():
+    # S -> aDC | cCC | aBC | dDC
+    # A -> aD | cC
+    # B -> aB | dD
+    # C -> eC | eA
+    # D -> fD | CB
+    grammar = {
+        'S':[
+            ['a', r'\D', r'\C'],
+            ['c', r'\C', r'\C'],
+            ['a', r'\B', r'\C'],
+            ['d', r'\D', r'\C'],
+        ],
+        'A':[
+            ['a', r'\D'],
+            ['c', r'\C'],
+        ],
+        'B':[
+            ['a', r'\B'],
+            ['d', r'\D'],
+        ],
+        'C':[
+            ['e', r'\C'],
+            ['e', r'\A'],
+        ],
+        'D':[
+            ['f', r'\D'],
+            [r'\C', r'\B'],
+        ],
+    }
+
+    expected = {
+        "S": [
+            ["a", r"\S'"],
+            ["c", r"\C", r"\C"],
+            ["d", r"\D", r"\C"]
+        ],
+        "S'": [
+            [r"\D", r"\C"],
+            [r"\B", r"\C"]
+        ],
+        "A": [
+            ["a", r"\D"],
+            ["c", r"\C"]
+        ],
+        "B": [
+            ["a", r"\B"],
+            ["d", r"\D"]
+        ],
+        "C": [
+            ["e", r"\C'"]
+        ],
+        "C'":[
+            [r"\C"],
+            [r"\A"]
+        ],
+        "D": [
+            ["f", r"\D"],
+            [r"\C", r"\B"]
+        ],
+    }
+
+    # TODO: Transformar produções em sets
+    # assert remove_direct_indetermination(grammar) == expected
 
 
 def test_remove_direct_indetermination_multiple_on_same_nonterminal():
@@ -243,11 +363,11 @@ def test_simple_get_first():
         ],
     }
     expected = {
-        'S':{'a', 'b'},
-        'A':{'c'},
-        'B':{'d'},
-        'C':{'e'},
-        'D':{'f'},
+        'S': {'a', 'b'},
+        'A': {'c'},
+        'B': {'d'},
+        'C': {'e'},
+        'D': {'f'},
     }
 
     assert get_first(grammar) == expected

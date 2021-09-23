@@ -1,4 +1,6 @@
 import copy
+import sys
+from analisador_lexico import read_specs_file, get_lexemas
 from typing import ClassVar
 
 def remove_left_recursion(grammar):
@@ -50,8 +52,6 @@ def remove_left_recursion(grammar):
 
     return new_grammar
 
-# FATORAÇÃO E FIRST?
-
 # insere lista na chave se vazio, append se ja existe
 def dictInsertAppend(dicionarioDict, chave, valor):
     if chave not in dicionarioDict:
@@ -59,9 +59,6 @@ def dictInsertAppend(dicionarioDict, chave, valor):
     else:
         dicionarioDict[chave].append(valor)
     return dicionarioDict
-
-
-
 
 def direct_indeterminant_productions(grammar: dict):
     sub_indeterminant_grammar = {}
@@ -87,21 +84,25 @@ def remove_direct_indetermination(grammar: dict):
     producoes_indeterminantes = direct_indeterminant_productions(grammar)
 
     for nonterminal, productions in grammar.items():
-        if (nonterminal, productions) not in producoes_indeterminantes.items():
-            new_grammar[nonterminal] = productions
+        new_grammar[nonterminal] = []
+        for production in productions:
+            if production not in producoes_indeterminantes.get(nonterminal, []):
+                new_grammar[nonterminal] += [production]
 
-    repeated_terminals = {}
     for nonterminal, productions in producoes_indeterminantes.items():
+        repeated_terminals = {}
         for terminal, *tail in productions:
             # S', S'', S'''...
             suffix = "'" * (len(repeated_terminals) + 1)
             name = repeated_terminals.get(terminal, f"{nonterminal}{suffix}")
             repeated_terminals[terminal] = name
+
             # S' -> A | B | &
             try:
                 new_grammar[name] += [tail]
             except KeyError:
                 new_grammar[name] = [tail]
+
             # S -> aS' | bS''
             new_production = [terminal, fr'\{name}']
             try:
@@ -111,10 +112,6 @@ def remove_direct_indetermination(grammar: dict):
                 new_grammar[nonterminal] = [new_production]
 
     return new_grammar
-
-def remove_indirect_indetermination():
-    pass
-
 
 # insere set na chave se vazio, append se ja existe nao adiciona valores repetidos a set
 def insert_or_union(_dict, key, value):
@@ -175,6 +172,7 @@ def get_first(grammar: dict):
 
     return first
 
+
 def get_follow(grammar: dict):
     def set_follow(production, follows, firsts, symbol):
         while production:
@@ -200,11 +198,6 @@ def get_follow(grammar: dict):
                         head_follow |= follows[symbol]
             insert_or_union(follows, head, head_follow)
 
-    # S -> ABC | A
-    # A -> aA | &
-    # B -> bB | ACd
-    # C -> cC | &
-
     firsts = get_first(grammar)
     follows, new_follows = None, {}
     initial_symbol = next(iter(grammar))
@@ -225,16 +218,50 @@ def get_follow(grammar: dict):
     return follows
 
 
+def remove_indirect_indetermination(grammar: dict):
+    firsts = get_first(grammar)
+    new_grammar = {}
+    for symbol, productions in grammar.items():
+        to_expand = set()
+        nonterminals = set()
+        # pega o simbolo inicial das produções que começam com um não terminal
+        for production in productions:
+            head, *tail = production
+            if is_non_terminal(head):
+                nonterminals |= {head}
+        # dos simbolos que pegou verifica entre eles quais possuem um first em comum
+        for non_terminal in nonterminals:
+            for other_nonterminal in nonterminals - {non_terminal}:
+                if firsts[non_terminal[1:]] & firsts[other_nonterminal[1:]]:
+                    to_expand |= {non_terminal, other_nonterminal}
+        # cria uma nova gramática expandindo os simbolos
+        new_grammar[symbol] = []
+        for production in productions:
+            head, *tail = production
+            if head in to_expand:
+                # head_productions = grammar[head[1:]]
+                for head_production in grammar[head[1:]]:
+                    new_grammar[symbol] += [[*head_production,*tail]]
+            else:
+                new_grammar[symbol] += [production]
+
+    return remove_direct_indetermination(new_grammar)
+
+
 def fatoracao(grammar: dict):
-    if len(direct_indeterminant_productions(grammar)) > 0:
-        grammar = remove_direct_indetermination(grammar)
-    get_first(grammar)
-        # for x in ndd:
-        #     print(f'{x}->{ndd[x]}')
-    # print(f'ndd {ndd}')
-    return grammar
+    grammar = remove_left_recursion(grammar)
+    return remove_indirect_indetermination(grammar)
 
 
+def main(args):
+    if len(args) == 1:
+        print(f'Usage: {sys.argv[0]} input-file specs-file')
+        return
+    _, input_file, specs_file = args
+    specs = read_specs_file(specs_file)
+    lexemas = get_lexemas(input_file)
+#     table = create_table()
+    # parsear o arquivo e verificar se percorrendo pela tabela o arquivo de entrada é aceito
 
 if __name__ == '__main__':
-    print('Usage: don\'t')
+    main(sys.argv)
