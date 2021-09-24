@@ -260,8 +260,8 @@ def get_first_production(firsts: dict, follows: dict, production):
             return production_first
 
         else:
-            production_first += list(firsts[symbol])
-            if 'epsilon' not in firsts[symbol]:
+            production_first += list(firsts[symbol[1:]])
+            if 'epsilon' not in firsts[symbol[1:]]:
                 return production_first
     return production_first
 
@@ -270,7 +270,7 @@ def create_table(grammar: dict, firsts: dict, follows: dict):
     table = {}
     for nonterminal, productions in grammar.items():
         for production in productions:
-            first = get_first_production(first, follows, production)
+            first = get_first_production(firsts, follows, production)
             if 'epsilon' in first:
                 first.remove('epsilon')
                 follow = follows[nonterminal]
@@ -292,7 +292,7 @@ def parse(lexemas, initial_symbol, table: dict):
             try:
                 production = table[(nonterminal[1:],lexema)]
             except KeyError:
-                return False
+                raise ParseError(f'Unexpected {lexema}')
 
             if production == 'epsilon':
                 continue
@@ -301,6 +301,8 @@ def parse(lexemas, initial_symbol, table: dict):
         stack.pop()
     return True
 
+class ParseError(Exception):
+    pass
 
 def main(args):
     if len(args) == 1:

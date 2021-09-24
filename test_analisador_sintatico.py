@@ -430,7 +430,55 @@ def test_follow():
 
     assert get_follow(grammar) == expected
 
-# criar teste para criação da tabela
+def test_create_table():
+    # E -> T E'
+    # E' -> + T E'
+    # E' -> ''
+    # T -> F T'
+    # T' -> * F T'
+    # T' -> ''
+    # F -> ( E )
+    # F -> id
+
+    grammar = {
+        'E':[
+            [r'\T', r"\E'"],
+        ],
+        "E'":[
+            ['v', r'\T', r"\E'"],
+            ['epsilon'],
+        ],
+        'T':[
+            [r'\F',r"\T'"],
+        ],
+        "T'":[
+            ['^', r'\F',r"\T'"],
+            ['epsilon'],
+        ],
+        'F':[
+            ['¬',r'\F'],
+            ['id'],
+        ],
+    }
+
+    expected_table = {
+        ('E','id'):[r'\T', r"\E'"],
+        ('E','¬'):[r'\T', r"\E'"],
+        ("E'",'v'):[r'v', r'\T', r"\E'"],
+        ("E'",'$'):['epsilon'],
+        ('T','id'):[r'\F',r"\T'"],
+        ('T','¬'):[r'\F',r"\T'"],
+        ("T'",'v'):['epsilon'],
+        ("T'",'^'):[r'^', r'\F', r"\T'"],
+        ("T'",'$'):['epsilon'],
+        ('F','id'):['id'],
+        ('F','¬'):['¬',r'\F'],
+    }
+
+    firsts = get_first(grammar)
+    follows = get_follow(grammar)
+
+    assert create_table(grammar, firsts, follows) == expected_table
 
 def test_table_parse_jerusa_example():
     table = {
