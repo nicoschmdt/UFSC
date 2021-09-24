@@ -252,6 +252,55 @@ def fatoracao(grammar: dict):
     grammar = remove_left_recursion(grammar)
     return remove_indirect_indetermination(grammar)
 
+def get_first_production(firsts: dict, follows: dict, production):
+    production_first = []
+    for symbol in production:
+        if is_terminal(symbol):
+            production_first += [symbol]
+            return production_first
+
+        else:
+            production_first += list(firsts[symbol])
+            if 'epsilon' not in firsts[symbol]:
+                return production_first
+    return production_first
+
+
+def create_table(grammar: dict, firsts: dict, follows: dict):
+    table = {}
+    for nonterminal, productions in grammar.items():
+        for production in productions:
+            first = get_first_production(first, follows, production)
+            if 'epsilon' in first:
+                first.remove('epsilon')
+                follow = follows[nonterminal]
+                for terminal in follow:
+                    table[(nonterminal,terminal)] = production
+            for terminal in first:
+                table[(nonterminal,terminal)] = production
+
+    return table
+
+def parse(lexemas, initial_symbol, table: dict):
+    splitted = lexemas.split()
+    stack = [initial_symbol]
+    for lexema in splitted:
+        while stack[-1] != lexema:
+            nonterminal = stack.pop()
+            if nonterminal == 'epsilon':
+                continue
+            try:
+                production = table[(nonterminal[1:],lexema)]
+            except KeyError:
+                return False
+
+            if production == 'epsilon':
+                continue
+            for symbol in reversed(production):
+                stack.append(symbol)
+        stack.pop()
+    return True
+
 
 def main(args):
     if len(args) == 1:
@@ -260,7 +309,8 @@ def main(args):
     _, input_file, specs_file = args
     specs = read_specs_file(specs_file)
     lexemas = get_lexemas(input_file)
-#     table = create_table()
+    # initial_symbol = next(iter(grammar))
+    # table = create_table()
     # parsear o arquivo e verificar se percorrendo pela tabela o arquivo de entrada é aceito
 
 if __name__ == '__main__':

@@ -7,8 +7,9 @@ from analisador_sintatico import (
     remove_direct_indetermination,
     remove_indirect_indetermination,
     remove_left_recursion,
+    create_table,
+    parse,
 )
-
 
 
 def test_remove_left_recursion():
@@ -428,3 +429,23 @@ def test_follow():
 
 
     assert get_follow(grammar) == expected
+
+# criar teste para criação da tabela
+
+def test_table_parse_jerusa_example():
+    table = {
+        ('E','id'):[r'\T', r"\E'"],
+        ('E','¬'):[r'\T', r"\E'"],
+        ("E'",'v'):[r'v', r'\T', r"\E'"],
+        ("E'",'$'):['epsilon'],
+        ('T','id'):[r'\F',r"\T'"],
+        ('T','¬'):[r'\F',r"\T'"],
+        ("T'",'v'):['epsilon'],
+        ("T'",'^'):[r'^', r'\F', r"\T'"],
+        ("T'",'$'):['epsilon'],
+        ('F','id'):['id'],
+        ('F','¬'):['id',r'\F'],
+    }
+    _input = "id v id ^ id"
+
+    assert parse(_input,r'\E', table)
