@@ -1,0 +1,8 @@
+[node]
+processos = 3
+id = 2
+
+[all_processes]
+0 = "localhost:6000"
+1 = "localhost:6001"
+2 = "localhost:6002"
