@@ -1,6 +1,7 @@
 import socket
 import toml
-from dataclasses import dataclass
+from collections import defaultdict
+from dataclasses import dataclass, field
 # 1:1 deve respeitar a ordem causal
 # Ordem Causal: Se o envio de uma mensagem m precede
 # causalmente o envio de uma mensagem m’, então
@@ -24,38 +25,51 @@ class Configs:
 @dataclass
 class Messenger:
     config: Configs
+    clocks: dict[int,int] = field(default_factory=defaultdict(lambda: 0))
 
     def send(self, id: int, msg: bytes) -> None:
+        pid = self.config.process_id
+        self.clocks[pid] += 1
         if id >= self.config.process_quantity:
             return "Error" # melhorar a msg
 
-        port, port_number = self.config.process_ports[str(id)].split(':')
-        print(f'{port}:{port_number}')
+        # pid.to_bytes(2,'big'),
+        message = b";".join([
+            f'{pid}'.encode(),
+            str(self.clocks).encode(),
+            msg
+        ])
 
+        port, port_number = self.config.process_ports[str(id)].split(':')
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            print('socket created!')
             s.bind((port, int(port_number)))
-            print('binded!')
             s.listen(1)
             conn, addr = s.accept()
-            # s.accept()
-            conn.send(msg)
-            # conn.close()
-            # do jeito que tá, a conexão n é feita, que outra forma é legal de fazer?
-            print('message sended!')
+            conn.send(message)
 
 
-    def receive(self) -> bytes: #ond que vai o msg?
+    def receive(self) -> bytes:
+        pid = self.config.process_id
+        self.clocks[pid] += 1
+
         port, port_number = self.config.process_ports[str(self.config.process_id)].split(':')
-        print(f'{port}:{port_number}')
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((port, int(port_number)))
             data = s.recv(1024)
             print(data)
-        return data
-        #     s.connect((TCP_IP, TCP_PORT))
-        #     data = s.recv(BUFFER_SIZE)
+
+        # get info from msg
+        pid_sender, clocks_sender, msg = data.decode().split(';')
+        clocks_sender = eval(clocks_sender)
+
+        for clock in clocks_sender:
+            # s = sender
+            pid_s, ticks_s = clock
+            if pid_s != pid:
+                self.clocks[pid_s] = max(ticks,self.clocks[pid_s])
+
+        return msg
 
 
 def load_conf_file(file_path):
@@ -68,10 +82,8 @@ def load_conf_file(file_path):
     )
 
 
-
-if __name__ == "__main__":
-    # send(id,"Hello, World!")
-    config = load_conf_file("conf0.toml")
-    msg = Messenger(config)
-    msg.send(1,"hi".encode())
-    # print(config)
+def initialize_clocks(num_process):
+    clocks = {}
+    for num in range(num_process):
+        clocks[num] = 0
+    return clocks
