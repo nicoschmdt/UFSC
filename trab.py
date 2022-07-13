@@ -25,33 +25,33 @@ class Configs:
 class Messenger:
     config: Configs
 
-    def send(self, id, msg):
+    def send(self, id: int, msg: bytes) -> None:
         if id >= self.config.process_quantity:
             return "Error" # melhorar a msg
 
         port, port_number = self.config.process_ports[str(id)].split(':')
+        print(f'{port}:{port_number}')
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             print('socket created!')
             s.bind((port, int(port_number)))
             print('binded!')
             s.listen(1)
-            # conn, addr = s.accept()
+            conn, addr = s.accept()
             # s.accept()
-            conn.send(msg.encode())
+            conn.send(msg)
             # conn.close()
             # do jeito que tá, a conexão n é feita, que outra forma é legal de fazer?
             print('message sended!')
 
 
-    def receive(self): #ond que vai o msg?
-        port, port_number = self.config.process_ports[str(config.process_id)].split(':')
-
+    def receive(self) -> bytes: #ond que vai o msg?
+        port, port_number = self.config.process_ports[str(self.config.process_id)].split(':')
+        print(f'{port}:{port_number}')
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((port, int(port_number)))
-            s.listen()
-            s.accept()
-            data = s.recv(1024).decode()
+            data = s.recv(1024)
             print(data)
         return data
         #     s.connect((TCP_IP, TCP_PORT))
@@ -73,5 +73,5 @@ if __name__ == "__main__":
     # send(id,"Hello, World!")
     config = load_conf_file("conf0.toml")
     msg = Messenger(config)
-    msg.send(1,"hi")
+    msg.send(1,"hi".encode())
     # print(config)
