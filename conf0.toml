@@ -1,8 +1,12 @@
 [node]
-processos = 3
+processos = 4
 id = 0
 
 [all_processes]
 0 = "localhost:6000"
 1 = "localhost:6001"
 2 = "localhost:6002"
+3 = "localhost:6003"
+
+[sequencer]
+id = 3
