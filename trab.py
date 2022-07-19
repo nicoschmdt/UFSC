@@ -89,29 +89,22 @@ class Messenger:
         try:
             pid_sender, msg, seqnum = self.receive()
             self.pending_messages.append((pid_sender, msg, seqnum))
-            # print(self.pending_messages)
-            # print(self.next_deliver)
-            for i in range(len(self.pending_messages)):
-                if self.next_deliver == (int)(self.pending_messages[i][2]):
-                    pid_sender_deliver, msg_deliver, seqnum_deliver = self.pending_messages.pop(i)
-                    self.next_deliver += 1
-                    if pid_sender_deliver != self.config.process_id:
-                        return (pid_sender_deliver, msg_deliver, seqnum_deliver)
-                    else:
-                        return (None, None, None)
-            return (None, None, None)
+            return self.get_from_pending_messages()
         except:
-            # print(self.pending_messages)
-            # print(self.next_deliver)
-            for i in range(len(self.pending_messages)):
-                if self.next_deliver == (int)(self.pending_messages[i][2]):
-                    pid_sender_deliver, msg_deliver, seqnum_deliver = self.pending_messages.pop(i)
-                    self.next_deliver += 1
-                    if pid_sender_deliver != self.config.process_id:
-                        return (pid_sender_deliver, msg_deliver, seqnum_deliver)
-                    else:
-                        return (None, None, None)
-            return (None, None, None)
+            return self.get_from_pending_messages()
+
+    def get_from_pending_messages(self):
+        # print(self.pending_messages)
+        # print(self.next_deliver)
+        for i in range(len(self.pending_messages)):
+            if self.next_deliver == (int)(self.pending_messages[i][2]):
+                pid_sender_deliver, msg_deliver, seqnum_deliver = self.pending_messages.pop(i)
+                self.next_deliver += 1
+                if pid_sender_deliver != self.config.process_id:
+                    return (pid_sender_deliver, msg_deliver, seqnum_deliver)
+                else:
+                    return (None, None, None)
+        return (None, None, None)
 
 @dataclass
 class Sequencer:
@@ -131,7 +124,13 @@ class Sequencer:
                     if pid != self.config.process_id:
                         # print(f"Sent to {pid}")
                         # print(f"seqnum: {seqnum}")
-                        self.messenger.send(pid, msg.encode(), seqnum)
+                        # Sequencer só envia a próxima mensagem se a anterior já foi enviada para TODOS os processos.
+                        while True:
+                            try: 
+                                self.messenger.send(pid, msg.encode(), seqnum, pid_sender)
+                                break
+                            except:
+                                continue
 
                 # Ordem do primeiro e do segundo seqnum invertida.
                 if seqnum == 2:
