@@ -14,4 +14,4 @@ while True:
         print(f'Sequence number: {seqnum}')
     else:
         print("No message received")
-    time.sleep(2)
+    time.sleep(1)

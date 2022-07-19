@@ -11,6 +11,8 @@ while True:
         print(f'Message received: {msg}')
         print(f'PID sender: {pid_sender}')
         print(f'Sequence number: {seqnum}')
+        sent = messenger.broadcast("Hello!".encode())
+        print("Sent" if sent else "Not sent")
     else:
         print("No message received")
-    time.sleep(2)
+    time.sleep(1)

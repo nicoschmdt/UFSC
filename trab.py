@@ -3,7 +3,6 @@ import toml
 from collections import defaultdict
 from dataclasses import dataclass, field
 import time
-from threading import Lock
 # 1:1 deve respeitar a ordem causal
 # Ordem Causal: Se o envio de uma mensagem m precede
 # causalmente o envio de uma mensagem m’, então
@@ -48,6 +47,7 @@ class Messenger:
         port, port_number = self.config.process_ports[str(id)].split(':')
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((port, int(port_number)))
+            s.settimeout(3) # Valor arbitrário. Idealmente, baseado no atraso de rede.
             s.listen(1)
             conn, addr = s.accept()
             conn.send(message)
@@ -76,8 +76,12 @@ class Messenger:
 
         return ((int)(pid_sender), msg, (int)(seqnum))
 
-    def broadcast(self, msg: bytes) -> None:
-        self.send(self.config.sequencer_id, msg)
+    def broadcast(self, msg: bytes) -> bool:
+        try:
+            self.send(self.config.sequencer_id, msg)
+            return True
+        except:
+            return False
 
     def deliver(self) -> bytes:
         try:
