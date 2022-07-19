@@ -30,8 +30,10 @@ class Messenger:
     next_deliver = 1
     pending_messages = []
 
-    def send(self, id: int, msg: bytes, seqnum: int = 0) -> None:
+    def send(self, id: int, msg: bytes, seqnum: int = 0, pid_sender: int = None) -> None:
         pid = self.config.process_id
+        if pid_sender != None:
+            pid = pid_sender
         self.clocks[pid] += 1
         if id >= self.config.process_quantity:
             return "Error" # melhorar a msg
@@ -93,7 +95,10 @@ class Messenger:
                 if self.next_deliver == (int)(self.pending_messages[i][2]):
                     pid_sender_deliver, msg_deliver, seqnum_deliver = self.pending_messages.pop(i)
                     self.next_deliver += 1
-                    return (pid_sender_deliver, msg_deliver, seqnum_deliver)
+                    if pid_sender_deliver != self.config.process_id:
+                        return (pid_sender_deliver, msg_deliver, seqnum_deliver)
+                    else:
+                        return (None, None, None)
             return (None, None, None)
         except:
             # print(self.pending_messages)
@@ -102,7 +107,10 @@ class Messenger:
                 if self.next_deliver == (int)(self.pending_messages[i][2]):
                     pid_sender_deliver, msg_deliver, seqnum_deliver = self.pending_messages.pop(i)
                     self.next_deliver += 1
-                    return (pid_sender_deliver, msg_deliver, seqnum_deliver)
+                    if pid_sender_deliver != self.config.process_id:
+                        return (pid_sender_deliver, msg_deliver, seqnum_deliver)
+                    else:
+                        return (None, None, None)
             return (None, None, None)
 
 @dataclass
@@ -120,7 +128,7 @@ class Sequencer:
 
                 for pid in range(0, self.config.process_quantity):
                     # print(f"Trying to send to {pid}")
-                    if pid != (int)(pid_sender) and pid != self.config.process_id:
+                    if pid != self.config.process_id:
                         # print(f"Sent to {pid}")
                         # print(f"seqnum: {seqnum}")
                         self.messenger.send(pid, msg.encode(), seqnum)
