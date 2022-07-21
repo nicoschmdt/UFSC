@@ -1,8 +1,9 @@
-import socket
+import json
 import toml
+import time
+import socket
 from collections import defaultdict
 from dataclasses import dataclass, field
-import time
 # 1:1 deve respeitar a ordem causal
 # Ordem Causal: Se o envio de uma mensagem m precede
 # causalmente o envio de uma mensagem m’, então
@@ -13,7 +14,22 @@ import time
 # Observe que a ordem causal implementa, internamente,
 # um vetor de relógios lógicos de n posições, onde n
 # representa o número de processos.
+class InvalidPID(Exception):
+    pass
 
+class MessageProtocol:
+    def send(self, target_pid: str, port: int, message: bytes) -> None:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((target_pid, port))
+            s.settimeout(3) # Valor arbitrário. Idealmente, baseado no atraso de rede.
+            s.listen(1)
+            conn, addr = s.accept()
+            conn.send(message)
+
+    def receive(self, target_pid: str, port: int) -> bytes:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((target_pid, port))
+            return s.recv(1024)
 
 @dataclass
 class Configs:
@@ -26,53 +42,44 @@ class Configs:
 @dataclass
 class Messenger:
     config: Configs
-    clocks: dict[int,int] = field(default_factory=defaultdict(lambda: 0))
-    next_deliver = 1
+    clocks: dict[int,int] = field(default_factory=lambda: defaultdict(lambda: 0))
+    next_deliver: int = 1
     pending_messages = []
+    protocol: MessageProtocol = field(default_factory=MessageProtocol)
 
-    def send(self, id: int, msg: bytes, seqnum: int = 0, pid_sender: int = None) -> None:
+    def send(self, id: int, msg: bytes, seqnum: int = 0, pid_sender: int | None = None) -> None:
         pid = self.config.process_id
-        if pid_sender != None:
+        if pid_sender is not None:
             pid = pid_sender
         self.clocks[pid] += 1
         if id >= self.config.process_quantity:
-            return "Error" # melhorar a msg
+            raise InvalidPID("PID is higher than the number of processes.")
 
-        # pid.to_bytes(2,'big'),
         message = b";".join([
             f'{pid}'.encode(),
-            str(self.clocks).encode(),
+            json.dumps(self.clocks).encode(),
             f'{seqnum}'.encode(),
             msg
-        ])        
+        ])
 
-        port, port_number = self.config.process_ports[str(id)].split(':')
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((port, int(port_number)))
-            s.settimeout(3) # Valor arbitrário. Idealmente, baseado no atraso de rede.
-            s.listen(1)
-            conn, addr = s.accept()
-            conn.send(message)
+        target_pid, port = self.config.process_ports[id].split(':')
+        self.protocol.send(target_pid, int(port), message)
 
 
-    def receive(self) -> bytes:
+    def receive(self) -> tuple[int,str,int]:
         pid = self.config.process_id
         self.clocks[pid] += 1
 
-        port, port_number = self.config.process_ports[str(self.config.process_id)].split(':')
-
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((port, int(port_number)))
-            data = s.recv(1024)
-            # print(data)
+        target_pid, port = self.config.process_ports[self.config.process_id].split(':')
+        data = self.protocol.receive(target_pid, int(port))
 
         # get info from msg
         pid_sender, clocks_sender, seqnum, msg = data.decode().split(';')
-        clocks_sender = eval(clocks_sender)
+        clocks = {int(pid): clock for pid, clock in json.loads(clocks).items()}
 
-        for pid_s in clocks_sender:
+        for pid_s in clocks:
             # s = sender
-            ticks_s = clocks_sender[pid_s]
+            ticks_s = clocks[pid_s]
             if pid_s != pid:
                 self.clocks[pid_s] = max(ticks_s,self.clocks[pid_s])
 
@@ -126,7 +133,7 @@ class Sequencer:
                         # print(f"seqnum: {seqnum}")
                         # Sequencer só envia a próxima mensagem se a anterior já foi enviada para TODOS os processos.
                         while True:
-                            try: 
+                            try:
                                 self.messenger.send(pid, msg.encode(), seqnum, pid_sender)
                                 break
                             except:
@@ -150,7 +157,7 @@ def load_conf_file(file_path):
     return Configs(
         process_quantity=data["node"]["processos"],
         process_id=data["node"]["id"],
-        process_ports=data["all_processes"],
+        process_ports={int(pid): port for pid, port in data["all_processes"].items()},
         sequencer_id=data["sequencer"]["id"]
     )
 

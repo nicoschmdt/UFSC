@@ -7,8 +7,10 @@ authors = ["Nicole Schmidt <nicoleschmidt2000@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 toml = "^0.10.2"
+types-toml = "^0.10.8"
 
 [tool.poetry.dev-dependencies]
+mypy = "^0.971"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
