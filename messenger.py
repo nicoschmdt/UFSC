@@ -74,7 +74,6 @@ class Message(NamedTuple):
 class Messenger:
     config: Configs
     clocks: dict[int,int] = field(default_factory=lambda: defaultdict(lambda: 0))
-
     next_deliver: int = 1
     pending_messages: list[Message] = field(default_factory=list)
     delivered_messages: list[Message] = field(default_factory=list)

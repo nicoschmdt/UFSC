@@ -1,6 +1,7 @@
 [node]
 processos = 4
 id = 0
+state = "RELEASED"
 
 [all_processes]
 0 = "localhost:6000"
