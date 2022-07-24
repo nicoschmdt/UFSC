@@ -1,8 +1,8 @@
 import time
-import trab
+import messenger
 
-configs = trab.load_conf_file("conf2.toml")
-clocks = trab.initialize_clocks(configs.process_quantity)
+configs = messenger.load_conf_file("conf2.toml")
+clocks = messenger.initialize_clocks(configs.process_quantity)
 state = configs["node"]["state"]
 clocks = messenger.initialize_clocks(configs.process_quantity)
 msgr = messenger.Messenger(config=configs, clocks=clocks)
@@ -20,27 +20,25 @@ while not sent:
     print("Sent" if sent else "Not sent")
     time.sleep(1)
 # Get responses from other processes
-receivedMessages = []
-while (len(receivedMessages) < 2):
-    # Wait until all respond (N -1)
-    messages = msgr.collect_messages();
-    for m in messages:
-        receivedMessages.append(m)
-for msg in receivedMessages:
-    if msg.pid is not None:
-        print(f'Message received: {msg.message}')
-        print(f'PID sender: {msg.pid}')
-        print(f'Sequence number: {msg.seqnum}')
-    if msg.message != "OK":
-        if int(msg.message) < msgr.clocks[pid]:
-            msgr.send(msg.pid, "OK".encode())
+num_oks = 0
+while num_oks < configs.process_quantity-2:
+    messages = msgr.collect_messages()
+    for msg in messages:
+        if msg.pid is not None:
+            print(f'Message received: {msg.message}')
+            print(f'PID sender: {msg.pid}')
+            print(f'Sequence number: {msg.seqnum}')
+        if msg.message != "OK":
+            if int(msg.message) < msgr.clocks[pid]:
+                msgr.send(msg.pid, "OK".encode())
+            else:
+                queue.append(msg.pid)
         else:
-            queue.append(msg.pid)
+            num_oks += 1
 
 ## Enter critical region
 state = "HELD"
 time.sleep(2)
 for process in queue:
     msgr.send(process, "OK".encode())
-        
-
+state = "RELEASED"
