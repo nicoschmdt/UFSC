@@ -2,7 +2,7 @@ import json
 import toml
 import time
 import socket
-from threading import RLock
+from threading import RLock, Thread
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Callable, NamedTuple, Protocol
@@ -206,3 +206,14 @@ def initialize_clocks(num_process):
     for num in range(num_process):
         clocks[num] = 0
     return clocks
+
+MessageReceivedCallback = Callable[[Message], None]
+
+def listen(messenger: Messenger, callback: MessageReceivedCallback) -> Thread:
+    def receive_messages():
+        while True:
+            message = messenger.receive()
+            callback(message)
+    thread = Thread(target=receive_messages)
+    thread.start()
+    return thread
