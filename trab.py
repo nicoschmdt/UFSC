@@ -2,8 +2,10 @@ import json
 import toml
 import time
 import socket
+from threading import RLock
 from collections import defaultdict
 from dataclasses import dataclass, field
+from typing import Callable, NamedTuple, Protocol
 # 1:1 deve respeitar a ordem causal
 # Ordem Causal: Se o envio de uma mensagem m precede
 # causalmente o envio de uma mensagem m’, então
@@ -17,19 +19,36 @@ from dataclasses import dataclass, field
 class InvalidPID(Exception):
     pass
 
-class MessageProtocol:
-    def send(self, target_pid: str, port: int, message: bytes) -> None:
+
+class Connection(Protocol):
+    def send(self, address: str, port: int, message: bytes) -> None:
+        ...
+
+    def receive(self) -> bytes:
+        ...
+
+
+@dataclass
+class TCPConnection:
+    address: str
+    port: int
+
+    def send(self, address: str, port: int, message: bytes) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((target_pid, port))
+            s.connect((address, port))
+            s.send(message)
+
+
+    def receive(self) -> bytes:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((self.address, self.port))
             s.settimeout(3) # Valor arbitrário. Idealmente, baseado no atraso de rede.
             s.listen(1)
-            conn, addr = s.accept()
-            conn.send(message)
+            s.accept()
 
-    def receive(self, target_pid: str, port: int) -> bytes:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((target_pid, port))
-            return s.recv(1024)
+            msg_size = s.recv(4)
+            return s.recv(msg_size)
+
 
 @dataclass
 class Configs:
@@ -39,51 +58,72 @@ class Configs:
     process_ports: dict[int, str]
     sequencer_id: int
 
+
+class Message(NamedTuple):
+    pid: int
+    message: str
+    seqnum: int
+
+
 @dataclass
 class Messenger:
     config: Configs
     clocks: dict[int,int] = field(default_factory=lambda: defaultdict(lambda: 0))
+
     next_deliver: int = 1
     pending_messages = []
-    protocol: MessageProtocol = field(default_factory=MessageProtocol)
+    connector_factory: Callable[[str, int], Connection] = TCPConnection
+    connector: Connection = field(init=False)
+    lock: RLock = field(default_factory=RLock)
+
+    def __post_init__(self) -> None:
+        full_address = self.config.process_ports[self.config.process_id]
+        address, port_text = full_address.split(':', maxsplit=1)
+        self.connector = self.connector_factory(address, int(port_text))
 
     def send(self, id: int, msg: bytes, seqnum: int = 0, pid_sender: int | None = None) -> None:
-        pid = self.config.process_id
-        if pid_sender is not None:
-            pid = pid_sender
-        self.clocks[pid] += 1
-        if id >= self.config.process_quantity:
-            raise InvalidPID("PID is higher than the number of processes.")
+        with self.lock:
+            pid = self.config.process_id
+            if pid_sender is not None:
+                pid = pid_sender
+            self.clocks[pid] += 1
+            if id >= self.config.process_quantity:
+                raise InvalidPID("PID is higher than the number of processes.")
 
-        message = b";".join([
-            f'{pid}'.encode(),
-            json.dumps(self.clocks).encode(),
-            f'{seqnum}'.encode(),
-            msg
-        ])
+            message = b";".join([
+                f'{pid}'.encode(),
+                json.dumps(self.clocks).encode(),
+                f'{seqnum}'.encode(),
+                msg,
+            ])
+            message = b"".join([len(message).to_bytes(4,'big'), message])
+            print(message)
 
-        target_pid, port = self.config.process_ports[id].split(':')
-        self.protocol.send(target_pid, int(port), message)
+            target_pid, port = self.config.process_ports[id].split(':')
+            self.connector.send(target_pid, int(port), message)
 
+    def increment_clock(self) -> None:
+        self.clocks[self.config.process_id] += 1
 
-    def receive(self) -> tuple[int,str,int]:
-        pid = self.config.process_id
-        self.clocks[pid] += 1
+    def receive(self) -> Message:
+        with self.lock:
+            pid = self.config.process_id
 
-        target_pid, port = self.config.process_ports[self.config.process_id].split(':')
-        data = self.protocol.receive(target_pid, int(port))
+            self.increment_clock()
 
-        # get info from msg
-        pid_sender, clocks_sender, seqnum, msg = data.decode().split(';')
-        clocks = {int(pid): clock for pid, clock in json.loads(clocks).items()}
+            data = self.connector.receive()
 
-        for pid_s in clocks:
-            # s = sender
-            ticks_s = clocks[pid_s]
-            if pid_s != pid:
-                self.clocks[pid_s] = max(ticks_s,self.clocks[pid_s])
+            # get info from msg
+            pid_sender, clocks_sender, seqnum, msg = data.decode().split(';')
+            clocks = {int(pid): clock for pid, clock in json.loads(clocks_sender).items()}
 
-        return ((int)(pid_sender), msg, (int)(seqnum))
+            for pid_s in clocks:
+                # s = senderticks_s
+                ticks_s = clocks[pid_s]
+                if pid_s != pid:
+                    self.clocks[pid_s] = max(ticks_s,self.clocks[pid_s])
+
+        return Message(int(pid_sender), msg, int(seqnum))
 
     def broadcast(self, msg: bytes) -> bool:
         try:
