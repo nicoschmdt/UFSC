@@ -12,10 +12,6 @@ from typing import Callable, NamedTuple, Protocol
 # nenhum processo correto entrega m’ a menos que m
 # já tenha sido entregue
 
-# ---------------------------------------------------
-# Observe que a ordem causal implementa, internamente,
-# um vetor de relógios lógicos de n posições, onde n
-# representa o número de processos.
 class InvalidPID(Exception):
     pass
 
@@ -36,18 +32,23 @@ class TCPConnection:
     def send(self, address: str, port: int, message: bytes) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((address, port))
-            s.send(message)
+            sock_out = s.makefile('wb')
+            sock_out.write(message)
+            sock_out.flush()
 
 
     def receive(self) -> bytes:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((self.address, self.port))
-            s.settimeout(3) # Valor arbitrário. Idealmente, baseado no atraso de rede.
+            # s.settimeout(10) # Valor arbitrário. Idealmente, baseado no atraso de rede.
             s.listen(1)
-            s.accept()
+            connection, _ = s.accept()
 
-            msg_size = s.recv(4)
-            return s.recv(msg_size)
+            sock_in = connection.makefile('rb')
+            f = sock_in.read(4)
+            msg_size = int.from_bytes(f, 'big')
+            message = sock_in.read(msg_size)
+            return message
 
 
 @dataclass
@@ -97,7 +98,6 @@ class Messenger:
                 msg,
             ])
             message = b"".join([len(message).to_bytes(4,'big'), message])
-            print(message)
 
             target_pid, port = self.config.process_ports[id].split(':')
             self.connector.send(target_pid, int(port), message)
@@ -110,12 +110,11 @@ class Messenger:
             pid = self.config.process_id
 
             self.increment_clock()
-
             data = self.connector.receive()
 
             # get info from msg
-            pid_sender, clocks_sender, seqnum, msg = data.decode().split(';')
-            clocks = {int(pid): clock for pid, clock in json.loads(clocks_sender).items()}
+            pid_sender, clocks_sender, seqnum, msg = data.split(b';')
+            clocks = {int(pid): clock for pid, clock in json.loads(clocks_sender.decode()).items()}
 
             for pid_s in clocks:
                 # s = senderticks_s
@@ -123,7 +122,7 @@ class Messenger:
                 if pid_s != pid:
                     self.clocks[pid_s] = max(ticks_s,self.clocks[pid_s])
 
-        return Message(int(pid_sender), msg, int(seqnum))
+        return Message(int.from_bytes(pid_sender, 'big'), msg.decode(), int.from_bytes(seqnum, 'big'))
 
     def broadcast(self, msg: bytes) -> bool:
         try:
