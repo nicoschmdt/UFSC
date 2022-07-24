@@ -74,3 +74,5 @@ def test_event_sequence() -> None:
     assert_clocks((5, 3, 1), (2, 3, 1), (0, 0, 2))
     p2.receive()
     assert_clocks((5, 3, 1), (2, 3, 1), (5, 3, 3))
+
+test_event_sequence()

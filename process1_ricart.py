@@ -1,18 +1,29 @@
 import time
-import trab
+import messenger
 
-configs = trab.load_conf_file("conf1.toml")
-clocks = trab.initialize_clocks(configs.process_quantity)
-messenger = trab.Messenger(configs,clocks)
+configs = messenger.load_conf_file("conf1.toml")
+clocks = messenger.initialize_clocks(configs.process_quantity)
+state = "RELEASED"
+clocks = messenger.initialize_clocks(configs.process_quantity)
+msgr = messenger.Messenger(config=configs, clocks=clocks)
+msgr.activate_broadcast()
 
+# def on_receive(message: messenger.Message) -> None:
+#     _, data, _ = message
+#     print(f'message received!: {data}')
+#     # mensagens.append(data)
+
+# messenger.listen(msgr, on_receive)
+# P1 not interested
 while True:
-    pid_sender, msg, seqnum = messenger.deliver()
-    if pid_sender != None:
-        print(f'Message received: {msg}')
-        print(f'PID sender: {pid_sender}')
-        print(f'Sequence number: {seqnum}')
-        sent = messenger.broadcast("Hello!".encode())
-        print("Sent" if sent else "Not sent")
-    else:
-        print("No message received")
-    time.sleep(1)
+    messages = msgr.collect_messages()
+    for msg in messages:
+        print("Received Message")
+        if msg.pid is not None:
+            print(messages)
+            print(f'Message received: {msg.message}')
+            print(f'PID sender: {msg.pid}')
+            print(f'Sequence number: {msg.seqnum}')
+            sent = False
+            while not sent:
+                sent = msgr.broadcast(f'OK,{msg.pid}'.encode())

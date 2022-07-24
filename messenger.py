@@ -145,7 +145,8 @@ class Messenger:
         try:
             self.send(self.config.sequencer_id, msg)
             return True
-        except:
+        except Exception as e:
+            # print(e)
             return False
 
     def deliver(self) -> None:
@@ -196,33 +197,33 @@ class Sequencer:
     messenger: Messenger
 
     def wait_messages(self) -> None:
-        seqnum: int = 2
+        seqnum: int = 1
         while(True):
             msg = self.messenger.receive()
-            # print(f'pid sender: {msg.pid}')
-            # print(f'message received!: {msg.message}')
+            print(f'pid sender: {msg.pid}')
+            print(f'message received!: {msg.message}')
 
             for target_pid in range(0, self.config.process_quantity):
-                # print(f"Trying to send to {target_pid}")
+                print(f"Trying to send to {target_pid}")
                 if target_pid != self.config.process_id:
                     # Sequencer só envia a próxima mensagem se a anterior já foi enviada para TODOS os processos.
                     while True:
                         try:
                             self.messenger.send(target_pid, msg.message.encode(), seqnum, msg.pid)
-                            # print(f"Sent to {msg.pid}")
-                            # print(f"seqnum: {msg.seqnum}")
+                            print(f"Sent to {target_pid}")
+                            print(f"seqnum: {seqnum}")
                             break
                         except:
-                            time.sleep(2)
                             continue
-
+            seqnum += 1
             # Ordem do primeiro e do segundo seqnum invertida.
-            if seqnum == 2:
-                seqnum = 1
-            elif seqnum == 1:
-                seqnum = 3
-            else:
-                seqnum += 1
+            # if seqnum == 2:
+            #     seqnum = 1
+            # elif seqnum == 1:
+            #     seqnum = 3
+            # else:
+            #     seqnum += 1
+            time.sleep(2)
 
 def load_conf_file(file_path):
     with open(file_path, "r") as f:
