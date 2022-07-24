@@ -1,17 +1,16 @@
 import time
-import trab
+import messenger
 
-configs = trab.load_conf_file("conf2.toml")
-clocks = trab.initialize_clocks(configs.process_quantity)
-messenger = trab.Messenger(configs,clocks)
-messenger = trab.Messenger(configs,clocks)
+configs = messenger.load_conf_file("conf2.toml")
+clocks = messenger.initialize_clocks(configs.process_quantity)
+msgr = messenger.Messenger(configs,clocks)
+msgr.activate_broadcast()
 
 while True:
-    pid_sender, msg, seqnum = messenger.deliver()
-    if pid_sender != None:
-        print(f'Message received: {msg}')
-        print(f'PID sender: {pid_sender}')
-        print(f'Sequence number: {seqnum}')
-    else:
-        print("No message received")
+    messages = msgr.collect_messages()
+    for msg in messages:
+        if msg.pid is not None:
+            print(f'Message received: {msg.message}')
+            print(f'PID sender: {msg.pid}')
+            print(f'Sequence number: {msg.seqnum}')
     time.sleep(1)

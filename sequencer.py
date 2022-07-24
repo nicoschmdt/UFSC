@@ -1,7 +1,7 @@
-import trab
+import messenger
 
-configs = trab.load_conf_file("conf_seq.toml")
-clocks = trab.initialize_clocks(configs.process_quantity)
-messenger = trab.Messenger(config=configs, clocks=clocks)
-sequencer = trab.Sequencer(config=configs, messenger=messenger)
+configs = messenger.load_conf_file("conf_seq.toml")
+clocks = messenger.initialize_clocks(configs.process_quantity)
+msgr = messenger.Messenger(config=configs, clocks=clocks)
+sequencer = messenger.Sequencer(config=configs, messenger=msgr)
 sequencer.wait_messages()

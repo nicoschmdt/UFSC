@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from collections import deque, defaultdict
-from trab import Configs, Messenger
+from messenger import Configs, Messenger
 from typing import DefaultDict
 
 

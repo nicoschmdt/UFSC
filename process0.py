@@ -1,11 +1,11 @@
 # from trab import load_conf_file, Messenger
-import trab
+import messenger
 
-configs = trab.load_conf_file("conf0.toml")
-clocks = trab.initialize_clocks(configs.process_quantity)
-messenger = trab.Messenger(config=configs, clocks=clocks)
+configs = messenger.load_conf_file("conf0.toml")
+clocks = messenger.initialize_clocks(configs.process_quantity)
+msgr = messenger.Messenger(config=configs, clocks=clocks)
 print('configs done!')
-messenger.send(1,"hi!".encode()) # envia msg pro processo 1
+msgr.send(1,"hi!".encode()) # envia msg pro processo 1
 
 # data = messenger.receive()
 # print(f'message received!: {data}')
