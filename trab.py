@@ -87,7 +87,11 @@ class Messenger:
             pid = self.config.process_id
             if pid_sender is not None:
                 pid = pid_sender
+
+            self.lock.acquire()
             self.clocks[pid] += 1
+            self.lock.release()
+
             if id >= self.config.process_quantity:
                 raise InvalidPID("PID is higher than the number of processes.")
 
@@ -109,18 +113,25 @@ class Messenger:
         with self.lock:
             pid = self.config.process_id
 
+            self.lock.acquire()
             self.increment_clock()
+            self.lock.release()
+
             data = self.connector.receive()
 
             # get info from msg
             pid_sender, clocks_sender, seqnum, msg = data.split(b';')
             clocks = {int(pid): clock for pid, clock in json.loads(clocks_sender.decode()).items()}
 
+            self.lock.acquire()
             for pid_s in clocks:
                 # s = senderticks_s
                 ticks_s = clocks[pid_s]
                 if pid_s != pid:
                     self.clocks[pid_s] = max(ticks_s,self.clocks[pid_s])
+            self.lock.release()
+
+
 
         return Message(int.from_bytes(pid_sender, 'big'), msg.decode(), int.from_bytes(seqnum, 'big'))
 
