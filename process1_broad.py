@@ -13,6 +13,8 @@ while True:
             print(f'Message received: {msg.message}')
             print(f'PID sender: {msg.pid}')
             print(f'Sequence number: {msg.seqnum}')
-            sent = msgr.broadcast("Hello!".encode())
-            print("Sent" if sent else "Not sent")
-    time.sleep(1)
+            sent = False
+            while not sent:
+                sent = msgr.broadcast("Hello!".encode())
+                print("Sent" if sent else "Not sent")
+                time.sleep(1)
