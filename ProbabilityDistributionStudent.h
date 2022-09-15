@@ -5,6 +5,7 @@
 #include "ProbabilityDistributionBase.h"
 #include "PDProxy.h"
 #include "SolverProxy.h"
+#include <math.h>
 
 /*!
 * Essa classe deve encontrar o valor x de uma distribuição de probabildiade cuja probabilidade acumulada corresponda a um valor dado.
@@ -49,6 +50,15 @@ public:
     */
 	static double inverseChi2(double cumulativeProbability, double degreeFreedom){
 	    // DESENVOLVER
+        // distribuição acumulada em lowerLimit = 0
+        double xLowerLimit = 0;
+        // distribuição acumulada em upperLimit =~ 1
+        // ta errado
+        double xUpperLimit = degreeFreedom*10;
+
+        // mediana = v*((1 - (2/9k))**3)
+        // mediana -> cumulativeProbability = 0,5
+
 	    return 0.0;
 	}
 	static double inverseFFisherSnedecor(double cumulativeProbability, double d1, double d2){
@@ -56,12 +66,37 @@ public:
 	    return 0.0;
 	}
 	static double inverseNormal(double cumulativeProbability, double mean, double stddev){
-	    // DESENVOLVER
-	    return 0.0;	    
+	    // implementar cache
+
+        // distribuição acumulada em lowerLimit =~ 0
+        double xLowerLimit = mean - 4*stddev;
+        // distribuição acumulada em upperLimit =~ 1
+        double xUpperLimit = mean + 4*stddev;
+
+        // determinar a e b necessários
+        double a,b;
+        if (cumulativeProbability == mean) {
+            return mean;
+        } else if (cumulativeProbability > mean) {
+            a = mean;
+            b = xUpperLimit;
+        } else {
+            a = xLowerLimit;
+            b = mean;
+        }
+
+        // usar integrais conhecidas de a e diminuir no cumulative probability
+
+        double fa = ProbabilityDistributionBase::normal(a, mean, stddev);
+        double fb = ProbabilityDistributionBase::normal(b, mean, stddev);
+        double x = PDProxy::findInverseNormal(a, fa, b, fb, 0, cumulativeProbability, mean, stddev);
+
+        // retornar x tal que a integral de -infinito até x seja igual a cumulativeProbability
+	    return x;
 	}
 	static double inverseTStudent(double cumulativeProbability, double mean, double stddev, double degreeFreedom){
 	    // DESENVOLVER
-	    return 0.0;	    
+	    return 0.0;
 	}
 
 
@@ -113,12 +148,35 @@ public:
 	    return 0.0;	    
 	}
 	static double findInverseNormal(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev){
-	    // DESENVOLVER RECURSIVO 
-	    return 0.0;	    
+        if (PDProxy::getMaxRecursions() == recursions) {
+            return b;
+        }
+        SolverProxy solver;
+        double integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
+        long double errorTolerance = pow(1, pow(10, -6));
+        if (abs(integralValue - cumulativeProbability) <= errorTolerance) {
+            return b;
+        }
+
+        // implementar método da secante p/ integral e achar valores de a e b novos
+        double integralA = solver.integrate(mean - 4*stddev, a, &ProbabilityDistributionBase::normal, mean, stddev);
+        double integralB = solver.integrate(mean - 4*stddev, b, &ProbabilityDistributionBase::normal, mean, stddev);
+        double approximateDerivative = (integralA - integralB)/(b-a);
+        double root = a - (integralA/approximateDerivative);
+        if (root < a) {
+            a = root;
+            fa = ProbabilityDistributionBase::normal(a, mean, stddev);
+            integralA = solver.integrate(mean - 4*stddev, a, &ProbabilityDistributionBase::normal, mean, stddev);
+        } else {
+            b = root;
+            fb = ProbabilityDistributionBase::normal(b, mean, stddev);
+        }
+
+        PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralA, mean, stddev);  
 	}
 	static double findInverseTStudent(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev, double degreeFreedom){
-	    // DESENVOLVER RECURSIVO 
-	    return 0.0;	    
+	    // DESENVOLVER RECURSIVO
+	    return 0.0;
 	}
 };
 
