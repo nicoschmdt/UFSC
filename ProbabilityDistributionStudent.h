@@ -75,9 +75,9 @@ public:
 
         // determinar a e b necessários
         double a,b;
-        if (cumulativeProbability == mean) {
+        if (cumulativeProbability == 0.5) {
             return mean;
-        } else if (cumulativeProbability > mean) {
+        } else if (cumulativeProbability > 0.5) {
             a = mean;
             b = xUpperLimit;
         } else {
