@@ -17,10 +17,10 @@ public:
     typedef double (*f5p)(double, double, double, double, double);
 public:
     virtual void setMinimumStepSize(double e) = 0;
-    virtual double getMinimumStepSize() = 0:
+    virtual double getMinimumStepSize() = 0;
     virtual void setMaxSteps(double steps) = 0;
     virtual double getMaxSteps() = 0;
-    virtual double integrate(double min, double max, fip) = 0;
+    virtual double integrate(double min, double max, f1p) = 0;
     virtual double integrate(double min, double max, f2p, double p2) = 0;
     virtual double integrate(double min, double max, f3p, double p2, double p3) = 0;
     virtual double integrate(double min, double max, f4p, double p2, double p3, double p4) = 0;
