@@ -2,6 +2,7 @@
 #define SOLVER_STUDENT_H
 
 #include "Legendre.h"
+#include "Solver_if.h"
 
 /*!
  * Essa é uma classe comum em simuladores, e é responsável por "resolver" integrais e derivadas (mais especificamente, sistemas de equações diferenciais).
@@ -95,7 +96,7 @@ public:
 		}
 		result *= ba2;
 
-	    return result
+	    return result;
 	}
 	virtual double integrate(double min, double max, Solver_if::f3p f, double p2, double p3) {
 	    auto intervalo = (max-min)/(getMaxSteps()-1);
@@ -116,7 +117,7 @@ public:
 		}
 		result *= ba2;
 
-	    return result
+	    return result;
 	}
 	virtual double integrate(double min, double max, Solver_if::f4p f, double p2, double p3, double p4) {
 	    auto intervalo = (max-min)/(getMaxSteps()-1);
@@ -137,7 +138,7 @@ public:
 		}
 		result *= ba2;
 
-	    return resultn
+	    return result;
 	}
 	virtual double integrate(double min, double max, Solver_if::f5p f, double p2, double p3, double p4, double p5) {
 	    auto intervalo = (max-min)/(getMaxSteps()-1);
@@ -223,9 +224,9 @@ public:
 	    std::vector<double> res(initValue);
 	    return res;
 	}
-private:
-	double h_min;
-	double max_steps;
+	private:
+		double h_min;
+		double max_steps;
 };
 
 #endif /* SOLVER_STUDENT_H */
