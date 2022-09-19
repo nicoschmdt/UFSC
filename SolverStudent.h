@@ -1,6 +1,8 @@
 #ifndef SOLVER_STUDENT_H
 #define SOLVER_STUDENT_H
 
+#include "Legendre.h"
+
 /*!
  * Essa é uma classe comum em simuladores, e é responsável por "resolver" integrais e derivadas (mais especificamente, sistemas de equações diferenciais).
  * Seus métodos incluem, principalmente, getters e setters de parâmetros e métodos para integrar ou derivar funções com diferentes quantidades de parâmetros (fp1, fp2, ...).
@@ -54,24 +56,109 @@ public:
     */
 
 	virtual double integrate(double min, double max, Solver_if::f1p f) {
-	    // DESENVOLVER
-	    return 0.0;
+	    auto intervalo = (max-min)/(getMaxSteps()-1);
+		if (intervalo<getMinimumStepSize()) {
+			intervalo=getMinimumStepSize();
+		}
+
+		auto ba2 = (max-min)/2;
+		auto ab2 = (max+min)/2;
+
+		unsigned int n = Legendre::maxN();
+		double root, weight;
+
+		auto result=0;
+		for (int step=min; step<= max; step+=intervalo) {
+			Legendre::values(n,step,root,weight);
+			result += weight*f((ba2*root)+ab2);
+		}
+		result *= ba2;
+
+	    return result;
 	}
 	virtual double integrate(double min, double max, Solver_if::f2p f, double p2) {
-	    // DESENVOLVER
-	    return 0.0;
+	    auto intervalo = (max-min)/(getMaxSteps()-1);
+		if (intervalo<getMinimumStepSize()) {
+			intervalo=getMinimumStepSize();
+		}
+
+		auto ba2 = (max-min)/2;
+		auto ab2 = (max+min)/2;
+
+		unsigned int n = Legendre::maxN();
+		double root, weight;
+
+		auto result=0;
+		for (int step=min; step<= max; step+=intervalo) {
+			Legendre::values(n,step,root,weight);
+			result += weight*f((ba2*root)+ab2,p2);
+		}
+		result *= ba2;
+
+	    return result
 	}
 	virtual double integrate(double min, double max, Solver_if::f3p f, double p2, double p3) {
-	    // DESENVOLVER
-	    return 0.0;
+	    auto intervalo = (max-min)/(getMaxSteps()-1);
+		if (intervalo<getMinimumStepSize()) {
+			intervalo=getMinimumStepSize();
+		}
+
+		auto ba2 = (max-min)/2;
+		auto ab2 = (max+min)/2;
+
+		unsigned int n = Legendre::maxN();
+		double root, weight;
+
+		auto result=0;
+		for (int step=min; step<= max; step+=intervalo) {
+			Legendre::values(n,step,root,weight);
+			result += weight*f((ba2*root)+ab2,p2,p3);
+		}
+		result *= ba2;
+
+	    return result
 	}
 	virtual double integrate(double min, double max, Solver_if::f4p f, double p2, double p3, double p4) {
-	    // DESENVOLVER
-	    return 0.0;
+	    auto intervalo = (max-min)/(getMaxSteps()-1);
+		if (intervalo<getMinimumStepSize()) {
+			intervalo=getMinimumStepSize();
+		}
+
+		auto ba2 = (max-min)/2;
+		auto ab2 = (max+min)/2;
+
+		unsigned int n = Legendre::maxN();
+		double root, weight;
+
+		auto result=0;
+		for (int step=min; step<= max; step+=intervalo) {
+			Legendre::values(n,step,root,weight);
+			result += weight*f((ba2*root)+ab2,p2,p3,p4);
+		}
+		result *= ba2;
+
+	    return resultn
 	}
 	virtual double integrate(double min, double max, Solver_if::f5p f, double p2, double p3, double p4, double p5) {
-	    // DESENVOLVER
-	    return 0.0;
+	    auto intervalo = (max-min)/(getMaxSteps()-1);
+		if (intervalo<getMinimumStepSize()) {
+			intervalo=getMinimumStepSize();
+		}
+
+		auto ba2 = (max-min)/2;
+		auto ab2 = (max+min)/2;
+
+		unsigned int n = Legendre::maxN();
+		double root, weight;
+
+		auto result=0;
+		for (int step=min; step<= max; step+=intervalo) {
+			Legendre::values(n,step,root,weight);
+			result += weight*f((ba2*root)+ab2,p2,p3,p4,p5);
+		}
+		result *= ba2;
+
+	    return result;
 	}
 
 
@@ -89,8 +176,36 @@ public:
     * Seus códigos serão praticamente idênticos. A única diferença deve ser na hora de invocar "f", depois demandará invocar f com 1, 2, ..., 5 parâmetros.
     */
 	virtual std::vector<double> derivate(double initPoint, double endPoint,  std::vector<double> initValue, std::vector<Solver_if::f2p> f) {
-	    // DESENVOLVER
-	    std::vector<double> res(initValue);
+	    auto functionsQuantity = f.size();
+	    std::vector<double> res;
+	    // std::vector<double> res(initValue);
+		for (int j=0; j<functionsQuantity; j++)  {
+			auto& function = f[j];
+			auto& init = initValue[j];
+
+			auto x0 = initPoint;
+			auto h = (init-x0)/(getMaxSteps()-1);
+			if (h<getMinimumStepSize()) {
+				h=getMinimumStepSize();
+			}
+
+			auto y = endPoint;
+			auto k1 = 0.0;
+			auto k2 = 0.0;
+			auto k3 = 0.0;
+			auto k4 = 0.0;
+			for (int step=initPoint; step<=endPoint; step+=h) {
+				k1 = function(x0,y);
+				k2 = function((x0 + 0.5 * h), (y + 0.5 * k1));
+				k3 = function((x0 + 0.5 * h), (y + 0.5 * k2));
+				k4 = function((x0 + h), (y + k3));
+
+				y += (1.0/6.0)*(k1+2*k2+2*k3+k4);
+				x0 += h;
+			}
+			res.push_back(y);
+		}
+
 	    return res;
 	}
 	virtual std::vector<double> derivate(double initPoint, double endPoint,  std::vector<double> initValue, std::vector<Solver_if::f3p> f) {
