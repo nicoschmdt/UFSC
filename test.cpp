@@ -8,6 +8,10 @@
 #include "DataAnalyserStudent.h"
 #include "SolverStudent.h"
 
+double seno(double x) {
+	return sin(x);
+}
+
 int main() {
     // auto solver = DataAnalyserStudent{};
     // auto n = 20;
@@ -28,8 +32,4 @@ int main() {
     std::cout<<"value: "<<value<<"\n";
     // std::cout<<avg.size() << "\n";
 
-}
-
-double seno(double x) {
-	return sin(x);
 }

@@ -172,7 +172,7 @@ public:
             fb = ProbabilityDistributionBase::normal(b, mean, stddev);
         }
 
-        PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralA, mean, stddev);  
+        return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralA, mean, stddev);  
 	}
 	static double findInverseTStudent(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev, double degreeFreedom){
 	    // DESENVOLVER RECURSIVO
@@ -181,4 +181,3 @@ public:
 };
 
 #endif /* PROBABILITYDISTRIBUTIONSTUDENT_H */
-
