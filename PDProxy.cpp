@@ -53,7 +53,7 @@ double PDProxy::findInverseFFisherSnedecor(double a, double fa, double b, double
 
 double PDProxy::findInverseNormal(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev) {
     _count++;
-    cout << "findInverseNormal ("<< a <<", "<< b << "J" << endl;
+    cout << "findInverseNormal ("<< a <<", "<< b << ")" << endl;
     return ProbabilityDistributionStudent::findInverseNormal(a, fa, b, fb, recursions, cumulativeProbability, mean, stddev);
 }
 

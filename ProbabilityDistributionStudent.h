@@ -6,6 +6,8 @@
 #include "PDProxy.h"
 #include "SolverProxy.h"
 #include <math.h>
+#include <stdlib.h>
+#include <iostream>
 
 /*!
 * Essa classe deve encontrar o valor x de uma distribuição de probabildiade cuja probabilidade acumulada corresponda a um valor dado.
@@ -80,15 +82,20 @@ public:
         } else if (cumulativeProbability > 0.5) {
             a = mean;
             b = xUpperLimit;
+            cumulativeProbability-=0.5;
         } else {
             a = xLowerLimit;
             b = mean;
         }
 
+        std::cout << "lowerLimit = "<< a << ", upperLimit = " << b << ", probability = " << cumulativeProbability << std::endl;
+
         // usar integrais conhecidas de a e diminuir no cumulative probability
 
         double fa = ProbabilityDistributionBase::normal(a, mean, stddev);
+        std::cout << "fa = "<< fa << std::endl;
         double fb = ProbabilityDistributionBase::normal(b, mean, stddev);
+        std::cout << "fb = "<< fb << std::endl;
         double x = PDProxy::findInverseNormal(a, fa, b, fb, 0, cumulativeProbability, mean, stddev);
 
         // retornar x tal que a integral de -infinito até x seja igual a cumulativeProbability
@@ -153,26 +160,39 @@ public:
         }
         SolverProxy solver;
         double integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
-        long double errorTolerance = pow(1, pow(10, -6));
-        if (abs(integralValue - cumulativeProbability) <= errorTolerance) {
+        std::cout << "Iteração " << recursions + 1 <<": integral = "<< integralValue << std::endl;
+        std::cout << "probabilidade esperada =  " << cumulativeProbability << std::endl;
+        //double maxIntegral = fmax(integralValue, cumulativeProbability);
+        if (abs(integralValue - cumulativeProbability) < 1e-6) {
+            std::cout << "integral - probability = " << integralValue - cumulativeProbability << std::endl;
+            std::cout << "Retorno = " << b << std::endl;
             return b;
         }
 
         // implementar método da secante p/ integral e achar valores de a e b novos
         double integralA = solver.integrate(mean - 4*stddev, a, &ProbabilityDistributionBase::normal, mean, stddev);
+        std::cout << "Integral de a (-infinito até " << a <<") = " << integralA << std::endl;
         double integralB = solver.integrate(mean - 4*stddev, b, &ProbabilityDistributionBase::normal, mean, stddev);
-        double approximateDerivative = (integralA - integralB)/(b-a);
+        std::cout << "Integral de b (-infinito até " << b <<") = " << integralB << std::endl;
+        double approximateDerivative = (integralB - integralA)/((b-a)/a);
+        std::cout << "Derivada aproximada = " << approximateDerivative << std::endl;
         double root = a - (integralA/approximateDerivative);
-        if (root < a) {
-            a = root;
-            fa = ProbabilityDistributionBase::normal(a, mean, stddev);
-            integralA = solver.integrate(mean - 4*stddev, a, &ProbabilityDistributionBase::normal, mean, stddev);
-        } else {
-            b = root;
-            fb = ProbabilityDistributionBase::normal(b, mean, stddev);
-        }
+        std::cout << "Root = " << root << std::endl;
 
-        return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralA, mean, stddev);  
+        a = b;
+        fa = fb;
+        b = root;
+        fb = fb = ProbabilityDistributionBase::normal(b, mean, stddev);
+
+        if (a > b) {
+            if (integralB < cumulativeProbability) {
+                return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralB, mean, stddev);  
+            }
+        }
+        if (integralA < cumulativeProbability) {
+            return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralA, mean, stddev);  
+        }
+        return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability, mean, stddev);  
 	}
 	static double findInverseTStudent(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev, double degreeFreedom){
 	    // DESENVOLVER RECURSIVO
