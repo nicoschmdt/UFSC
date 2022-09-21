@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
+#include <tuple>
 
 /*!
 * Essa classe deve encontrar o valor x de uma distribuição de probabildiade cuja probabilidade acumulada corresponda a um valor dado.
@@ -69,7 +70,7 @@ public:
 	}
 	static double inverseNormal(double cumulativeProbability, double mean, double stddev){
 	    // implementar cache
-
+        std::vector<std::tuple<double, double, double, double, double>> probabilityValuesCache;
         // distribuição acumulada em lowerLimit =~ 0
         double xLowerLimit = mean - 4*stddev;
         // distribuição acumulada em upperLimit =~ 1
@@ -82,7 +83,6 @@ public:
         } else if (cumulativeProbability > 0.5) {
             a = mean;
             b = xUpperLimit;
-            cumulativeProbability-=0.5;
         } else {
             a = xLowerLimit;
             b = mean;
@@ -98,6 +98,7 @@ public:
         std::cout << "fb = "<< fb << std::endl;
         double x = PDProxy::findInverseNormal(a, fa, b, fb, 0, cumulativeProbability, mean, stddev);
 
+        probabilityValuesCache.push_back(std::tuple<double, double, double, double, double>(mean, stddev, xLowerLimit, x, cumulativeProbability));
         // retornar x tal que a integral de -infinito até x seja igual a cumulativeProbability
 	    return x;
 	}
@@ -159,22 +160,33 @@ public:
             return b;
         }
         SolverProxy solver;
-        double integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
+
+        double integralA = solver.integrate(mean - 4*stddev, a, &ProbabilityDistributionBase::normal, mean, stddev);
+        double integralB = solver.integrate(mean - 4*stddev, b, &ProbabilityDistributionBase::normal, mean, stddev);
+
+        double integralValue;
+        if (a > b && integralB < cumulativeProbability) {
+            integralValue = solver.integrate(b, a, &ProbabilityDistributionBase::normal, mean, stddev) + integralB;
+        } else if (integralA < cumulativeProbability) {
+            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev) + integralA;
+        } else {
+            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
+        }
+
         std::cout << "Iteração " << recursions + 1 <<": integral = "<< integralValue << std::endl;
         std::cout << "probabilidade esperada =  " << cumulativeProbability << std::endl;
-        //double maxIntegral = fmax(integralValue, cumulativeProbability);
-        if (abs(integralValue - cumulativeProbability) < 1e-6) {
+
+        double maxValue = fmax(integralValue, cumulativeProbability);
+        if (abs(integralValue - cumulativeProbability)/maxValue < 1e-4) {
             std::cout << "integral - probability = " << integralValue - cumulativeProbability << std::endl;
             std::cout << "Retorno = " << b << std::endl;
             return b;
         }
 
         // implementar método da secante p/ integral e achar valores de a e b novos
-        double integralA = solver.integrate(mean - 4*stddev, a, &ProbabilityDistributionBase::normal, mean, stddev);
         std::cout << "Integral de a (-infinito até " << a <<") = " << integralA << std::endl;
-        double integralB = solver.integrate(mean - 4*stddev, b, &ProbabilityDistributionBase::normal, mean, stddev);
         std::cout << "Integral de b (-infinito até " << b <<") = " << integralB << std::endl;
-        double approximateDerivative = (integralB - integralA)/((b-a)/a);
+        double approximateDerivative = (integralB - integralA)/((b-a)/b);
         std::cout << "Derivada aproximada = " << approximateDerivative << std::endl;
         double root = a - (integralA/approximateDerivative);
         std::cout << "Root = " << root << std::endl;
@@ -184,14 +196,6 @@ public:
         b = root;
         fb = fb = ProbabilityDistributionBase::normal(b, mean, stddev);
 
-        if (a > b) {
-            if (integralB < cumulativeProbability) {
-                return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralB, mean, stddev);  
-            }
-        }
-        if (integralA < cumulativeProbability) {
-            return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability - integralA, mean, stddev);  
-        }
         return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability, mean, stddev);  
 	}
 	static double findInverseTStudent(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev, double degreeFreedom){
