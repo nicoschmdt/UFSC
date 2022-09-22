@@ -7,7 +7,7 @@
 
 using namespace std;
 
-double TEST_EPSILON = 1e-5;
+double TEST_EPSILON = 1e-3;
 
 std::string showDescription(std::string description) {
     if (description == "") {

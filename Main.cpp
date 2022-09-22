@@ -166,7 +166,7 @@ int test(int num) {
 		case 8: {
 			SolverProxy* solver = new SolverProxy();
 			cout << "solver->derivate(-1.0, 7.0, {2.0, -1.0}, {y1+2*y2+1; -y1+y2+t})" << endl;
-			cout << "Scilab deff(' [wl=f(x,y)', ['f1=y(1)+2*y(2)+1'; ‘f2=-y(1)+y(2)+x';'w=[f1;f2]'])" << endl;
+			cout << "Scilab deff(' [wl=f(x,y)', ['f1=y(1)+2*y(2)+1'; f2=-y(1)+y(2)+x';'w=[f1;f2]'])" << endl;
 			cout << "x0=-1; xn=7; Dx=(xn-x0)/1e3: y0=[2;-1]; x=[x0:Dx:xn);" << endl;
 			cout << "y = ode(y0,x0,x,f)" << endl;
 			solver->setMaxSteps(1e3);
@@ -221,7 +221,7 @@ int test(int num) {
 			value = PDProxy::inverseNormal(0.975, -400.0, 20.0);
 			errors += TEST_EQUAL_FP(value, -360.800720309199);
 			value = PDProxy::getCount();
-			errors += TEST_LESS<double>(value, 10, "Limite máximo de invocações");
+			errors += TEST_LESS<double>(value, 50, "Limite máximo de invocações");
 			value = PDProxy::inverseNormal (0.975, -401.0, 21.0); // any other
 			PDProxy::setCount(0);
 			cout << "PDProxy::inverseNormal (0.975, -400.0, 20.0)" << endl;
