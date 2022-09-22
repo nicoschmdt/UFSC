@@ -29,7 +29,7 @@ double difEq1_0(double t, double y1, double y2) {
 	return y2+t;
 }
 double difEq1_1(double t, double y1, double y2) {
-return y1+y2;
+return -y1+y2;
 }
 
 //
@@ -65,7 +65,7 @@ double difEq3_1(double t, double y1, double y2) {
 double difEq4_0(double t, double y1, double y2) {
 	return y1+2*y2+1;
 }
-double difEEq4_1(double t, double y1, double y2) {
+double difEq4_1(double t, double y1, double y2) {
 	return -y1+y2+t;
 }
 
@@ -171,7 +171,7 @@ int test(int num) {
 			cout << "y = ode(y0,x0,x,f)" << endl;
 			solver->setMaxSteps(1e3);
 			std::vector<double> initVal = {2.0, -1.0};
-			std::vector<Solver_if::f3p> f = {difEq3_0, difEq3_1};
+			std::vector<Solver_if::f3p> f = {difEq4_0, difEq4_1};
 			std::vector<double> result = solver->derivate(-1.0, 7.0, initVal, f);
 			errors += TEST_EQUAL_FP(result[0], 6836.733340746551220946);
 			errors += TEST_EQUAL_FP(result[1], 4077.8568461106583527);
