@@ -80,17 +80,36 @@ public:
         então o cálculo descrito deve ser realziado e o resultado deve ser guardado na cache antes de ser retornado.
     */
 	static double inverseChi2(double cumulativeProbability, double degreeFreedom){
-	    // DESENVOLVER
-        // distribuição acumulada em lowerLimit = 0
-        double xLowerLimit = 0;
-        // distribuição acumulada em upperLimit =~ 1
-        // ta errado
-        double xUpperLimit = degreeFreedom*10;
+	    double xLowerLimit, xUpperLimit;
+        xLowerLimit = 0;
+        xUpperLimit = 24*(1+ (degreeFreedom/10));
 
-        // mediana = v*((1 - (2/9k))**3)
-        // mediana -> cumulativeProbability = 0,5
+        double median = degreeFreedom*pow((1 - 2/(9*degreeFreedom)),3);
+        //determinar a e b necessários
+        double a,b;
+        if (cumulativeProbability == 0.5) {
+            return median;
+        } else if (cumulativeProbability > 0.5) {
+            a = median;
+            b = xUpperLimit;
+        } else {
+            a = xLowerLimit;
+            b = median;
+        }
 
-	    return 0.0;
+        std::cout << "lowerLimit = "<< xLowerLimit << ", upperLimit = " << xUpperLimit << ", median = " << median << ", probability = " << cumulativeProbability << std::endl;
+
+        // usar integrais conhecidas de a e diminuir no cumulative probability
+
+        double fa = ProbabilityDistributionBase::chi2(a, degreeFreedom);
+        std::cout << "fa = "<< fa << std::endl;
+        double fb = ProbabilityDistributionBase::chi2(b, degreeFreedom);
+        std::cout << "fb = "<< fb << std::endl;
+        double x = PDProxy::findInverseChi2(a, fa, b, fb, 0, cumulativeProbability, degreeFreedom);
+
+        //probabilityValuesCache.push_back(std::tuple<double, double, double, double, double>(mean, stddev, xLowerLimit, x, cumulativeProbability));
+        // retornar x tal que a integral de -infinito até x seja igual a cumulativeProbability
+	    return x;
 	}
 	static double inverseFFisherSnedecor(double cumulativeProbability, double d1, double d2){
 	    // DESENVOLVER
@@ -147,19 +166,8 @@ public:
 	}
 	static double inverseTStudent(double cumulativeProbability, double mean, double stddev, double degreeFreedom){
         double xLowerLimit, xUpperLimit;
-        if (degreeFreedom == 1) {
-            xLowerLimit = -318000;
-            // 318000 para gl=1 -> ~99,9999º percentil da distribuição
-            xUpperLimit = 318000;
-        } else if (degreeFreedom == 2){
-            xLowerLimit = -707;
-            // 707 para gl=1 -> ~99,9999º percentil da distribuição
-            xUpperLimit = 707;
-        } else {
-            // ta errado tem que definir alguma função
-            xLowerLimit = -100/(degreeFreedom-1);
-            xUpperLimit = 100/(degreeFreedom-1);
-        }
+        xLowerLimit = - (318000/pow(degreeFreedom, 5) +900/pow(degreeFreedom, 2));
+        xUpperLimit = (318000/pow(degreeFreedom, 5) +900/pow(degreeFreedom, 2));
 
         // determinar a e b necessários
         double a,b;
@@ -218,19 +226,50 @@ public:
     */
     
 	static double findInverseChi2(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double degreeFreedom){
-	    // DESENVOLVER RECURSIVO 
-	    // ...
-	    // // trechos de exemplo...
-	    // if (PDProxy::getMaxRecursions() ...
-	    // ...
-	    // // invocando o cálculo da integral de uma distribuição normal padrão de -1.5 até 1.5
-	    //SolverProxy solver;
-	    //double value = solver.integrate(-1.5, 1.5, &ProbabilityDistributionBase::normal, 0.0, 1.0); 
-	    // ...
-	    // // chamada recursiva
-	    // double value = PDProxy::findInverseChi2(a, fa, b, fb, ++recursions, cumulativeProbability, degreeFreedom);
-	    //
-	    return 0.0;
+	    if (PDProxy::getMaxRecursions() == recursions) {
+            return b;
+        }
+        double xLowerLimit = 0;
+
+        SolverProxy solver;
+
+        double integralA = solver.integrate(xLowerLimit, a, &ProbabilityDistributionBase::chi2, degreeFreedom);
+        double integralB = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::chi2, degreeFreedom);
+
+        double integralValue;
+        if (a > b && integralB < cumulativeProbability) {
+            integralValue = solver.integrate(b, a, &ProbabilityDistributionBase::chi2, degreeFreedom) + integralB;
+        } else if (integralA < cumulativeProbability) {
+            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::chi2, degreeFreedom) + integralA;
+        } else {
+            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::chi2, degreeFreedom);
+        }
+
+        std::cout << "Iteração " << recursions + 1 <<": integral = "<< integralValue << std::endl;
+        std::cout << "probabilidade esperada =  " << cumulativeProbability << std::endl;
+
+        double maxValue = fmax(integralValue, cumulativeProbability);
+        if (abs(integralValue - cumulativeProbability)/maxValue < 1e-3) {
+            std::cout << "integral - probability = " << integralValue - cumulativeProbability << std::endl;
+            std::cout << "Retorno = " << b << std::endl;
+            return fmax(a,b);
+        }
+
+        // implementar método da secante p/ integral e achar valores de a e b novos
+        std::cout << "Integral de a (-infinito até " << a <<") = " << integralA << std::endl;
+        std::cout << "Integral de b (-infinito até " << b <<") = " << integralB << std::endl;
+        double approximateDerivative = (integralB - integralA)*degreeFreedom/((b-a));
+        std::cout << "Derivada aproximada = " << approximateDerivative << std::endl;
+        double root = a - (integralA/approximateDerivative);
+        std::cout << "Root = " << root << std::endl;
+
+        
+        a = b;
+        fa = fb;
+        b = root;
+        fb = fb = ProbabilityDistributionBase::chi2(b, degreeFreedom);
+
+        return PDProxy::findInverseChi2(a, fa, b, fb, ++recursions, cumulativeProbability, degreeFreedom);  
 	}
 	static double findInverseFFisherSnedecor(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double d1, double d2){
 	    // DESENVOLVER RECURSIVO 
@@ -319,8 +358,50 @@ public:
         return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability, mean, stddev);  
 	}
 	static double findInverseTStudent(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev, double degreeFreedom){
-	    // DESENVOLVER RECURSIVO
-	    return 0.0;
+	    if (PDProxy::getMaxRecursions() == recursions) {
+            return b;
+        }
+        double xLowerLimit = - (318000/pow(degreeFreedom, 5) +900/pow(degreeFreedom, 2));
+
+        SolverProxy solver;
+
+        double integralA = solver.integrate(xLowerLimit, a, &ProbabilityDistributionBase::tStudent, mean, stddev, degreeFreedom);
+        double integralB = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::tStudent, mean, stddev, degreeFreedom);
+
+        double integralValue;
+        if (a > b && integralB < cumulativeProbability) {
+            integralValue = solver.integrate(b, a, &ProbabilityDistributionBase::tStudent, mean, stddev, degreeFreedom) + integralB;
+        } else if (integralA < cumulativeProbability) {
+            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::tStudent, mean, stddev, degreeFreedom) + integralA;
+        } else {
+            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::tStudent, mean, stddev, degreeFreedom);
+        }
+
+        std::cout << "Iteração " << recursions + 1 <<": integral = "<< integralValue << std::endl;
+        std::cout << "probabilidade esperada =  " << cumulativeProbability << std::endl;
+
+        double maxValue = fmax(integralValue, cumulativeProbability);
+        if (abs(integralValue - cumulativeProbability)/maxValue < 1e-3) {
+            std::cout << "integral - probability = " << integralValue - cumulativeProbability << std::endl;
+            std::cout << "Retorno = " << b << std::endl;
+            return fmax(a,b);
+        }
+
+        // implementar método da secante p/ integral e achar valores de a e b novos
+        std::cout << "Integral de a (-infinito até " << a <<") = " << integralA << std::endl;
+        std::cout << "Integral de b (-infinito até " << b <<") = " << integralB << std::endl;
+        double approximateDerivative = (integralB - integralA)*degreeFreedom/((b-a));
+        std::cout << "Derivada aproximada = " << approximateDerivative << std::endl;
+        double root = a - (integralA/approximateDerivative);
+        std::cout << "Root = " << root << std::endl;
+
+        
+        a = b;
+        fa = fb;
+        b = root;
+        fb = fb = ProbabilityDistributionBase::tStudent(b, mean, stddev, degreeFreedom);
+
+        return PDProxy::findInverseTStudent(a, fa, b, fb, ++recursions, cumulativeProbability, mean, stddev, degreeFreedom);  
 	}
 };
 
