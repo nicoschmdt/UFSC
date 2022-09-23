@@ -65,8 +65,7 @@ public:
 	    double ba2 = (max-min)/2;
 	    double ab2 = (max+min)/2;
 
-	   // unsigned int n = Legendre::maxN();
-	    unsigned int n = 8;
+	    unsigned int n = 9;
 	    double root, weight;
 
 	    double result=0;
@@ -75,13 +74,10 @@ public:
 	        Legendre::values(n,step,root,weight);
 	        result += ba2*(weight*f(ba2*root+ab2));
 	    }
-	   // result = c*f((ba2*x)+ab2);
-	   // result *=ba2;
 
 	    return result;
 	}
 	virtual double integrate(double min, double max, Solver_if::f2p f, double p2) {
-	   // double intervalo = (max-min)/(getMaxSteps()-1);
 	    double ba2 = (max-min)/2;
 	    double ab2 = (max+min)/2;
 
@@ -102,7 +98,6 @@ public:
 	    double ba2 = (max-min)/2;
 	    double ab2 = (max+min)/2;
 
-	   // unsigned int n = Legendre::maxN();
 	    unsigned int n = 6;
 
 	    double root, weight;
