@@ -190,9 +190,9 @@ int test(int num) {
 			break;
 		}
 		case 10: {
-			cout << "PDProxy::inverseChi2(0.85, 20)" << endl;
-			cout << "=CHIINV(O,85; 20)" << endl;
-			value = PDProxy::inverseChi2(0.85, 20);
+			cout << "PDProxy::inverseChi2(0.15, 20)" << endl;
+			cout << "Office =CHIINV(1-0,85; 20)" << endl;
+			value = PDProxy::inverseChi2(0.15, 20);
 			errors += TEST_EQUAL_FP(value, 13.6038595449049);
 			break;
 		}
