@@ -88,26 +88,16 @@ public:
         xLowerLimit = 0;
         xUpperLimit = 24*(1+ (degreeFreedom/10));
 
-        double median = degreeFreedom*pow((1 - 2/(9*degreeFreedom)),3);
         //determinar a e b necessários
-        double a,b;
-        if (cumulativeProbability == 0.5) {
-            return median;
-        } else if (cumulativeProbability > 0.5) {
-            a = median;
-            b = xUpperLimit;
-        } else {
-            a = xLowerLimit;
-            b = median;
-        }
+        double a = xLowerLimit;
+        double b = xUpperLimit;
 
-        std::cout << "lowerLimit = "<< xLowerLimit << ", upperLimit = " << xUpperLimit << ", median = " << median << ", probability = " << cumulativeProbability << std::endl;
+        std::cout << "lowerLimit = "<< xLowerLimit << ", upperLimit = " << xUpperLimit << ", probability = " << cumulativeProbability << std::endl;
 
-        // usar integrais conhecidas de a e diminuir no cumulative probability
-
-        double fa = ProbabilityDistributionBase::chi2(a, degreeFreedom);
+        SolverProxy solver;
+        double fa = 0;
         std::cout << "fa = "<< fa << std::endl;
-        double fb = ProbabilityDistributionBase::chi2(b, degreeFreedom);
+        double fb = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::chi2, degreeFreedom);
         std::cout << "fb = "<< fb << std::endl;
         double x = PDProxy::findInverseChi2(a, fa, b, fb, 0, cumulativeProbability, degreeFreedom);
 
@@ -116,51 +106,71 @@ public:
 	    return x;
 	}
 	static double inverseFFisherSnedecor(double cumulativeProbability, double d1, double d2){
-	    // DESENVOLVER
-	    return 0.0;
+	    double xLowerLimit, xUpperLimit;
+        xLowerLimit = 0;
+        xUpperLimit = (1000/d1) + 5000/(5*pow(d2, 2));
+
+        //determinar a e b necessários
+        double a = xLowerLimit;
+        double b = xUpperLimit;
+
+        std::cout << "lowerLimit = "<< xLowerLimit << ", upperLimit = " << xUpperLimit << ", probability = " << cumulativeProbability << std::endl;
+
+        SolverProxy solver;
+        double fa = 0;
+        std::cout << "fa = "<< fa << std::endl;
+        double fb = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::fisherSnedecor, d1, d2);
+        std::cout << "fb = "<< fb << std::endl;
+        double x = PDProxy::findInverseFFisherSnedecor(a, fa, b, fb, 0, cumulativeProbability, d1, d2);
+
+        //probabilityValuesCache.push_back(std::tuple<double, double, double, double, double>(mean, stddev, xLowerLimit, x, cumulativeProbability));
+        // retornar x tal que a integral de -infinito até x seja igual a cumulativeProbability
+	    return x;
 	}
 	static double inverseNormal(double cumulativeProbability, double mean, double stddev){
         // distribuição acumulada em lowerLimit =~ 0
-        double xLowerLimit = mean - 4*stddev;
+        double xLowerLimit = mean - 5*stddev;
+
+
         // distribuição acumulada em upperLimit =~ 1
-        double xUpperLimit = mean + 4*stddev;
+        double xUpperLimit = mean + 5*stddev;
 
-        struct normalDistributionCacheEntry halfDistributionLower =
-            {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = mean, .cumulativeProbability = 0.5};
-        insertInNormalCache(halfDistributionLower);
-        struct normalDistributionCacheEntry halfDistributionUpper =
-            {.mean = mean, .stddev = stddev, .a = mean, .b = xUpperLimit, .cumulativeProbability = 0.5};
-        insertInNormalCache(halfDistributionUpper);
+        // struct normalDistributionCacheEntry halfDistributionLower =
+        //     {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = mean, .cumulativeProbability = 0.5};
+        // insertInNormalCache(halfDistributionLower);
+        // struct normalDistributionCacheEntry halfDistributionUpper =
+        //     {.mean = mean, .stddev = stddev, .a = mean, .b = xUpperLimit, .cumulativeProbability = 0.5};
+        // insertInNormalCache(halfDistributionUpper);
 
-        for (struct normalDistributionCacheEntry cachedValue : normalDistributionCache) {
-            if (isClose(cachedValue.mean, mean) && isClose(cachedValue.stddev, stddev) &&
-                isClose(cachedValue.cumulativeProbability, cumulativeProbability) && isClose(cachedValue.a, xLowerLimit)) {
-                    // std::cout << " Pegou valor já calculado na cache!" << std::endl;
-                    return cachedValue.b;
-            }
-        }
+        // for (struct normalDistributionCacheEntry cachedValue : normalDistributionCache) {
+        //     if (isClose(cachedValue.mean, mean) && isClose(cachedValue.stddev, stddev) &&
+        //         isClose(cachedValue.cumulativeProbability, cumulativeProbability) && isClose(cachedValue.a, xLowerLimit)) {
+        //             // std::cout << " Pegou valor já calculado na cache!" << std::endl;
+        //             return cachedValue.b;
+        //     }
+        // }
 
         // determinar a e b necessários
-        double a,b;
+        double a,b,fa,fb;
+
+        SolverProxy solver;
 
         if (cumulativeProbability == 0.5) {
             return mean;
         } else if (cumulativeProbability > 0.5) {
             a = mean;
+            fa = 0.5;
             b = xUpperLimit;
+            fb = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::normal, mean, stddev);
         } else {
             a = xLowerLimit;
+            fa = 0;
             b = mean;
+            fb = 0.5;
         }
 
-        // std::cout << "lowerLimit = "<< a << ", upperLimit = " << b << ", probability = " << cumulativeProbability << std::endl;
+        std::cout << "lowerLimit = "<< xLowerLimit << ", upperLimit = " << xUpperLimit << ", probability = " << cumulativeProbability << std::endl;
 
-        // usar integrais conhecidas de a e diminuir no cumulative probability
-
-        double fa = ProbabilityDistributionBase::normal(a, mean, stddev);
-        // std::cout << "fa = "<< fa << std::endl;
-        double fb = ProbabilityDistributionBase::normal(b, mean, stddev);
-        // std::cout << "fb = "<< fb << std::endl;
         double x = PDProxy::findInverseNormal(a, fa, b, fb, 0, cumulativeProbability, mean, stddev);
 
         struct normalDistributionCacheEntry result = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = x, .cumulativeProbability = cumulativeProbability};
@@ -230,136 +240,153 @@ public:
     */
 
 	static double findInverseChi2(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double degreeFreedom){
-	    if (PDProxy::getMaxRecursions() == recursions) {
+
+        if (PDProxy::getMaxRecursions() == recursions) {
             return b;
         }
-        double xLowerLimit = 0;
 
         SolverProxy solver;
 
-        double integralA = solver.integrate(xLowerLimit, a, &ProbabilityDistributionBase::chi2, degreeFreedom);
-        double integralB = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::chi2, degreeFreedom);
+        double currentProbability = cumulativeProbability - fa;
+        double approximateDerivative = (currentProbability / (fb - fa))*(b-a);
+        double root = a + approximateDerivative;
+        double fr = solver.integrate(a, b, &ProbabilityDistributionBase::chi2, degreeFreedom) + fa;
 
-        double integralValue;
-        if (a > b && integralB < cumulativeProbability) {
-            integralValue = solver.integrate(b, a, &ProbabilityDistributionBase::chi2, degreeFreedom) + integralB;
-        } else if (integralA < cumulativeProbability) {
-            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::chi2, degreeFreedom) + integralA;
+        std::cout << "Iteração " << recursions + 1 <<": froot = "<< fr << " probabilidade esperada =  " << cumulativeProbability << " root =  " << root << std::endl;
+
+        double maxValue = fmax(fr, cumulativeProbability);
+        if (abs(fr - cumulativeProbability)/maxValue < 1e-3) {
+            return root;
+        }
+
+        if (fr < cumulativeProbability) {
+            return PDProxy::findInverseChi2(root, fr, b, fb, ++recursions, cumulativeProbability, degreeFreedom);  
         } else {
-            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::chi2, degreeFreedom);
+            return PDProxy::findInverseChi2(a, fa, root, fr, ++recursions, cumulativeProbability, degreeFreedom);  
         }
-
-        std::cout << "Iteração " << recursions + 1 <<": integral = "<< integralValue << std::endl;
-        std::cout << "probabilidade esperada =  " << cumulativeProbability << std::endl;
-
-        double maxValue = fmax(integralValue, cumulativeProbability);
-        if (abs(integralValue - cumulativeProbability)/maxValue < 1e-3) {
-            std::cout << "integral - probability = " << integralValue - cumulativeProbability << std::endl;
-            std::cout << "Retorno = " << b << std::endl;
-            return fmax(a,b);
-        }
-
-        // implementar método da secante p/ integral e achar valores de a e b novos
-        std::cout << "Integral de a (-infinito até " << a <<") = " << integralA << std::endl;
-        std::cout << "Integral de b (-infinito até " << b <<") = " << integralB << std::endl;
-        double approximateDerivative = (integralB - integralA)*degreeFreedom/((b-a));
-        std::cout << "Derivada aproximada = " << approximateDerivative << std::endl;
-        double root = a - (integralA/approximateDerivative);
-        std::cout << "Root = " << root << std::endl;
-
-        
-        a = b;
-        fa = fb;
-        b = root;
-        fb = fb = ProbabilityDistributionBase::chi2(b, degreeFreedom);
-
-        return PDProxy::findInverseChi2(a, fa, b, fb, ++recursions, cumulativeProbability, degreeFreedom);  
 	}
 	static double findInverseFFisherSnedecor(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double d1, double d2){
-	    // DESENVOLVER RECURSIVO
-	    return 0.0;
+	    if (PDProxy::getMaxRecursions() == recursions) {
+            return b;
+        }
+
+        SolverProxy solver;
+
+        double currentProbability = cumulativeProbability - fa;
+        double approximateDerivative = (currentProbability / (fb - fa))*(b-a);
+        double root = a + approximateDerivative;
+        double fr = solver.integrate(a, b, &ProbabilityDistributionBase::fisherSnedecor, d1, d2) + fa;
+
+        std::cout << "Iteração " << recursions + 1 <<": froot = "<< fr << " probabilidade esperada =  " << cumulativeProbability << " root =  " << root << std::endl;
+
+        double error = abs(fr - cumulativeProbability);
+        std::cout << "Erro =  " << error << std::endl;
+        if (abs(fr - cumulativeProbability) < 1e-2) {
+            return root;
+        }
+
+        if (fr < cumulativeProbability) {
+            return PDProxy::findInverseFFisherSnedecor(root, fr, b, fb, ++recursions, cumulativeProbability, d1, d2);  
+        } else {
+            return PDProxy::findInverseFFisherSnedecor(a, fa, root, fr, ++recursions, cumulativeProbability, d1, d2);  
+        }
 	}
 	static double findInverseNormal(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev){
         if (PDProxy::getMaxRecursions() == recursions) {
             return b;
         }
-        double xLowerLimit = mean - 4*stddev;
+        // double xLowerLimit = mean - 5*stddev;
 
-        double integralA = -1, integralB = -1, integralValue = -1;
+        // double integralA = -1, integralB = -1, integralValue = -1;
 
-        for (struct normalDistributionCacheEntry cachedValue : normalDistributionCache) {
-            if (isClose(cachedValue.mean, mean) && isClose(cachedValue.stddev, stddev)) {
-                if (isClose(cachedValue.b, a) && isClose(cachedValue.a, xLowerLimit)) {
-                    integralA = cachedValue.cumulativeProbability;
-                }
-                if (isClose(cachedValue.b, b) && isClose(cachedValue.a, xLowerLimit)) {
-                    integralB = cachedValue.cumulativeProbability;
-                }
-                if (isClose(cachedValue.a, a) && isClose(cachedValue.b, b)) {
-                    integralValue = cachedValue.cumulativeProbability;
-                }
-            }
-        }
+        // for (struct normalDistributionCacheEntry cachedValue : normalDistributionCache) {
+        //     if (isClose(cachedValue.mean, mean) && isClose(cachedValue.stddev, stddev)) {
+        //         if (isClose(cachedValue.b, a) && isClose(cachedValue.a, xLowerLimit)) {
+        //             integralA = cachedValue.cumulativeProbability;
+        //         }
+        //         if (isClose(cachedValue.b, b) && isClose(cachedValue.a, xLowerLimit)) {
+        //             integralB = cachedValue.cumulativeProbability;
+        //         }
+        //         if (isClose(cachedValue.a, a) && isClose(cachedValue.b, b)) {
+        //             integralValue = cachedValue.cumulativeProbability;
+        //         }
+        //     }
+        // }
+
+        // SolverProxy solver;
+
+        // if (integralA == -1) {
+        //     integralA = solver.integrate(xLowerLimit, a, &ProbabilityDistributionBase::normal, mean, stddev);
+        //     struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = a, .cumulativeProbability = integralA};
+        //     insertInNormalCache(newEntry);
+        // }
+        // if (integralB == -1) {
+        //     integralB = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::normal, mean, stddev);
+        //     struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = b, .cumulativeProbability = integralB};
+        //     // std::cout << "{ mean = "<< newEntry.mean << ", stddev = " << newEntry.stddev << ", a = " << newEntry.a << ", b = "<< newEntry.b << ", cumulativeProbability = " << newEntry.cumulativeProbability << "}" << std::endl;
+        //     insertInNormalCache(newEntry);
+        // }
+
+        // if (a > b && integralB < cumulativeProbability) {
+        //     if (integralValue == -1) {
+        //         integralValue = solver.integrate(b, a, &ProbabilityDistributionBase::normal, mean, stddev);
+        //         struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = b, .b = a, .cumulativeProbability = integralValue};
+        //     }
+        //     integralValue += integralB;
+        //     struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = a, .cumulativeProbability = integralValue};
+        // } else if (integralA < cumulativeProbability) {
+        //     if (integralValue == -1) {
+        //         integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
+        //         struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = a, .b = b, .cumulativeProbability = integralValue};
+        //         insertInNormalCache(newEntry);
+        //     }
+        //     integralValue += integralA;
+        // } else if (integralValue == -1) {
+        //     integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
+        // }
+
+        // struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = b, .cumulativeProbability = integralValue};
+        // insertInNormalCache(newEntry);
+
+        // // std::cout << "Iteração " << recursions + 1 <<": integral = "<< integralValue << std::endl;
+        // // std::cout << "probabilidade esperada =  " << cumulativeProbability << std::endl;
+
+        // double maxValue = fmax(integralValue, cumulativeProbability);
+        // if (abs(integralValue - cumulativeProbability)/maxValue < 1e-3) {
+        //     // std::cout << "integral - probability = " << integralValue - cumulativeProbability << std::endl;
+        //     // std::cout << "Retorno = " << b << std::endl;degreeFreedom
+
+        // a = b;
+        // fa = fb;
+        // b = root;
+        // fb = ProbabilityDistributionBase::normal(b, mean, stddev);
+
+        // return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability, mean, stddev);
 
         SolverProxy solver;
 
-        if (integralA == -1) {
-            integralA = solver.integrate(xLowerLimit, a, &ProbabilityDistributionBase::normal, mean, stddev);
-            struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = a, .cumulativeProbability = integralA};
-            insertInNormalCache(newEntry);
-        }
-        if (integralB == -1) {
-            integralB = solver.integrate(xLowerLimit, b, &ProbabilityDistributionBase::normal, mean, stddev);
-            struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = b, .cumulativeProbability = integralB};
-            // std::cout << "{ mean = "<< newEntry.mean << ", stddev = " << newEntry.stddev << ", a = " << newEntry.a << ", b = "<< newEntry.b << ", cumulativeProbability = " << newEntry.cumulativeProbability << "}" << std::endl;
-            insertInNormalCache(newEntry);
-        }
+        double currentProbability = cumulativeProbability - fa;
+        double approximateDerivative = (currentProbability / (fb - fa))*(b-a);
+        double root = a + approximateDerivative;
 
-        if (a > b && integralB < cumulativeProbability) {
-            if (integralValue == -1) {
-                integralValue = solver.integrate(b, a, &ProbabilityDistributionBase::normal, mean, stddev);
-                struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = b, .b = a, .cumulativeProbability = integralValue};
-            }
-            integralValue += integralB;
-            struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = a, .cumulativeProbability = integralValue};
-        } else if (integralA < cumulativeProbability) {
-            if (integralValue == -1) {
-                integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
-                struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = a, .b = b, .cumulativeProbability = integralValue};
-                insertInNormalCache(newEntry);
-            }
-            integralValue += integralA;
-        } else if (integralValue == -1) {
-            integralValue = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev);
-        }
-
-        struct normalDistributionCacheEntry newEntry = {.mean = mean, .stddev = stddev, .a = xLowerLimit, .b = b, .cumulativeProbability = integralValue};
-        insertInNormalCache(newEntry);
-
-        // std::cout << "Iteração " << recursions + 1 <<": integral = "<< integralValue << std::endl;
-        // std::cout << "probabilidade esperada =  " << cumulativeProbability << std::endl;
-
-        double maxValue = fmax(integralValue, cumulativeProbability);
-        if (abs(integralValue - cumulativeProbability)/maxValue < 1e-3) {
-            // std::cout << "integral - probability = " << integralValue - cumulativeProbability << std::endl;
-            // std::cout << "Retorno = " << b << std::endl;
-            return b;
-        }
-
-        // implementar método da secante p/ integral e achar valores de a e b novos
-        // std::cout << "Integral de a (-infinito até " << a <<") = " << integralA << std::endl;
-        // std::cout << "Integral de b (-infinito até " << b <<") = " << integralB << std::endl;
-        double approximateDerivative = (integralB - integralA)/((b-a)/b);
+        // double approximateDerivative = (fb - fa)*b/((b-a));
         // std::cout << "Derivada aproximada = " << approximateDerivative << std::endl;
-        double root = a - (integralA/approximateDerivative);
-        // std::cout << "Root = " << root << std::endl;
+        // double root = a - (fa/approximateDerivative);
 
-        a = b;
-        fa = fb;
-        b = root;
-        fb = ProbabilityDistributionBase::normal(b, mean, stddev);
+        double fr = solver.integrate(a, b, &ProbabilityDistributionBase::normal, mean, stddev) + fa;
 
-        return PDProxy::findInverseNormal(a, fa, b, fb, ++recursions, cumulativeProbability, mean, stddev);
+        std::cout << "Iteração " << recursions + 1 <<": froot = "<< fr << " probabilidade esperada =  " << cumulativeProbability << " root =  " << root << std::endl;
+
+        double maxValue = fmax(fr, cumulativeProbability);
+        if (abs(fr - cumulativeProbability)/maxValue < 1e-4) {
+            return root;
+        }
+
+        if (fr < cumulativeProbability) {
+            return PDProxy::findInverseNormal(root, fr, b, fb, ++recursions, cumulativeProbability, mean ,stddev);  
+        } else {
+            return PDProxy::findInverseNormal(a, fa, root, fr, ++recursions, cumulativeProbability, mean, stddev);  
+        }
 	}
 	static double findInverseTStudent(double a, double fa, double b, double fb, unsigned int recursions, double cumulativeProbability, double mean, double stddev, double degreeFreedom){
 	    if (PDProxy::getMaxRecursions() == recursions) {
