@@ -6,421 +6,427 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1009</width>
-    <height>669</height>
+    <width>1285</width>
+    <height>726</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBox">
+   <widget class="QWidget" name="horizontalLayoutWidget_4">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>231</width>
-      <height>601</height>
+      <x>0</x>
+      <y>0</y>
+      <width>1011</width>
+      <height>611</height>
      </rect>
     </property>
-    <property name="title">
-     <string>Menu de funções</string>
-    </property>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>160</y>
-       <width>211</width>
-       <height>431</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Window</string>
-     </property>
-     <widget class="QWidget" name="horizontalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>191</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Passo:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPlainTextEdit" name="plainTextEdit">
-         <property name="maximumSize">
-          <size>
-           <width>100</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="plainText">
-          <string>10</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>%</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QPushButton" name="pushButton">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>90</y>
-        <width>61</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Up</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>61</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Left</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_3">
-      <property name="geometry">
-       <rect>
-        <x>70</x>
-        <y>120</y>
-        <width>71</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Right</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_4">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>150</y>
-        <width>61</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Down</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_5">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>100</y>
-        <width>51</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>In</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_6">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>150</y>
-        <width>51</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Out</string>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_5">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>180</y>
-        <width>191</width>
-        <height>91</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Rotação</string>
-      </property>
-      <widget class="QWidget" name="horizontalLayoutWidget_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>20</y>
-         <width>191</width>
-         <height>31</height>
-        </rect>
+    <layout class="QHBoxLayout" name="centralHorizontalLayout" stretch="0,0">
+     <item>
+      <widget class="QGroupBox" name="menufuncoes">
+       <property name="maximumSize">
+        <size>
+         <width>500</width>
+         <height>16777215</height>
+        </size>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Graus</string>
+       <property name="title">
+        <string>Menu de funções</string>
+       </property>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>160</y>
+          <width>211</width>
+          <height>431</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Window</string>
+        </property>
+        <widget class="QWidget" name="horizontalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>40</y>
+           <width>191</width>
+           <height>89</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayoutPasso">
+          <item>
+           <widget class="QLabel" name="labelPasso">
+            <property name="text">
+             <string>Passo:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacerPassoTexto">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEditPasso">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="plainText">
+             <string>10</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelPorcento_2">
+            <property name="text">
+             <string>%</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QPushButton" name="pushButtonUp">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>90</y>
+           <width>61</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Up</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButtonLeft">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>120</y>
+           <width>61</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Left</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButtonRight">
+         <property name="geometry">
+          <rect>
+           <x>70</x>
+           <y>120</y>
+           <width>71</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Right</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButtonDown">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>150</y>
+           <width>61</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Down</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButtonIn">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>100</y>
+           <width>51</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>In</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButtonOut">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>150</y>
+           <width>51</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Out</string>
+         </property>
+        </widget>
+        <widget class="QGroupBox" name="groupBoxRotacao">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>180</y>
+           <width>191</width>
+           <height>91</height>
+          </rect>
+         </property>
+         <property name="title">
+          <string>Rotação</string>
+         </property>
+         <widget class="QWidget" name="horizontalLayoutWidget_2">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>20</y>
+            <width>191</width>
+            <height>31</height>
+           </rect>
           </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPlainTextEdit" name="plainTextEdit_2">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>100</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="plainText">
-           <string>45
+          <layout class="QHBoxLayout" name="horizontalLayoutGraus">
+           <item>
+            <widget class="QLabel" name="labelGraus">
+             <property name="text">
+              <string>Graus</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="spacerGrausTexto">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="plainTextEditGraus">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="plainText">
+              <string>45
 </string>
-          </property>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelPorcento">
+             <property name="text">
+              <string>º</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_4">
+         <widget class="QPushButton" name="pushButtonX">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>60</y>
+            <width>41</width>
+            <height>27</height>
+           </rect>
+          </property>
           <property name="text">
-           <string>º</string>
+           <string>X</string>
           </property>
          </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QPushButton" name="pushButton_7">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>41</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_8">
-       <property name="geometry">
-        <rect>
-         <x>70</x>
-         <y>60</y>
-         <width>51</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Y</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_9">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>60</y>
-         <width>41</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Z</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget_3">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>280</y>
-        <width>191</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QLabel" name="label_5">
+         <widget class="QPushButton" name="pushButtonY">
+          <property name="geometry">
+           <rect>
+            <x>70</x>
+            <y>60</y>
+            <width>51</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Y</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButtonZ">
+          <property name="geometry">
+           <rect>
+            <x>140</x>
+            <y>60</y>
+            <width>41</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Z</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="horizontalLayoutWidget_3">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>280</y>
+           <width>234</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayoutZoom">
+          <item>
+           <widget class="QLabel" name="labelZoom">
+            <property name="text">
+             <string>Zoom</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonPlus">
+            <property name="text">
+             <string>+</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonMinus">
+            <property name="text">
+             <string>-</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QPushButton" name="pushButtonSetWindow">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>310</y>
+           <width>100</width>
+           <height>27</height>
+          </rect>
+         </property>
          <property name="text">
-          <string>Zoom</string>
+          <string>Set Window</string>
          </property>
         </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_10">
-         <property name="text">
-          <string>+</string>
+        <widget class="QGroupBox" name="groupBoxProjecao">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>340</y>
+           <width>191</width>
+           <height>81</height>
+          </rect>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_11">
-         <property name="text">
-          <string>-</string>
+         <property name="title">
+          <string>Projeção</string>
          </property>
+         <widget class="QWidget" name="verticalLayoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>20</y>
+            <width>191</width>
+            <height>58</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="botoesProjecaoLayout">
+           <item>
+            <widget class="QRadioButton" name="radioButtonParalela">
+             <property name="text">
+              <string>Paralela</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButtonPerspectiva">
+             <property name="text">
+              <string>Perspectiva</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QPushButton" name="pushButton_12">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>310</y>
-        <width>100</width>
-        <height>27</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Set Window</string>
-      </property>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_6">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>340</y>
-        <width>191</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Projeção</string>
-      </property>
-      <widget class="QWidget" name="verticalLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>20</y>
-         <width>191</width>
-         <height>58</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QRadioButton" name="radioButton">
+       </widget>
+       <widget class="QGroupBox" name="groupBoxObjetos">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>211</width>
+          <height>121</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Objetos</string>
+        </property>
+        <widget class="QListWidget" name="listWidgetObjetos">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>211</width>
+           <height>101</height>
+          </rect>
+         </property>
+         <item>
           <property name="text">
-           <string>Paralela</string>
+           <string>Reta (Reta 1)</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="radioButton_2">
+         </item>
+         <item>
           <property name="text">
-           <string>Perspectiva</string>
+           <string>Wireframe (cubo 1)</string>
           </property>
-         </widget>
-        </item>
-       </layout>
+         </item>
+        </widget>
+       </widget>
       </widget>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>211</width>
-       <height>121</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Objetos</string>
-     </property>
-     <widget class="QListWidget" name="listWidget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>20</y>
-        <width>211</width>
-        <height>101</height>
-       </rect>
-      </property>
-      <item>
-       <property name="text">
-        <string>Reta (Reta 1)</string>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="viewport">
+       <property name="title">
+        <string>Viewport</string>
        </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Wireframe (cubo 1)</string>
-       </property>
-      </item>
-     </widget>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_4">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>10</y>
-      <width>721</width>
-      <height>601</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Viewport</string>
-    </property>
-    <widget class="QGraphicsView" name="graphicsView">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>20</y>
-       <width>721</width>
-       <height>581</height>
-      </rect>
-     </property>
-    </widget>
+       <widget class="QGraphicsView" name="graphicsView">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>20</y>
+          <width>721</width>
+          <height>581</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -428,8 +434,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1009</width>
-     <height>24</height>
+     <width>1285</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuiojoij">
