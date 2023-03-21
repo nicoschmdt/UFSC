@@ -12,6 +12,9 @@ from window import CustomCanvas
 import incluirobjeto
 
 class Ui_MainWindow(object):
+    
+    objectCreationWindow = None
+    
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 754)
@@ -46,8 +49,8 @@ class Ui_MainWindow(object):
         self.listWidget.addItem(item)
         item = QtWidgets.QListWidgetItem()
         self.listWidget.addItem(item)
-        self.listWidget.itemClicked.connect(self.openObjectCreationWindow)
-        self.listWidget.clicked.connect(self.openObjectCreationWindow)
+        self.listWidget.itemClicked.connect(self.selectObject)
+        self.listWidget.itemDoubleClicked.connect(self.openObjectCreationWindow)
         
         self.verticalLayoutMenuFuncoes_2.addWidget(self.groupBoxObjetos)
         self.groupBoxWindow = QtWidgets.QGroupBox(parent=self.groupBoxMenuFuncoes)
@@ -325,9 +328,8 @@ class Ui_MainWindow(object):
         pass
     
     def openObjectCreationWindow(self):
-        ui = incluirobjeto.Ui_IncluirObjeto()
-        print(ui.labelNome)
-        ui.show()
+        self.objectCreationWindow = incluirobjeto.Ui_IncluirObjeto()
+        # adicionar lógica de pegar valores dos campos de texto
 
 if __name__ == "__main__":
     import sys
