@@ -92,19 +92,23 @@ class Ui_MainWindow(object):
         self.pushButtonUp = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButtonUp.setMaximumSize(QtCore.QSize(40, 16777215))
         self.pushButtonUp.setObjectName("pushButtonUp")
+        self.pushButtonUp.clicked.connect(self.panUp)
         self.gridLayoutMovimentacao.addWidget(self.pushButtonUp, 0, 0, 1, 1)
         self.pushButtonDown = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButtonDown.setMinimumSize(QtCore.QSize(0, 0))
         self.pushButtonDown.setMaximumSize(QtCore.QSize(40, 16777215))
         self.pushButtonDown.setObjectName("pushButtonDown")
+        self.pushButtonDown.clicked.connect(self.panDown)
         self.gridLayoutMovimentacao.addWidget(self.pushButtonDown, 1, 0, 1, 1)
         self.pushButtonLeft = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButtonLeft.setMaximumSize(QtCore.QSize(40, 16777215))
         self.pushButtonLeft.setObjectName("pushButtonLeft")
+        self.pushButtonLeft.clicked.connect(self.panLeft)
         self.gridLayoutMovimentacao.addWidget(self.pushButtonLeft, 0, 1, 1, 1)
         self.pushButtonRight = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButtonRight.setMaximumSize(QtCore.QSize(40, 16777215))
         self.pushButtonRight.setObjectName("pushButtonRight")
+        self.pushButtonRight.clicked.connect(self.panRight)
         self.gridLayoutMovimentacao.addWidget(self.pushButtonRight, 1, 1, 1, 1)
         self.pushButtonIn = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButtonIn.setMaximumSize(QtCore.QSize(40, 16777215))
@@ -181,10 +185,12 @@ class Ui_MainWindow(object):
         self.pushButtonPlus = QtWidgets.QPushButton(parent=self.verticalLayoutWidget_3)
         self.pushButtonPlus.setMaximumSize(QtCore.QSize(40, 40))
         self.pushButtonPlus.setObjectName("pushButtonPlus")
+        self.pushButtonPlus.clicked.connect(self.zoomIn)
         self.horizontalLayout.addWidget(self.pushButtonPlus)
         self.pushButtonMinus = QtWidgets.QPushButton(parent=self.verticalLayoutWidget_3)
         self.pushButtonMinus.setMaximumSize(QtCore.QSize(40, 40))
         self.pushButtonMinus.setObjectName("pushButtonMinus")
+        self.pushButtonMinus.clicked.connect(self.zoomOut)
         self.horizontalLayout.addWidget(self.pushButtonMinus)
         self.horizontalLayout.setStretch(0, 1)
         self.horizontalLayout.setStretch(1, 1)
@@ -236,6 +242,10 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.actionZoomPlus = QtGui.QAction(parent=MainWindow)
         self.actionZoomPlus.setObjectName("actionZoomPlus")
+        self.actionZoomPlus.triggered.connect(self.zoomIn)
+        self.actionZoomMinus = QtGui.QAction(parent=MainWindow)
+        self.actionZoomMinus.setObjectName("actionZoomMinus")
+        self.actionZoomMinus.triggered.connect(self.zoomOut)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -277,7 +287,29 @@ class Ui_MainWindow(object):
         self.groupBoxViewPort.setTitle(_translate("MainWindow", "Viewport"))
         self.actionZoomPlus.setText(_translate("MainWindow", "ZoomPlus"))
         self.actionZoomPlus.setShortcut(_translate("MainWindow", "+"))
+        self.actionZoomMinus.setText(_translate("MainWindow", "ZoomMinus"))
+        self.actionZoomMinus.setShortcut(_translate("MainWindow", "-"))
 
+    def zoomIn(self):
+        # placeholder
+        self.graphicsViewViewport.zoom += 1
+        
+    def zoomOut(self):
+        # placeholder
+        self.graphicsViewViewport.zoom -= 1
+        
+    # completar funções de panning
+    def panUp(self):
+        pass
+    
+    def panDown(self):
+        pass
+    
+    def panRight(self):
+        pass
+    
+    def panLeft(self):
+        pass
 
 if __name__ == "__main__":
     import sys
