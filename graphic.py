@@ -9,7 +9,7 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from window import CustomCanvas
-
+import incluirobjeto
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -36,6 +36,7 @@ class Ui_MainWindow(object):
         self.verticalLayoutMenuFuncoes.setObjectName("verticalLayoutMenuFuncoes")
         self.verticalLayoutMenuFuncoes_2 = QtWidgets.QVBoxLayout()
         self.verticalLayoutMenuFuncoes_2.setObjectName("verticalLayoutMenuFuncoes_2")
+        
         self.groupBoxObjetos = QtWidgets.QGroupBox(parent=self.groupBoxMenuFuncoes)
         self.groupBoxObjetos.setObjectName("groupBoxObjetos")
         self.listWidget = QtWidgets.QListWidget(parent=self.groupBoxObjetos)
@@ -45,6 +46,9 @@ class Ui_MainWindow(object):
         self.listWidget.addItem(item)
         item = QtWidgets.QListWidgetItem()
         self.listWidget.addItem(item)
+        self.listWidget.itemClicked.connect(self.openObjectCreationWindow)
+        self.listWidget.clicked.connect(self.openObjectCreationWindow)
+        
         self.verticalLayoutMenuFuncoes_2.addWidget(self.groupBoxObjetos)
         self.groupBoxWindow = QtWidgets.QGroupBox(parent=self.groupBoxMenuFuncoes)
         self.groupBoxWindow.setObjectName("groupBoxWindow")
@@ -289,6 +293,11 @@ class Ui_MainWindow(object):
         self.actionZoomPlus.setShortcut(_translate("MainWindow", "+"))
         self.actionZoomMinus.setText(_translate("MainWindow", "ZoomMinus"))
         self.actionZoomMinus.setShortcut(_translate("MainWindow", "-"))
+        
+    def __init__(self, MainWindow):
+        super().__init__()
+        self.setupUi(MainWindow)
+        MainWindow.show()
 
     def zoomIn(self):
         # placeholder
@@ -310,12 +319,19 @@ class Ui_MainWindow(object):
     
     def panLeft(self):
         pass
+    
+    # completar função de selecionar objeto
+    def selectObject(self):
+        pass
+    
+    def openObjectCreationWindow(self):
+        ui = incluirobjeto.Ui_IncluirObjeto()
+        print(ui.labelNome)
+        ui.show()
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    ui = Ui_MainWindow(MainWindow)
     sys.exit(app.exec())
