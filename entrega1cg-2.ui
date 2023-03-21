@@ -7,13 +7,37 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>744</height>
+    <height>754</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>800</width>
+    <height>800</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>800</width>
+    <height>800</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="maximumSize">
+    <size>
+     <width>800</width>
+     <height>800</height>
+    </size>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>800</width>
+     <height>800</height>
+    </size>
+   </property>
    <property name="font">
     <font>
      <pointsize>10</pointsize>
@@ -45,7 +69,7 @@
             <widget class="QListWidget" name="listWidget">
              <property name="geometry">
               <rect>
-               <x>10</x>
+               <x>0</x>
                <y>21</y>
                <width>231</width>
                <height>141</height>
@@ -72,7 +96,7 @@
             <widget class="QWidget" name="verticalLayoutWidget_2">
              <property name="geometry">
               <rect>
-               <x>10</x>
+               <x>0</x>
                <y>19</y>
                <width>231</width>
                <height>471</height>
@@ -90,10 +114,10 @@
                 <widget class="QWidget" name="horizontalLayoutWidget_2">
                  <property name="geometry">
                   <rect>
-                   <x>10</x>
+                   <x>0</x>
                    <y>10</y>
-                   <width>211</width>
-                   <height>41</height>
+                   <width>221</width>
+                   <height>42</height>
                   </rect>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayoutPasso" stretch="2,3,1">
@@ -150,13 +174,19 @@
                   <rect>
                    <x>0</x>
                    <y>10</y>
-                   <width>231</width>
+                   <width>221</width>
                    <height>81</height>
                   </rect>
                  </property>
                  <layout class="QGridLayout" name="gridLayoutMovimentacao">
                   <item row="0" column="0">
                    <widget class="QPushButton" name="pushButtonUp">
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Up</string>
                     </property>
@@ -164,6 +194,18 @@
                   </item>
                   <item row="1" column="0">
                    <widget class="QPushButton" name="pushButtonDown">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Down</string>
                     </property>
@@ -171,6 +213,12 @@
                   </item>
                   <item row="0" column="1">
                    <widget class="QPushButton" name="pushButtonLeft">
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Left</string>
                     </property>
@@ -178,6 +226,12 @@
                   </item>
                   <item row="1" column="1">
                    <widget class="QPushButton" name="pushButtonRight">
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Right</string>
                     </property>
@@ -185,6 +239,12 @@
                   </item>
                   <item row="0" column="2">
                    <widget class="QPushButton" name="pushButtonIn">
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>In</string>
                     </property>
@@ -192,6 +252,12 @@
                   </item>
                   <item row="1" column="2">
                    <widget class="QPushButton" name="pushButtonOut">
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Out</string>
                     </property>
@@ -321,15 +387,18 @@
                 <widget class="QWidget" name="verticalLayoutWidget_3">
                  <property name="geometry">
                   <rect>
-                   <x>10</x>
+                   <x>0</x>
                    <y>10</y>
-                   <width>211</width>
+                   <width>221</width>
                    <height>81</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayoutZoom">
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1">
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QLabel" name="labelZoom">
                       <property name="maximumSize">
@@ -372,7 +441,7 @@
                    </layout>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton">
+                   <widget class="QPushButton" name="pushButtonSetWindow">
                     <property name="text">
                      <string>Set Window</string>
                     </property>
@@ -387,9 +456,9 @@
                 <widget class="QGroupBox" name="groupBoxProjecao">
                  <property name="geometry">
                   <rect>
-                   <x>9</x>
+                   <x>-1</x>
                    <y>-1</y>
-                   <width>211</width>
+                   <width>221</width>
                    <height>81</height>
                   </rect>
                  </property>
@@ -399,9 +468,9 @@
                  <widget class="QWidget" name="verticalLayoutWidget_5">
                   <property name="geometry">
                    <rect>
-                    <x>10</x>
+                    <x>0</x>
                     <y>19</y>
-                    <width>201</width>
+                    <width>221</width>
                     <height>61</height>
                    </rect>
                   </property>
