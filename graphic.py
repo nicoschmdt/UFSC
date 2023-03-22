@@ -8,13 +8,14 @@
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+import window
 from window import CustomCanvas
 import incluirobjeto
 
-class Ui_MainWindow(object):
-    
+
+class Ui_MainWindow:
     objectCreationWindow = None
-    
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 754)
@@ -39,19 +40,15 @@ class Ui_MainWindow(object):
         self.verticalLayoutMenuFuncoes.setObjectName("verticalLayoutMenuFuncoes")
         self.verticalLayoutMenuFuncoes_2 = QtWidgets.QVBoxLayout()
         self.verticalLayoutMenuFuncoes_2.setObjectName("verticalLayoutMenuFuncoes_2")
-        
+
         self.groupBoxObjetos = QtWidgets.QGroupBox(parent=self.groupBoxMenuFuncoes)
         self.groupBoxObjetos.setObjectName("groupBoxObjetos")
         self.listWidget = QtWidgets.QListWidget(parent=self.groupBoxObjetos)
         self.listWidget.setGeometry(QtCore.QRect(0, 21, 231, 141))
         self.listWidget.setObjectName("listWidget")
-        item = QtWidgets.QListWidgetItem()
-        self.listWidget.addItem(item)
-        item = QtWidgets.QListWidgetItem()
-        self.listWidget.addItem(item)
         self.listWidget.itemClicked.connect(self.selectObject)
         self.listWidget.itemDoubleClicked.connect(self.openObjectCreationWindow)
-        
+
         self.verticalLayoutMenuFuncoes_2.addWidget(self.groupBoxObjetos)
         self.groupBoxWindow = QtWidgets.QGroupBox(parent=self.groupBoxMenuFuncoes)
         self.groupBoxWindow.setObjectName("groupBoxWindow")
@@ -240,6 +237,7 @@ class Ui_MainWindow(object):
         self.graphicsViewViewport = CustomCanvas(parent=self.groupBoxViewPort)
         self.graphicsViewViewport.setGeometry(QtCore.QRect(0, 20, 571, 691))
         self.graphicsViewViewport.setObjectName("graphicsViewViewport")
+
         self.horizontalLayoutCentral.addWidget(self.groupBoxViewPort)
         self.horizontalLayoutCentral.setStretch(0, 1)
         self.horizontalLayoutCentral.setStretch(1, 2)
@@ -264,10 +262,10 @@ class Ui_MainWindow(object):
         self.groupBoxObjetos.setTitle(_translate("MainWindow", "Objetos"))
         __sortingEnabled = self.listWidget.isSortingEnabled()
         self.listWidget.setSortingEnabled(False)
-        item = self.listWidget.item(0)
-        item.setText(_translate("MainWindow", "Reta(Reta 1)"))
-        item = self.listWidget.item(1)
-        item.setText(_translate("MainWindow", "Wireframe(cubo 1)"))
+        for item in self.graphicsViewViewport.world_items:
+            widget = QtWidgets.QListWidgetItem()
+            widget.setText(_translate("MainWindow", item.name))
+            self.listWidget.addItem(widget)
         self.listWidget.setSortingEnabled(__sortingEnabled)
         self.groupBoxWindow.setTitle(_translate("MainWindow", "Window"))
         self.label.setText(_translate("MainWindow", "Passo:"))
@@ -296,43 +294,68 @@ class Ui_MainWindow(object):
         self.actionZoomPlus.setShortcut(_translate("MainWindow", "+"))
         self.actionZoomMinus.setText(_translate("MainWindow", "ZoomMinus"))
         self.actionZoomMinus.setShortcut(_translate("MainWindow", "-"))
-        
+
     def __init__(self, MainWindow):
         super().__init__()
         self.setupUi(MainWindow)
+        self.add_item_to_world(
+            window.WorldItem(
+                name="Reta (Reta 1)",
+                graphic=window.Line(start=window.Point(0, 0),
+                                    end=window.Point(500, 500))
+            )
+        )
         MainWindow.show()
+
+    def add_item_to_world(self, item: window.WorldItem):
+        self.graphicsViewViewport.world_items.append(item)
+
+        widget = QtWidgets.QListWidgetItem()
+        widget.setText(item.name)
+        self.listWidget.addItem(widget)
+        self.graphicsViewViewport.repaint()
 
     def zoomIn(self):
         # placeholder
-        self.graphicsViewViewport.zoom += 1
-        
+        self.graphicsViewViewport.viewport.zoom(int(self.plainTextEdit.toPlainText()))
+        self.graphicsViewViewport.repaint()
+
     def zoomOut(self):
         # placeholder
-        self.graphicsViewViewport.zoom -= 1
-        
+        self.graphicsViewViewport.viewport.zoom(-int(self.plainTextEdit.toPlainText()))
+        self.graphicsViewViewport.repaint()
+
     # completar funções de panning
     def panUp(self):
-        pass
-    
+        self.graphicsViewViewport.viewport.move_window(0, -10)
+        self.graphicsViewViewport.repaint()
+
     def panDown(self):
-        pass
-    
-    def panRight(self):
-        pass
-    
+        self.graphicsViewViewport.viewport.move_window(0, 10)
+        self.graphicsViewViewport.repaint()
+
     def panLeft(self):
-        pass
-    
+        self.graphicsViewViewport.viewport.move_window(10, 0)
+        self.graphicsViewViewport.repaint()
+
+    def panRight(self):
+        self.graphicsViewViewport.viewport.move_window(-10, 0)
+        self.graphicsViewViewport.repaint()
+
     # completar função de selecionar objeto
     def selectObject(self):
         pass
-    
+
     def openObjectCreationWindow(self):
-        self.objectCreationWindow = incluirobjeto.Ui_IncluirObjeto()
+        self.objectCreationWindow = incluirobjeto.Ui_IncluirObjeto(self.add_item_to_world)
         # adicionar lógica de pegar valores dos campos de texto
+
+
+
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow(MainWindow)

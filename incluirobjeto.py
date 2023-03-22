@@ -9,6 +9,9 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget
 
+import window
+
+
 class Ui_IncluirObjeto(QWidget):
     
     vertixCounter: int = 1
@@ -364,18 +367,40 @@ class Ui_IncluirObjeto(QWidget):
         self.verticalLayoutWireframe.addWidget(self.pushButtonAdicionarVertice)
 
     def createObject(self):
-        currentTab = self.tabWidget.currentWidget()
-        tabVerticalLayout = currentTab.findChild(QtWidgets.QVBoxLayout)
-        
-        # sempre ter um widget sobrando para padronizar, então iterar -1 vezes que o count()
-        for i in range (tabVerticalLayout.count() - 1):
-            groupBox = tabVerticalLayout.itemAt(i).widget()
-            print(groupBox.objectName())
-            print(groupBox.children())
+        # currentTab = self.tabWidget.currentWidget()
+        # tabVerticalLayout = currentTab.findChild(QtWidgets.QVBoxLayout)
+        #
+        # # sempre ter um widget sobrando para padronizar, então iterar -1 vezes que o count()
+        # for i in range (tabVerticalLayout.count() - 1):
+        #     groupBox = tabVerticalLayout.itemAt(i).widget()
+        #     print(groupBox.objectName())
+        #     print(groupBox.children())
+        #
+        index = self.tabWidget.currentIndex()
+        if index == 0:
+            self.on_ok(window.WorldItem(
+                name=self.textEditInserirNome.toPlainText(),
+                graphic=window.Point(int(self.plainTextEditXPonto.toPlainText()),
+                                     int(self.plainTextEditYPonto.toPlainText()))
+            ))
+        elif index == 1:
+            self.on_ok(window.WorldItem(
+                name=self.textEditInserirNome.toPlainText(),
+                graphic=window.Line(
+                    start=window.Point(int(self.plainTextEditXPontoInicialReta.toPlainText()),
+                                       int(self.plainTextEditYPontoInicialReta.toPlainText())),
+                    end=window.Point(int(self.plainTextEditXPontoFinalReta.toPlainText()),
+                                     int(self.plainTextEditYPontoFinalReta.toPlainText()))
+                )))
+        else:
+            pass
+
+        self.close()
     
-    def __init__(self):
+    def __init__(self, on_ok):
         super().__init__()
         self.setupUi()
+        self.on_ok = on_ok
         self.show()
 
 if __name__ == "__main__":

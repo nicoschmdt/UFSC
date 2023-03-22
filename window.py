@@ -13,25 +13,9 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QPalette, QColor, QPainter
 from PySide6.QtCore import QObject, Slot
-from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 
-# import style_rc
-
-
-
-# [ ] Display file para 2D capaz de representar pontos, segmentos de retas e polígonos (listas de pontos
-# interconectados), onde: Cada objeto possui um nome, cada objeto possui um tipo e sua lista de  coordenadas de
-# tamanho variável dependendo de seu tipo. Para facilitar a sua vida mais tarde, chame o objeto polígono de
-# wireframe;
-# [ ] Transformação de viewport em 2D; [ ] Funções de Panning/navegação 2D (movimentação do window);
-# [ ] Funções de Zooming (modificação do tamanho do window);
-
-# OBS: Use apenas as diretivas de desenho de pontos e linhas para exibir os objetos no canvas, não use
-# drawPolygon;
-# A transformada de viewport não deve distorcer os objetos. Ex.: Se um objeto for um quadrado,
-# ele deve ser exibido como tal.
 
 @dataclass
 class Size:
@@ -39,6 +23,29 @@ class Size:
     y: int
     width: int
     height: int
+
+
+@dataclass
+class Point:
+    x: int
+    y: int
+
+
+@dataclass
+class Line:
+    start: Point
+    end: Point
+
+
+@dataclass
+class Wireframe:
+    points: list[Point]
+
+
+@dataclass
+class WorldItem:
+    name: str
+    graphic: Point | Line | Wireframe
 
 
 class Viewport:
@@ -53,11 +60,18 @@ class Viewport:
             height=height
         )
 
-    def draw(self, painter: QPainter):
+    def draw(self, painter: QPainter, items: list[WorldItem]):
         painter.setPen(QColor.fromString('blue'))
         painter.drawRect(self.viewport_size.x, self.viewport_size.y, self.viewport_size.width,
                          self.viewport_size.height)
-        # painter.drawPoint(int((self.viewport_size.x+self.viewport_size.width)/2),int((self.viewport_size.y+self.viewport_size.height)/2))
+        for item in items:
+            obj = item.graphic
+            if isinstance(obj, Line):
+                self.draw_line(obj.start.x, obj.start.y, obj.end.x, obj.end.y, painter)
+            elif isinstance(obj, Point):
+                self.draw_point(obj.x, obj.y, painter)
+            elif isinstance(obj, Wireframe):
+                self.draw_wireframe(obj.points)
 
     def zoom(self, step: int):
         # print(f'x={self.window_size.x}, y={self.window_size.y}, max_x={self.window_size.x + self.window_size.width}, max_y={self.window_size.y + self.window_size.height}')
@@ -85,17 +99,23 @@ class Viewport:
             height=height
         )
 
+    def transformada_vp_y(self, y):
+        # print(f'x={self.window_size.x}, y={self.window_size.y}, max_x={self.window_size.x + self.window_size.width}, max_y={self.window_size.y + self.window_size.height}')
+        y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))
+        y_vp *= (self.viewport_size.y + self.viewport_size.height) - self.viewport_size.y
+        return int(y_vp + self.viewport_size.y)
+
     def transformada_vp_x(self, x):
         # print(f'x={self.viewport_size.x}, y={self.viewport_size.y}, max_x={self.viewport_size.x + self.viewport_size.width}, max_y={self.viewport_size.y + self.viewport_size.height}')
         x_vp = ((x - self.window_size.x) / ((self.window_size.width + self.window_size.x) - self.window_size.x))
         x_vp *= (self.viewport_size.x + self.viewport_size.width) - self.viewport_size.x
         return int(x_vp + self.viewport_size.x)
 
-    def transformada_vp_y(self, y):
-        # print(f'x={self.window_size.x}, y={self.window_size.y}, max_x={self.window_size.x + self.window_size.width}, max_y={self.window_size.y + self.window_size.height}')
-        y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))
-        y_vp *= (self.viewport_size.y + self.viewport_size.height) - self.viewport_size.y
-        return int(y_vp + self.viewport_size.y)
+    def draw_point(self, x: int, y: int, painter: QPainter):
+        painter.drawPoint(
+            int((self.viewport_size.x + self.viewport_size.width)/2),
+            int((self.viewport_size.y + self.viewport_size.height)/2)
+        )
 
     def draw_line(self, x1, y1, x2, y2, painter: QPainter):
         # print(f'x1={x1}, y1={y1}, x2={x2}, y2={y2}')
@@ -106,9 +126,14 @@ class Viewport:
         # print(f'x1={x1}, y1={y1}, x2={x2}, y2={y2}')
         painter.drawLine(x1, y1, x2, y2)
 
+    def draw_wireframe(self, points: list[Point]):
+        pass
+
 
 class CustomCanvas(QWidget):
-    step = 10
+    step: int
+    viewport: Viewport
+    world_items: list[WorldItem]
 
     def __init__(self, color='white', **kwargs):
         super(CustomCanvas, self).__init__(**kwargs)
@@ -118,6 +143,12 @@ class CustomCanvas(QWidget):
         palette.setColor(QPalette.ColorRole.Window, QColor(color))
         self.setPalette(palette)
 
+        self.step = 10
+        self.viewport = Viewport(0, 0, 515, 680)
+        self.viewport.set_window(0, 0, 200, 200)
+
+        self.world_items = []
+
     def paintEvent(self, event):
         super().paintEvent(event)
         print("paint")
@@ -126,13 +157,12 @@ class CustomCanvas(QWidget):
 
         # draw viewport
         # viewport = Viewport(5, 5, 400, 200)
-        viewport = Viewport(0, 0, 515, 680)
-        viewport.draw(painter)
-        viewport.set_window(0, 0, 200, 200)
-        viewport.move_window(50,0)
+        # viewport = Viewport(0, 0, 515, 680)
+        self.viewport.draw(painter, self.world_items)
+        # self.viewport.move_window(50,0)
         # viewport.zoom(0)
 
-        viewport.draw_line(0, 0, 100, 100, painter)
+        # viewport.draw_line(0, 0, 100, 100, painter)
         # viewport.draw_line(100, 0, 400, 100, painter)
         # painter.drawLine(5, 5, 105, 105)
 
