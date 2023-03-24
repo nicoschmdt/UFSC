@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from PyQt6.QtWidgets import QMainWindow,QWidget
-from PyQt6.QtCore import QSize
+
+import PyQt6
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPalette, QColor, QPainter
 
 
@@ -101,26 +103,25 @@ class Viewport:
         )
 
     def draw_line(self, x1, y1, x2, y2, painter: QPainter):
-        # print(f'x1={x1}, y1={y1}, x2={x2}, y2={y2}')
         x1 = self.transformada_vp_x(x1)
         y1 = self.transformada_vp_y(y1)
         x2 = self.transformada_vp_x(x2)
         y2 = self.transformada_vp_y(y2)
-        # print(f'x1={x1}, y1={y1}, x2={x2}, y2={y2}')
         painter.drawLine(x1, y1, x2, y2)
 
     def draw_wireframe(self, points: list[Point]):
         pass
 
 
-class CustomCanvas(QWidget):
+class Canvas(QWidget):
     step: int
     viewport: Viewport
     world_items: list[WorldItem]
 
     def __init__(self, color='white', **kwargs):
-        super(CustomCanvas, self).__init__(**kwargs)
+        super(Canvas, self).__init__(**kwargs)
         self.setAutoFillBackground(True)
+        self.setFocusPolicy(PyQt6.QtCore.Qt.FocusPolicy.ClickFocus)
 
         palette = self.palette()
         palette.setColor(QPalette.ColorRole.Window, QColor(color))
@@ -134,18 +135,26 @@ class CustomCanvas(QWidget):
 
     def paintEvent(self, event):
         super().paintEvent(event)
-        print("paint")
         painter = QPainter(self)
         painter.setPen(QColor.fromString('blue'))
 
         self.viewport.draw(painter, self.world_items)
 
+    # TODO: pegar o valor do step ao inves de usar algo fixo
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+        if event.key() == QtCore.Qt.Key.Key_Left:
+            self.viewport.move_window(10, 0)
+        elif event.key() == QtCore.Qt.Key.Key_Right:
+            self.viewport.move_window(-10, 0)
+        elif event.key() == QtCore.Qt.Key.Key_Up:
+            self.viewport.move_window(0, -10)
+        elif event.key() == QtCore.Qt.Key.Key_Down:
+            self.viewport.move_window(0, 10)
+        elif event.key() == QtCore.Qt.Key.Key_Plus:
+            self.viewport.zoom(10)
+        elif event.key() == QtCore.Qt.Key.Key_Minus:
+            self.viewport.zoom(-10)
+        else:
+            super().keyPressEvent(event)
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle("My App")
-
-        self.setFixedSize(QSize(450, 450))
-        self.setCentralWidget(CustomCanvas("white"))
+        self.repaint()
