@@ -1,19 +1,19 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 import window
-from window import CustomCanvas
+from window import Canvas
 import incluirobjeto
 
 
-class Ui_MainWindow:
+class MainWindow:
     objectCreationWindow = None
 
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 754)
-        MainWindow.setMaximumSize(QtCore.QSize(800, 800))
-        MainWindow.setBaseSize(QtCore.QSize(800, 800))
-        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+    def setupUi(self, main_window):
+        main_window.setObjectName("MainWindow")
+        main_window.resize(800, 754)
+        main_window.setMaximumSize(QtCore.QSize(800, 800))
+        main_window.setBaseSize(QtCore.QSize(800, 800))
+        self.centralwidget = QtWidgets.QWidget(parent=main_window)
         self.centralwidget.setMaximumSize(QtCore.QSize(800, 800))
         self.centralwidget.setBaseSize(QtCore.QSize(800, 800))
         font = QtGui.QFont()
@@ -85,6 +85,8 @@ class Ui_MainWindow:
         self.gridLayoutMovimentacao = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayoutMovimentacao.setContentsMargins(0, 0, 0, 0)
         self.gridLayoutMovimentacao.setObjectName("gridLayoutMovimentacao")
+
+        # setas
         self.pushButtonUp = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButtonUp.setMaximumSize(QtCore.QSize(40, 16777215))
         self.pushButtonUp.setObjectName("pushButtonUp")
@@ -106,6 +108,8 @@ class Ui_MainWindow:
         self.pushButtonRight.setObjectName("pushButtonRight")
         self.pushButtonRight.clicked.connect(self.panRight)
         self.gridLayoutMovimentacao.addWidget(self.pushButtonRight, 1, 1, 1, 1)
+
+        #
         self.pushButtonIn = QtWidgets.QPushButton(parent=self.gridLayoutWidget)
         self.pushButtonIn.setMaximumSize(QtCore.QSize(40, 16777215))
         self.pushButtonIn.setObjectName("pushButtonIn")
@@ -174,6 +178,8 @@ class Ui_MainWindow:
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setContentsMargins(-1, -1, 0, -1)
         self.horizontalLayout.setObjectName("horizontalLayout")
+
+        # Zoom
         self.labelZoom = QtWidgets.QLabel(parent=self.verticalLayoutWidget_3)
         self.labelZoom.setMaximumSize(QtCore.QSize(50, 16777215))
         self.labelZoom.setObjectName("labelZoom")
@@ -188,6 +194,13 @@ class Ui_MainWindow:
         self.pushButtonMinus.setObjectName("pushButtonMinus")
         self.pushButtonMinus.clicked.connect(self.zoomOut)
         self.horizontalLayout.addWidget(self.pushButtonMinus)
+        self.actionZoomPlus = QtGui.QAction(parent=main_window)
+        self.actionZoomPlus.setObjectName("actionZoomPlus")
+        self.actionZoomPlus.triggered.connect(self.zoomIn)
+        self.actionZoomMinus = QtGui.QAction(parent=main_window)
+        self.actionZoomMinus.setObjectName("actionZoomMinus")
+        self.actionZoomMinus.triggered.connect(self.zoomOut)
+
         self.horizontalLayout.setStretch(0, 1)
         self.horizontalLayout.setStretch(1, 1)
         self.horizontalLayout.setStretch(2, 1)
@@ -226,38 +239,34 @@ class Ui_MainWindow:
         self.horizontalLayoutCentral.addWidget(self.groupBoxMenuFuncoes)
         self.groupBoxViewPort = QtWidgets.QGroupBox(parent=self.horizontalLayoutWidget)
         self.groupBoxViewPort.setObjectName("groupBoxViewPort")
-        self.graphicsViewViewport = CustomCanvas(parent=self.groupBoxViewPort)
+        self.graphicsViewViewport = Canvas(parent=self.groupBoxViewPort)
         self.graphicsViewViewport.setGeometry(QtCore.QRect(0, 20, 571, 691))
         self.graphicsViewViewport.setObjectName("graphicsViewViewport")
 
         self.horizontalLayoutCentral.addWidget(self.groupBoxViewPort)
         self.horizontalLayoutCentral.setStretch(0, 1)
         self.horizontalLayoutCentral.setStretch(1, 2)
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        main_window.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(parent=main_window)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
-        self.actionZoomPlus = QtGui.QAction(parent=MainWindow)
-        self.actionZoomPlus.setObjectName("actionZoomPlus")
-        self.actionZoomPlus.triggered.connect(self.zoomIn)
-        self.actionZoomMinus = QtGui.QAction(parent=MainWindow)
-        self.actionZoomMinus.setObjectName("actionZoomMinus")
-        self.actionZoomMinus.triggered.connect(self.zoomOut)
+        main_window.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslate(main_window)
+        QtCore.QMetaObject.connectSlotsByName(main_window)
 
-    def retranslateUi(self, MainWindow):
+    def retranslate(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.groupBoxMenuFuncoes.setTitle(_translate("MainWindow", "Menu de Funções"))
         self.groupBoxObjetos.setTitle(_translate("MainWindow", "Objetos"))
         __sortingEnabled = self.listWidget.isSortingEnabled()
         self.listWidget.setSortingEnabled(False)
+        # adiciona items existentes na barra de objetos
         for item in self.graphicsViewViewport.world_items:
             widget = QtWidgets.QListWidgetItem()
             widget.setText(_translate("MainWindow", item.name))
             self.listWidget.addItem(widget)
+
         self.listWidget.setSortingEnabled(__sortingEnabled)
         self.groupBoxWindow.setTitle(_translate("MainWindow", "Window"))
         self.label.setText(_translate("MainWindow", "Passo:"))
@@ -287,9 +296,9 @@ class Ui_MainWindow:
         self.actionZoomMinus.setText(_translate("MainWindow", "ZoomMinus"))
         self.actionZoomMinus.setShortcut(_translate("MainWindow", "-"))
 
-    def __init__(self, MainWindow):
+    def __init__(self, main_window):
         super().__init__()
-        self.setupUi(MainWindow)
+        self.setupUi(main_window)
         self.add_item_to_world(
             window.WorldItem(
                 name="Reta (Reta 1)",
@@ -297,7 +306,7 @@ class Ui_MainWindow:
                                     end=window.Point(500, 500))
             )
         )
-        MainWindow.show()
+        main_window.show()
 
     def add_item_to_world(self, item: window.WorldItem):
         self.graphicsViewViewport.world_items.append(item)
@@ -308,16 +317,23 @@ class Ui_MainWindow:
         self.graphicsViewViewport.repaint()
 
     def zoomIn(self):
-        # placeholder
-        self.graphicsViewViewport.viewport.zoom(int(self.plainTextEdit.toPlainText()))
+        text = self.plainTextEdit.toPlainText()
+        if text == "":
+            step = 10
+        else:
+            step = int(text)
+        self.graphicsViewViewport.viewport.zoom(step)
         self.graphicsViewViewport.repaint()
 
     def zoomOut(self):
-        # placeholder
-        self.graphicsViewViewport.viewport.zoom(-int(self.plainTextEdit.toPlainText()))
+        text = self.plainTextEdit.toPlainText()
+        if text == "":
+            step = 10
+        else:
+            step = int(text)
+        self.graphicsViewViewport.viewport.zoom(-step)
         self.graphicsViewViewport.repaint()
 
-    # completar funções de panning
     def panUp(self):
         self.graphicsViewViewport.viewport.move_window(0, -10)
         self.graphicsViewViewport.repaint()
@@ -339,7 +355,7 @@ class Ui_MainWindow:
         pass
 
     def openObjectCreationWindow(self):
-        self.objectCreationWindow = incluirobjeto.Ui_IncluirObjeto(self.add_item_to_world)
+        self.objectCreationWindow = incluirobjeto.IncluirObjeto(self.add_item_to_world)
         # adicionar lógica de pegar valores dos campos de texto
 
 
@@ -347,6 +363,6 @@ if __name__ == "__main__":
     import sys
 
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow(MainWindow)
+    main_window = QtWidgets.QMainWindow()
+    ui = MainWindow(main_window)
     sys.exit(app.exec())
