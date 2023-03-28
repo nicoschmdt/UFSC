@@ -39,13 +39,13 @@ class MainWindow:
         self.listWidget = QtWidgets.QListWidget(parent=self.groupBoxObjetos)
         self.listWidget.setGeometry(QtCore.QRect(0, 21, 231, 141))
         self.listWidget.setObjectName("listWidget")
-        self.listWidget.itemClicked.connect(self.selectObject)
         self.listWidget.itemDoubleClicked.connect(self.openTransformacoesObjeto)
 
         self.pushButtonAddObject = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.pushButtonAddObject.setGeometry(QtCore.QRect(160, 32, 50, 30))
+        self.pushButtonAddObject.setGeometry(QtCore.QRect(160, 31, 50, 30))
         self.pushButtonAddObject.setObjectName("pushButtonAddObject")
         self.pushButtonAddObject.clicked.connect(self.openObjectCreationWindow)
+        self.pushButtonAddObject.setAutoDefault(False)
 
         self.verticalLayoutMenuFuncoes_2.addWidget(self.groupBoxObjetos)
         self.groupBoxWindow = QtWidgets.QGroupBox(parent=self.groupBoxMenuFuncoes)
@@ -316,14 +316,14 @@ class MainWindow:
         main_window.show()
 
     def add_item_to_world(self, item: window.WorldItem):
+        if item.name == "":
+            item.name = "Sem nome"
         self.graphicsViewViewport.world_items.append(item)
 
         widget = QtWidgets.QListWidgetItem()
         widget.setText(item.name)
         self.listWidget.addItem(widget)
         self.graphicsViewViewport.repaint()
-
-        print(self.graphicsViewViewport.world_items)
 
     def zoomIn(self):
         text = self.plainTextEdit.toPlainText()
@@ -358,10 +358,6 @@ class MainWindow:
     def panRight(self):
         self.graphicsViewViewport.viewport.move_window(-10, 0)
         self.graphicsViewViewport.repaint()
-
-    # TODO completar função de selecionar objeto
-    def selectObject(self):
-        pass
 
     def openObjectCreationWindow(self):
         self.objectCreationWindow = incluirobjeto.IncluirObjeto(self.add_item_to_world)
