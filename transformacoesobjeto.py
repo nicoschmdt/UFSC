@@ -423,6 +423,7 @@ class TransformacoesObjetoUI(QWidget):
         self.radioButtonRotacionarCentro.setChecked(False)
         self.radioButtonRotacionarPonto.setChecked(False)
         self.groupBoxPontoRotacao.setEnabled(False)
+        self.groupBoxSelecaoTipoRotacao.setTitle("Rotacionar sobre a Origem")
         self.plainTextEditX.setPlainText("0")
         self.plainTextEditY.setPlainText("0")
         self.plainTextEditZ.setPlainText("0")
@@ -432,6 +433,7 @@ class TransformacoesObjetoUI(QWidget):
         self.radioButtonRotacionarCentro.setChecked(True)
         self.radioButtonRotacionarPonto.setChecked(False)
         self.groupBoxPontoRotacao.setEnabled(False)
+        self.groupBoxSelecaoTipoRotacao.setTitle("Rotacionar sobre o Centro do Objeto")
         # TODO modificar valores para ser igual ao do centro do objeto
         # self.plainTextEditX.setPlainText("")
         # self.plainTextEditY.setPlainText("")
@@ -442,6 +444,7 @@ class TransformacoesObjetoUI(QWidget):
         self.radioButtonRotacionarCentro.setChecked(False)
         self.radioButtonRotacionarPonto.setChecked(True)
         self.groupBoxPontoRotacao.setEnabled(True)
+        self.groupBoxSelecaoTipoRotacao.setTitle("Rotacionar sobre um Ponto")
         self.plainTextEditX.setPlainText("")
         self.plainTextEditY.setPlainText("")
         self.plainTextEditZ.setPlainText("")
