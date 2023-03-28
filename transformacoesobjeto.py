@@ -225,10 +225,12 @@ class TransformacoesObjetoUI(QWidget):
         self.labelZ = QtWidgets.QLabel(parent=self.horizontalLayoutWidget_4)
         self.labelZ.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.labelZ.setObjectName("labelZ")
+        self.labelZ.setEnabled(False)
         self.horizontalLayoutPontoRotacao.addWidget(self.labelZ)
         self.plainTextEditZ = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutWidget_4)
         self.plainTextEditZ.setMaximumSize(QtCore.QSize(16777215, 30))
         self.plainTextEditZ.setObjectName("plainTextEditZ")
+        self.plainTextEditZ.setEnabled(False)
         self.horizontalLayoutPontoRotacao.addWidget(self.plainTextEditZ)
         self.horizontalLayoutPontoRotacao.setStretch(0, 1)
         self.horizontalLayoutPontoRotacao.setStretch(1, 1)
@@ -380,11 +382,22 @@ class TransformacoesObjetoUI(QWidget):
         self.radioButtonDireita.clicked.connect(self.checkMoveRight)
         self.radioButtonCima.clicked.connect(self.checkMoveUp)
         self.radioButtonBaixo.clicked.connect(self.checkMoveDown)
+        self.radioButtonRotacionarOrigem.clicked.connect(self.checkRotateOnOrigin)
+        self.radioButtonRotacionarCentro.clicked.connect(self.checkRotateOnObjectCenter)
+        self.radioButtonRotacionarPonto.clicked.connect(self.checkRotateOnPoint)
 
 
     def addTransformation(self):
-        
-        pass
+        index = self.tabWidgetTiposTransformacao.currentIndex()
+        # translaçao
+        if index == 1:
+            pass
+        # rotaçao
+        elif index == 2:
+            pass
+        # escalonamento
+        else:
+            pass
     
     def applyTransformations(self):
         pass
@@ -404,6 +417,34 @@ class TransformacoesObjetoUI(QWidget):
     def checkMoveDown(self):
         self.radioButtonCima.setChecked(False)
         self.radioButtonBaixo.setChecked(True)
+        
+    def checkRotateOnOrigin(self):
+        self.radioButtonRotacionarOrigem.setChecked(True)
+        self.radioButtonRotacionarCentro.setChecked(False)
+        self.radioButtonRotacionarPonto.setChecked(False)
+        self.groupBoxPontoRotacao.setEnabled(False)
+        self.plainTextEditX.setPlainText("0")
+        self.plainTextEditY.setPlainText("0")
+        self.plainTextEditZ.setPlainText("0")
+
+    def checkRotateOnObjectCenter(self):
+        self.radioButtonRotacionarOrigem.setChecked(False)
+        self.radioButtonRotacionarCentro.setChecked(True)
+        self.radioButtonRotacionarPonto.setChecked(False)
+        self.groupBoxPontoRotacao.setEnabled(False)
+        # TODO modificar valores para ser igual ao do centro do objeto
+        # self.plainTextEditX.setPlainText("")
+        # self.plainTextEditY.setPlainText("")
+        # self.plainTextEditZ.setPlainText("")
+
+    def checkRotateOnPoint(self):
+        self.radioButtonRotacionarOrigem.setChecked(False)
+        self.radioButtonRotacionarCentro.setChecked(False)
+        self.radioButtonRotacionarPonto.setChecked(True)
+        self.groupBoxPontoRotacao.setEnabled(True)
+        self.plainTextEditX.setPlainText("")
+        self.plainTextEditY.setPlainText("")
+        self.plainTextEditZ.setPlainText("")
     
     def __init__(self, on_ok):
         super().__init__()
