@@ -7,6 +7,7 @@ from window import Point
 
 class IncluirObjeto(QWidget):
     vertixCounter: int = 1
+    lastAddedObject: window.WorldItem = None
 
     def setupUi(self):
         self.setObjectName("IncluirObjeto")
@@ -365,21 +366,23 @@ class IncluirObjeto(QWidget):
 
     def createObject(self):
         index = self.tabWidget.currentIndex()
+        newObject: window.WorldItem = None
         if index == 0:
-            self.on_ok(window.WorldItem(
+            newObject = window.WorldItem(
                 name=self.textEditInserirNome.toPlainText(),
                 graphic=window.Point(int(self.plainTextEditXPonto.toPlainText()),
                                      int(self.plainTextEditYPonto.toPlainText()))
-            ))
+            )
         elif index == 1:
-            self.on_ok(window.WorldItem(
+            newObject = window.WorldItem(
                 name=self.textEditInserirNome.toPlainText(),
                 graphic=window.Line(
                     start=window.Point(int(self.plainTextEditXPontoInicialReta.toPlainText()),
                                        int(self.plainTextEditYPontoInicialReta.toPlainText())),
                     end=window.Point(int(self.plainTextEditXPontoFinalReta.toPlainText()),
                                      int(self.plainTextEditYPontoFinalReta.toPlainText()))
-                )))
+                )
+            )
         elif index == 2:
             currentTab = self.tabWidget.currentWidget()
             tabVerticalLayout = currentTab.findChild(QtWidgets.QVBoxLayout)
@@ -390,16 +393,20 @@ class IncluirObjeto(QWidget):
                 xValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditXVertice{i+1}").toPlainText()
                 yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditYVertice{i+1}").toPlainText()
                 vertixList.append(Point(int(xValue), int(yValue)))
-            self.on_ok(window.WorldItem(
+            newObject = window.WorldItem(
                 name = self.textEditInserirNome.toPlainText(),
                 graphic = window.Wireframe(vertixList)
-            ))
+            )
         else:
             pass
-
-        # TODO adicionar objeto na lista
+        
+        self.on_ok(newObject)
+        self.lastAddedObject = newObject
 
         self.close()
+
+    def getLastAddedObject(self):
+        return self.lastAddedObject
 
     def __init__(self, on_ok):
         super().__init__()

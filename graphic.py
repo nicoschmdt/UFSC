@@ -3,6 +3,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import window
 from window import Canvas
 import incluirobjeto
+from transformacoesobjeto import TransformacoesObjetoUI
 
 
 class MainWindow:
@@ -39,7 +40,12 @@ class MainWindow:
         self.listWidget.setGeometry(QtCore.QRect(0, 21, 231, 141))
         self.listWidget.setObjectName("listWidget")
         self.listWidget.itemClicked.connect(self.selectObject)
-        self.listWidget.itemDoubleClicked.connect(self.openObjectCreationWindow)
+        self.listWidget.itemDoubleClicked.connect(self.openTransformacoesObjeto)
+
+        self.pushButtonAddObject = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButtonAddObject.setGeometry(QtCore.QRect(160, 32, 50, 30))
+        self.pushButtonAddObject.setObjectName("pushButtonAddObject")
+        self.pushButtonAddObject.clicked.connect(self.openObjectCreationWindow)
 
         self.verticalLayoutMenuFuncoes_2.addWidget(self.groupBoxObjetos)
         self.groupBoxWindow = QtWidgets.QGroupBox(parent=self.groupBoxMenuFuncoes)
@@ -295,6 +301,7 @@ class MainWindow:
         self.actionZoomPlus.setShortcut(_translate("MainWindow", "+"))
         self.actionZoomMinus.setText(_translate("MainWindow", "ZoomMinus"))
         self.actionZoomMinus.setShortcut(_translate("MainWindow", "-"))
+        self.pushButtonAddObject.setText(_translate("MainWindow", "+"))
 
     def __init__(self, main_window):
         super().__init__()
@@ -315,6 +322,8 @@ class MainWindow:
         widget.setText(item.name)
         self.listWidget.addItem(widget)
         self.graphicsViewViewport.repaint()
+
+        print(self.graphicsViewViewport.world_items)
 
     def zoomIn(self):
         text = self.plainTextEdit.toPlainText()
@@ -356,7 +365,12 @@ class MainWindow:
 
     def openObjectCreationWindow(self):
         self.objectCreationWindow = incluirobjeto.IncluirObjeto(self.add_item_to_world)
+        object: window.WorldItem = self.objectCreationWindow.getLastAddedObject()
+        if object is not None:
+            self.add_item_to_world(object)
 
+    def openTransformacoesObjeto(self):
+        self.objectCreationWindow = TransformacoesObjetoUI(None)
 
 if __name__ == "__main__":
     import sys
