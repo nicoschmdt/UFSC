@@ -61,7 +61,7 @@ class Viewport:
             elif isinstance(obj, Point):
                 self.draw_point(obj.x, obj.y, painter)
             elif isinstance(obj, Wireframe):
-                self.draw_wireframe(obj.points)
+                self.draw_wireframe(obj.points, painter)
 
     def zoom(self, step: int):
         new_width = int(self.window_size.width * (1 - (step / 100)))
@@ -87,12 +87,12 @@ class Viewport:
             height=height
         )
 
-    def transformada_vp_y(self, y):
+    def transformada_vp_y(self, y: int):
         y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))
         y_vp *= (self.viewport_size.y + self.viewport_size.height) - self.viewport_size.y
         return int(y_vp + self.viewport_size.y)
 
-    def transformada_vp_x(self, x):
+    def transformada_vp_x(self, x: int):
         x_vp = ((x - self.window_size.x) / ((self.window_size.width + self.window_size.x) - self.window_size.x))
         x_vp *= (self.viewport_size.x + self.viewport_size.width) - self.viewport_size.x
         return int(x_vp + self.viewport_size.x)
@@ -103,16 +103,21 @@ class Viewport:
             int((self.viewport_size.y + self.viewport_size.height) / 2)
         )
 
-    def draw_line(self, x1, y1, x2, y2, painter: QPainter):
+    def draw_line(self, x1: int, y1: int, x2: int, y2: int, painter: QPainter):
         x1 = self.transformada_vp_x(x1)
         y1 = self.transformada_vp_y(y1)
         x2 = self.transformada_vp_x(x2)
         y2 = self.transformada_vp_y(y2)
         painter.drawLine(x1, y1, x2, y2)
 
-    def draw_wireframe(self, points: List[Point]):
-        pass
-
+    def draw_wireframe(self, points: List[Point], painter: QPainter):
+        iterator_points = iter(points)
+        first_point = next(iterator_points)
+        previous_point = first_point
+        for point in iterator_points:
+            self.draw_line(previous_point.x, previous_point.y, point.x, point.y, painter)
+            previous_point = point
+        self.draw_line(previous_point.x, previous_point.y, point.x, point.y, painter)
 
 class Canvas(QWidget):
     step: int
@@ -129,7 +134,7 @@ class Canvas(QWidget):
         self.setPalette(palette)
 
         self.step = 10
-        self.viewport = Viewport(0, 0, 515, 680)
+        self.viewport = Viewport(10, 10, 670, 670)
         self.viewport.set_window(0, 0, 200, 200)
 
         self.world_items = []

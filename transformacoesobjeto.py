@@ -459,5 +459,5 @@ class TransformacoesObjetoUI(QWidget):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    ui = TransformacoesObjetoUI()
+    ui = TransformacoesObjetoUI(None)
     sys.exit(app.exec())

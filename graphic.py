@@ -10,18 +10,18 @@ class MainWindow:
 
     def setupUi(self, main_window):
         main_window.setObjectName("MainWindow")
-        main_window.resize(800, 754)
-        main_window.setMaximumSize(QtCore.QSize(800, 800))
-        main_window.setBaseSize(QtCore.QSize(800, 800))
+        main_window.resize(1000, 800)
+        main_window.setMaximumSize(QtCore.QSize(1000, 754))
+        main_window.setBaseSize(QtCore.QSize(1000, 754))
         self.centralwidget = QtWidgets.QWidget(parent=main_window)
-        self.centralwidget.setMaximumSize(QtCore.QSize(800, 800))
-        self.centralwidget.setBaseSize(QtCore.QSize(800, 800))
+        self.centralwidget.setMaximumSize(QtCore.QSize(1000, 754))
+        self.centralwidget.setBaseSize(QtCore.QSize(1000, 754))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.centralwidget.setFont(font)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(9, 9, 781, 711))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(9, 9, 1000, 711))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayoutCentral = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayoutCentral.setContentsMargins(0, 0, 0, 0)
@@ -240,12 +240,12 @@ class MainWindow:
         self.groupBoxViewPort = QtWidgets.QGroupBox(parent=self.horizontalLayoutWidget)
         self.groupBoxViewPort.setObjectName("groupBoxViewPort")
         self.graphicsViewViewport = Canvas(parent=self.groupBoxViewPort)
-        self.graphicsViewViewport.setGeometry(QtCore.QRect(0, 20, 571, 691))
+        self.graphicsViewViewport.setGeometry(QtCore.QRect(0, 20, 690, 700))
         self.graphicsViewViewport.setObjectName("graphicsViewViewport")
 
         self.horizontalLayoutCentral.addWidget(self.groupBoxViewPort)
         self.horizontalLayoutCentral.setStretch(0, 1)
-        self.horizontalLayoutCentral.setStretch(1, 2)
+        self.horizontalLayoutCentral.setStretch(1, 3)
         main_window.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(parent=main_window)
         self.statusbar.setObjectName("statusbar")
@@ -350,13 +350,12 @@ class MainWindow:
         self.graphicsViewViewport.viewport.move_window(-10, 0)
         self.graphicsViewViewport.repaint()
 
-    # completar função de selecionar objeto
+    # TODO completar função de selecionar objeto
     def selectObject(self):
         pass
 
     def openObjectCreationWindow(self):
         self.objectCreationWindow = incluirobjeto.IncluirObjeto(self.add_item_to_world)
-        # adicionar lógica de pegar valores dos campos de texto
 
 
 if __name__ == "__main__":

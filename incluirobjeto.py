@@ -386,18 +386,18 @@ class IncluirObjeto(QWidget):
             vertixList = list()
             for i in range (tabVerticalLayout.count() - 1):
                 groupBox = tabVerticalLayout.itemAt(i).widget()
-                horizontalLayout = groupBox.findChild(QWidget).findChild(QtWidgets.QHBoxLayout)
+                horizontalLayout = groupBox.findChild(QWidget)
                 xValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditXVertice{i+1}").toPlainText()
                 yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditYVertice{i+1}").toPlainText()
-                vertixList.append(Point(xValue, yValue))
-                print(horizontalLayout.objectName())
-                print(groupBox.children())
+                vertixList.append(Point(int(xValue), int(yValue)))
             self.on_ok(window.WorldItem(
                 name = self.textEditInserirNome.toPlainText(),
                 graphic = window.Wireframe(vertixList)
             ))
         else:
             pass
+
+        # TODO adicionar objeto na lista
 
         self.close()
 
@@ -407,11 +407,10 @@ class IncluirObjeto(QWidget):
         self.on_ok = on_ok
         self.show()
 
-
 if __name__ == "__main__":
     import sys
 
     app = QtWidgets.QApplication(sys.argv)
     incluir_objeto = QtWidgets.QWidget()
-    ui = IncluirObjeto()
+    ui = IncluirObjeto(None)
     sys.exit(app.exec())
