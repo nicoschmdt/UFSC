@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 import PyQt6
+from typing import List
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPalette, QColor, QPainter
@@ -28,7 +29,7 @@ class Line:
 
 @dataclass
 class Wireframe:
-    points: list[Point]
+    points: List[Point]
 
 
 @dataclass
@@ -49,7 +50,7 @@ class Viewport:
             height=height
         )
 
-    def draw(self, painter: QPainter, items: list[WorldItem]):
+    def draw(self, painter: QPainter, items: List[WorldItem]):
         painter.setPen(QColor.fromString('blue'))
         painter.drawRect(self.viewport_size.x, self.viewport_size.y, self.viewport_size.width,
                          self.viewport_size.height)
@@ -109,14 +110,14 @@ class Viewport:
         y2 = self.transformada_vp_y(y2)
         painter.drawLine(x1, y1, x2, y2)
 
-    def draw_wireframe(self, points: list[Point]):
+    def draw_wireframe(self, points: List[Point]):
         pass
 
 
 class Canvas(QWidget):
     step: int
     viewport: Viewport
-    world_items: list[WorldItem]
+    world_items: List[WorldItem]
 
     def __init__(self, color='white', **kwargs):
         super(Canvas, self).__init__(**kwargs)

@@ -2,6 +2,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget
 
 import window
+from window import Point
 
 
 class IncluirObjeto(QWidget):
@@ -379,6 +380,22 @@ class IncluirObjeto(QWidget):
                     end=window.Point(int(self.plainTextEditXPontoFinalReta.toPlainText()),
                                      int(self.plainTextEditYPontoFinalReta.toPlainText()))
                 )))
+        elif index == 2:
+            currentTab = self.tabWidget.currentWidget()
+            tabVerticalLayout = currentTab.findChild(QtWidgets.QVBoxLayout)
+            vertixList = list()
+            for i in range (tabVerticalLayout.count() - 1):
+                groupBox = tabVerticalLayout.itemAt(i).widget()
+                horizontalLayout = groupBox.findChild(QWidget).findChild(QtWidgets.QHBoxLayout)
+                xValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditXVertice{i+1}").toPlainText()
+                yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditYVertice{i+1}").toPlainText()
+                vertixList.append(Point(xValue, yValue))
+                print(horizontalLayout.objectName())
+                print(groupBox.children())
+            self.on_ok(window.WorldItem(
+                name = self.textEditInserirNome.toPlainText(),
+                graphic = window.Wireframe(vertixList)
+            ))
         else:
             pass
 
