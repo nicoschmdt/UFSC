@@ -7,19 +7,20 @@
 
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QWidget
 
 
-class Ui_Form(object):
-    def setupUi(self, Form):
-        Form.setObjectName("Form")
-        Form.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
-        Form.resize(800, 600)
-        Form.setMinimumSize(QtCore.QSize(800, 600))
-        Form.setMaximumSize(QtCore.QSize(800, 600))
+class TransformacoesObjetoUI(QWidget):
+    def setupUi(self):
+        self.setObjectName("Form")
+        self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+        self.resize(800, 600)
+        self.setMinimumSize(QtCore.QSize(800, 600))
+        self.setMaximumSize(QtCore.QSize(800, 600))
         font = QtGui.QFont()
         font.setPointSize(9)
-        Form.setFont(font)
-        self.verticalLayoutWidget = QtWidgets.QWidget(parent=Form)
+        self.setFont(font)
+        self.verticalLayoutWidget = QtWidgets.QWidget(parent=self)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 10, 781, 581))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
         self.verticalLayoutPrincipal = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
@@ -35,6 +36,7 @@ class Ui_Form(object):
         self.horizontalLayoutTransformacoes.setObjectName("horizontalLayoutTransformacoes")
         self.tabWidgetTiposTransformacao = QtWidgets.QTabWidget(parent=self.horizontalLayoutWidget_2)
         self.tabWidgetTiposTransformacao.setObjectName("tabWidgetTiposTransformacao")
+        
         self.tabTranslacao = QtWidgets.QWidget()
         self.tabTranslacao.setObjectName("tabTranslacao")
         self.verticalLayoutWidget_7 = QtWidgets.QWidget(parent=self.tabTranslacao)
@@ -128,6 +130,7 @@ class Ui_Form(object):
         self.verticalLayoutParametrosTranslacao.setStretch(2, 1)
         self.verticalLayoutParametrosTranslacao.setStretch(3, 1)
         self.tabWidgetTiposTransformacao.addTab(self.tabTranslacao, "")
+        
         self.tabRotacao = QtWidgets.QWidget()
         self.tabRotacao.setObjectName("tabRotacao")
         self.verticalLayoutWidget_3 = QtWidgets.QWidget(parent=self.tabRotacao)
@@ -238,6 +241,7 @@ class Ui_Form(object):
         self.verticalLayoutRotacao.setStretch(0, 3)
         self.verticalLayoutRotacao.setStretch(1, 4)
         self.tabWidgetTiposTransformacao.addTab(self.tabRotacao, "")
+        
         self.tabEscalonamento = QtWidgets.QWidget()
         self.tabEscalonamento.setObjectName("tabEscalonamento")
         self.verticalLayoutWidget_6 = QtWidgets.QWidget(parent=self.tabEscalonamento)
@@ -318,13 +322,12 @@ class Ui_Form(object):
         self.verticalLayoutPrincipal.setStretch(0, 7)
         self.verticalLayoutPrincipal.setStretch(1, 1)
 
-        self.retranslateUi(Form)
+        self.retranslateUi()
         self.tabWidgetTiposTransformacao.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(Form)
 
-    def retranslateUi(self, Form):
+    def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        self.setWindowTitle(_translate("Form", "Transformações Objeto"))
         self.groupBoxTransformacoes.setTitle(_translate("Form", "Transformações"))
         self.groupBoxSelecionarEsqDir.setTitle(_translate("Form", "Selecionar deslocamento horizontal"))
         self.radioButtonEsquerda.setText(_translate("Form", "Mover para a esquerda"))
@@ -369,12 +372,48 @@ class Ui_Form(object):
         self.pushButtonCancel.setText(_translate("Form", "Cancel"))
         self.pushButtonOK.setText(_translate("Form", "OK"))
 
+    def setupEvents(self):
+        self.pushButtonAdiciona.clicked.connect(self.addTransformation)
+        self.pushButtonCancel.clicked.connect(self.close)
+        self.pushButtonOK.clicked.connect(self.applyTransformations)
+        self.radioButtonEsquerda.clicked.connect(self.checkMoveLeft)
+        self.radioButtonDireita.clicked.connect(self.checkMoveRight)
+        self.radioButtonCima.clicked.connect(self.checkMoveUp)
+        self.radioButtonBaixo.clicked.connect(self.checkMoveDown)
+
+
+    def addTransformation(self):
+        
+        pass
+    
+    def applyTransformations(self):
+        pass
+    
+    def checkMoveLeft(self):
+        self.radioButtonEsquerda.setChecked(True)
+        self.radioButtonDireita.setChecked(False)
+    
+    def checkMoveRight(self):
+        self.radioButtonEsquerda.setChecked(False)
+        self.radioButtonDireita.setChecked(True)
+        
+    def checkMoveUp(self):
+        self.radioButtonCima.setChecked(True)
+        self.radioButtonBaixo.setChecked(False)
+    
+    def checkMoveDown(self):
+        self.radioButtonCima.setChecked(False)
+        self.radioButtonBaixo.setChecked(True)
+    
+    def __init__(self, on_ok):
+        super().__init__()
+        self.setupUi()
+        self.setupEvents()
+        self.on_ok = on_ok
+        self.show()
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
+    ui = TransformacoesObjetoUI()
     sys.exit(app.exec())
