@@ -32,10 +32,12 @@ class Wireframe:
     points: List[Point]
 
 
+GraphicObject = Point | Line | Wireframe
+
 @dataclass
 class WorldItem:
     name: str
-    graphic: Point | Line | Wireframe
+    graphic: GraphicObject
 
 
 class Viewport:
@@ -164,3 +166,47 @@ class Canvas(QWidget):
             super().keyPressEvent(event)
 
         self.repaint()
+
+
+def translate_points(points: list[Point], offset: Point):
+    translated_points = []
+    for point in points:
+        new_point = Point(
+            x=point.x + offset.x,
+            y=point.y + offset.y
+        )
+        translated_points.append(new_point)
+
+    return translated_points
+
+
+def translacao(object: GraphicObject, offset: Point):
+    if isinstance(object, Point):
+        translated = translate_points([object], offset)[0]
+        object.x = translated.x
+        object.y = translated.y
+    elif isinstance(object, Line):
+        start, end = translate_points([object.start, object.end], offset)
+        object.start = start
+        object.end = end
+    else:
+        object.points = translate_points(object.points, offset)
+        
+
+# falta deixar o escalonamento em torno do centro do objeto
+def escalonamento(object: GraphicObject, escalonamento):
+
+    points = object.points
+
+    translated_points = []
+    for point in points:
+        new_point = Point(
+            x=point.x * escalonamento,
+            y=point.y * escalonamento
+        )
+        translated_points.append(new_point)
+
+    return translated_points
+
+def rotacao():
+    pass

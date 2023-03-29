@@ -9,7 +9,8 @@ from transformacoesobjeto import TransformacoesObjetoUI
 class MainWindow:
     objectCreationWindow = None
 
-    def setupUi(self, main_window):
+    def setupUi(self):
+        main_window = self.main_window
         main_window.setObjectName("MainWindow")
         main_window.resize(1000, 800)
         main_window.setMaximumSize(QtCore.QSize(1000, 754))
@@ -305,15 +306,9 @@ class MainWindow:
 
     def __init__(self, main_window):
         super().__init__()
-        self.setupUi(main_window)
-        self.add_item_to_world(
-            window.WorldItem(
-                name="Reta (Reta 1)",
-                graphic=window.Line(start=window.Point(0, 0),
-                                    end=window.Point(500, 500))
-            )
-        )
-        main_window.show()
+        self.main_window = main_window
+        self.setupUi()
+        self.main_window.show()
 
     def add_item_to_world(self, item: window.WorldItem):
         if item.name == "":
@@ -365,8 +360,11 @@ class MainWindow:
         if object is not None:
             self.add_item_to_world(object)
 
-    def openTransformacoesObjeto(self):
-        self.objectCreationWindow = TransformacoesObjetoUI(None)
+    def openTransformacoesObjeto(self, item):
+        item_index = self.listWidget.indexFromItem(item).row()
+        object = self.graphicsViewViewport.world_items[item_index]
+        self.transformacoesObjeto = TransformacoesObjetoUI(object, on_close=self.graphicsViewViewport.repaint)
+
 
 if __name__ == "__main__":
     import sys
