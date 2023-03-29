@@ -399,12 +399,11 @@ class TransformacoesObjetoUI(QWidget):
     def addTransformation(self):
         index = self.tabWidgetTiposTransformacao.currentIndex()
         # translaçao
-        if index == 1:
-            # self.verticalLayoutSelecionarEsqDir
-            self.translate()
-            # window.Viewport.translacao()
+        if index == 0:
+            # self.translate()
+            pass
         # rotaçao
-        elif index == 2:
+        elif index == 1:
             pass
         # escalonamento
         else:
@@ -426,6 +425,13 @@ class TransformacoesObjetoUI(QWidget):
         point = window.Point(x, y)
         window.translacao(self.item.graphic, point)
 
+    def scaling(self):
+        try:
+            proportion = int(self.plainTextEditPorcentagemEscalonamento.toPlainText()) / 100
+        except ValueError:
+            return
+        window.escalonamento(self.item.graphic, proportion)
+
     def applyTransformations(self):
         print(self.item)
         index = self.tabWidgetTiposTransformacao.currentIndex()
@@ -437,8 +443,9 @@ class TransformacoesObjetoUI(QWidget):
             pass
         # escalonamento
         else:
-            pass
+            self.scaling()
 
+        print(self.item)
         self.on_close()
         self.close()
 
