@@ -124,7 +124,6 @@ class Viewport:
         self.draw_line(first_point.x, first_point.y, reference.x, reference.y, painter)
 
 
-
 class Canvas(QWidget):
     step: int
     viewport: Viewport
@@ -218,13 +217,12 @@ def translacao(object: GraphicObject, offset: Point):
         object.points = translate_points(object.points, offset)
 
 
-# falta deixar o escalonamento em torno do centro do objeto
 def scaling_points(points: list[Point], scaling, center_point: Point):
     matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-center_point.x, -center_point.y, 1]]
     matrix_scaling = [[scaling, 0, 0], [0, scaling, 0], [0, 0, 1]]
     matrix_center_pos = [[1, 0, 0], [0, 1, 0], [center_point.x, center_point.y, 1]]
 
-    translated_points = []
+    scaled_points = []
     for point in points:
         matrix_point = [point.x, point.y, 1]
         first = numpy.matmul(matrix_point, matrix_center_neg)
@@ -235,9 +233,9 @@ def scaling_points(points: list[Point], scaling, center_point: Point):
             x=result[0],
             y=result[1]
         )
-        translated_points.append(new_point)
+        scaled_points.append(new_point)
 
-    return translated_points
+    return scaled_points
 
 
 def escalonamento(object: GraphicObject, scaling, center_point: Point):
@@ -253,5 +251,37 @@ def escalonamento(object: GraphicObject, scaling, center_point: Point):
         object.points = scaling_points(object.points, scaling, center_point)
 
 
-def rotacao():
-    pass
+def calculate_rotation(points: list[Point], reference: Point, graus):
+    cos = numpy.cos(graus)
+    sin = numpy.sin(graus)
+    matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-reference.x, -reference.y, 1]]
+    matrix_scaling = [[cos, -sin, 0], [sin, cos, 0], [0, 0, 1]]
+    matrix_center_pos = [[1, 0, 0], [0, 1, 0], [reference.x, reference.y, 1]]
+
+    rotated_points = []
+    for point in points:
+        matrix_point = [point.x, point.y, 1]
+        first = numpy.matmul(matrix_point, matrix_center_neg)
+        second = numpy.matmul(first, matrix_scaling)
+        result = numpy.matmul(second, matrix_center_pos)
+
+        new_point = Point(
+            x=result[0],
+            y=result[1]
+        )
+        rotated_points.append(new_point)
+
+    return rotated_points
+
+
+def rotacao(object: GraphicObject, reference: Point, graus):
+    if isinstance(object, Point):
+        translated = calculate_rotation([object], reference, graus)[0]
+        object.x = translated.x
+        object.y = translated.y
+    elif isinstance(object, Line):
+        start, end = calculate_rotation([object.start, object.end], reference, graus)
+        object.start = start
+        object.end = end
+    else:
+        object.points = calculate_rotation(object.points, reference, graus)

@@ -432,6 +432,26 @@ class TransformacoesObjetoUI(QWidget):
             return
         window.escalonamento(self.item.graphic, proportion, self.item.center_point)
 
+    def rotation(self):
+        try:
+            graus = self.plainTextEditPorcentagemEscalonamento.toPlainText()
+        except ValueError:
+            return
+
+        if self.radioButtonRotacionarOrigem.isChecked():
+            reference_point = window.Point(0, 0)
+        elif self.radioButtonRotacionarPonto.isChecked():
+            try:
+                x = int(self.plainTextEditX.toPlainText())
+                y = int(self.plainTextEditY.toPlainText())
+            except ValueError:
+                return
+            reference_point = window.Point(x, y)
+        else:
+            reference_point = self.item.center_point
+
+        window.rotacao(self.item.graphic, reference_point, graus)
+
     def applyTransformations(self):
         print(self.item)
         index = self.tabWidgetTiposTransformacao.currentIndex()
@@ -440,7 +460,7 @@ class TransformacoesObjetoUI(QWidget):
             self.translate()
         # rotaçao
         elif index == 1:
-            pass
+            self.rotation()
         # escalonamento
         else:
             self.scaling()
