@@ -370,12 +370,14 @@ class IncluirObjeto(QWidget):
         if index == 0:
             newObject = window.WorldItem(
                 name=self.textEditInserirNome.toPlainText(),
+                center_point=Point(0,0),
                 graphic=window.Point(int(self.plainTextEditXPonto.toPlainText()),
                                      int(self.plainTextEditYPonto.toPlainText()))
             )
         elif index == 1:
             newObject = window.WorldItem(
                 name=self.textEditInserirNome.toPlainText(),
+                center_point=Point(0,0),
                 graphic=window.Line(
                     start=window.Point(int(self.plainTextEditXPontoInicialReta.toPlainText()),
                                        int(self.plainTextEditYPontoInicialReta.toPlainText())),
@@ -387,19 +389,23 @@ class IncluirObjeto(QWidget):
             currentTab = self.tabWidget.currentWidget()
             tabVerticalLayout = currentTab.findChild(QtWidgets.QVBoxLayout)
             vertixList = list()
-            for i in range (tabVerticalLayout.count() - 1):
+            for i in range(tabVerticalLayout.count() - 1):
                 groupBox = tabVerticalLayout.itemAt(i).widget()
                 horizontalLayout = groupBox.findChild(QWidget)
-                xValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditXVertice{i+1}").toPlainText()
-                yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit, f"plainTextEditYVertice{i+1}").toPlainText()
+                xValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
+                                                    f"plainTextEditXVertice{i + 1}").toPlainText()
+                yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
+                                                    f"plainTextEditYVertice{i + 1}").toPlainText()
                 vertixList.append(Point(int(xValue), int(yValue)))
             newObject = window.WorldItem(
-                name = self.textEditInserirNome.toPlainText(),
-                graphic = window.Wireframe(vertixList)
+                name=self.textEditInserirNome.toPlainText(),
+                center_point=Point(0,0),
+                graphic=window.Wireframe(vertixList)
             )
         else:
             pass
-        
+
+        window.determine_object_center(newObject)
         self.on_ok(newObject)
         self.lastAddedObject = newObject
 
@@ -413,6 +419,7 @@ class IncluirObjeto(QWidget):
         self.setupUi()
         self.on_ok = on_ok
         self.show()
+
 
 if __name__ == "__main__":
     import sys

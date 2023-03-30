@@ -5,6 +5,7 @@ from typing import List
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPalette, QColor, QPainter
+import numpy
 
 
 @dataclass
@@ -38,6 +39,7 @@ GraphicObject = Point | Line | Wireframe
 @dataclass
 class WorldItem:
     name: str
+    center_point: Point
     graphic: GraphicObject
 
 
@@ -114,13 +116,13 @@ class Viewport:
         painter.drawLine(x1, y1, x2, y2)
 
     def draw_wireframe(self, points: List[Point], painter: QPainter):
-        iterator_points = iter(points)
-        first_point = next(iterator_points)
-        previous_point = first_point
-        for point in iterator_points:
-            self.draw_line(previous_point.x, previous_point.y, point.x, point.y, painter)
-            previous_point = point
-        self.draw_line(previous_point.x, previous_point.y, point.x, point.y, painter)
+        first_point = points[0]
+        for point in points[1:]:
+            self.draw_line(first_point.x, first_point.y, point.x, point.y, painter)
+            first_point = point
+        reference = points[0]
+        self.draw_line(first_point.x, first_point.y, reference.x, reference.y, painter)
+
 
 
 class Canvas(QWidget):
@@ -170,6 +172,27 @@ class Canvas(QWidget):
         self.repaint()
 
 
+def calculate_object_center(points: list[Point]):
+    new_point_x = 0
+    new_point_y = 0
+    for point in points:
+        new_point_x += point.x
+        new_point_y += point.y
+    x = int(new_point_x / len(points))
+    y = int(new_point_y / len(points))
+    return Point(x=x, y=y)
+
+
+def determine_object_center(item: WorldItem):
+    object = item.graphic
+    if isinstance(object, Point):
+        item.center_point = object
+    elif isinstance(object, Line):
+        item.center_point = calculate_object_center([object.start, object.end])
+    else:
+        item.center_point = calculate_object_center(object.points)
+
+
 def translate_points(points: list[Point], offset: Point):
     translated_points = []
     for point in points:
@@ -196,29 +219,38 @@ def translacao(object: GraphicObject, offset: Point):
 
 
 # falta deixar o escalonamento em torno do centro do objeto
-def scaling_points(points: list[Point], scaling):
+def scaling_points(points: list[Point], scaling, center_point: Point):
+    matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-center_point.x, -center_point.y, 1]]
+    matrix_scaling = [[scaling, 0, 0], [0, scaling, 0], [0, 0, 1]]
+    matrix_center_pos = [[1, 0, 0], [0, 1, 0], [center_point.x, center_point.y, 1]]
+
     translated_points = []
     for point in points:
+        matrix_point = [point.x, point.y, 1]
+        first = numpy.matmul(matrix_point, matrix_center_neg)
+        second = numpy.matmul(first, matrix_scaling)
+        result = numpy.matmul(second, matrix_center_pos)
+
         new_point = Point(
-            x=point.x * scaling,
-            y=point.y * scaling
+            x=result[0],
+            y=result[1]
         )
         translated_points.append(new_point)
 
     return translated_points
 
 
-def escalonamento(object: GraphicObject, scaling):
+def escalonamento(object: GraphicObject, scaling, center_point: Point):
     if isinstance(object, Point):
-        translated = scaling_points([object], scaling)[0]
+        translated = scaling_points([object], scaling, center_point)[0]
         object.x = translated.x
         object.y = translated.y
     elif isinstance(object, Line):
-        start, end = scaling_points([object.start, object.end], scaling)
+        start, end = scaling_points([object.start, object.end], scaling, center_point)
         object.start = start
         object.end = end
     else:
-        object.points = scaling_points(object.points, scaling)
+        object.points = scaling_points(object.points, scaling, center_point)
 
 
 def rotacao():

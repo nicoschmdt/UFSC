@@ -430,7 +430,7 @@ class TransformacoesObjetoUI(QWidget):
             proportion = int(self.plainTextEditPorcentagemEscalonamento.toPlainText()) / 100
         except ValueError:
             return
-        window.escalonamento(self.item.graphic, proportion)
+        window.escalonamento(self.item.graphic, proportion, self.item.center_point)
 
     def applyTransformations(self):
         print(self.item)
