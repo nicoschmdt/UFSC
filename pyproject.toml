@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "cg"
+version = "0.1.0"
+description = ""
+authors = ["nicole <n.schmidt@grad.ufsc.br>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.24.2"
+
+[tool.poetry.group.dev.dependencies]
+PyQt6 = "^6.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
