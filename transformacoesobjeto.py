@@ -3,10 +3,16 @@ from typing import Callable
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget
 
+from typing import List, Callable
+
 import window
 
 
 class TransformacoesObjetoUI(QWidget):
+
+    transformationList: List[Callable] = list()
+    translationCounter = rotationCounter = scalingCounter = 0
+
     def setupUi(self):
         self.setObjectName("Form")
         self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
@@ -305,8 +311,6 @@ class TransformacoesObjetoUI(QWidget):
         self.listWidgetListaTransformacoes = QtWidgets.QListWidget(parent=self.groupBoxListaTransformacoes)
         self.listWidgetListaTransformacoes.setGeometry(QtCore.QRect(5, 23, 237, 405))
         self.listWidgetListaTransformacoes.setObjectName("listWidgetListaTransformacoes")
-        item = QtWidgets.QListWidgetItem()
-        self.listWidgetListaTransformacoes.addItem(item)
         self.verticalLayoutListaTransformacoes.addWidget(self.groupBoxListaTransformacoes)
         self.horizontalLayoutTransformacoes.addLayout(self.verticalLayoutListaTransformacoes)
         self.horizontalLayoutTransformacoes.setStretch(0, 2)
@@ -378,8 +382,6 @@ class TransformacoesObjetoUI(QWidget):
         self.groupBoxListaTransformacoes.setTitle(_translate("Form", "Lista de transformações"))
         __sortingEnabled = self.listWidgetListaTransformacoes.isSortingEnabled()
         self.listWidgetListaTransformacoes.setSortingEnabled(False)
-        item = self.listWidgetListaTransformacoes.item(0)
-        item.setText(_translate("Form", "Rotação 1"))
         self.listWidgetListaTransformacoes.setSortingEnabled(__sortingEnabled)
         self.pushButtonCancel.setText(_translate("Form", "Cancel"))
         self.pushButtonOK.setText(_translate("Form", "OK"))
@@ -396,20 +398,7 @@ class TransformacoesObjetoUI(QWidget):
         self.radioButtonRotacionarCentro.clicked.connect(self.checkRotateOnObjectCenter)
         self.radioButtonRotacionarPonto.clicked.connect(self.checkRotateOnPoint)
 
-    def addTransformation(self):
-        index = self.tabWidgetTiposTransformacao.currentIndex()
-        # translaçao
-        if index == 0:
-            # self.translate()
-            pass
-        # rotaçao
-        elif index == 1:
-            pass
-        # escalonamento
-        else:
-            pass
-
-    def translate(self):
+    def translate(self) -> Callable:
         try:
             x = int(self.plainTextEditUnidadesEsqDir.toPlainText())
             y = int(self.plainTextEditUnidadesCimaBaixo.toPlainText())
@@ -423,16 +412,16 @@ class TransformacoesObjetoUI(QWidget):
             y *= -1
 
         point = window.Point(x, y)
-        window.translacao(self.item.graphic, point)
+        return window.translacao(self.item.graphic, point)
 
-    def scaling(self):
+    def scaling(self) -> Callable:
         try:
             proportion = int(self.plainTextEditPorcentagemEscalonamento.toPlainText()) / 100
         except ValueError:
             return
-        window.escalonamento(self.item.graphic, proportion, self.item.center_point)
+        return window.escalonamento(self.item.graphic, proportion, self.item.center_point)
 
-    def rotation(self):
+    def rotation(self) -> Callable:
         try:
             graus = self.plainTextEditPorcentagemEscalonamento.toPlainText()
         except ValueError:
@@ -450,22 +439,32 @@ class TransformacoesObjetoUI(QWidget):
         else:
             reference_point = self.item.center_point
 
-        window.rotacao(self.item.graphic, reference_point, graus)
+        return window.rotacao(self.item.graphic, reference_point, graus)
 
-    def applyTransformations(self):
+    def addTransformation(self):
         print(self.item)
         index = self.tabWidgetTiposTransformacao.currentIndex()
         # translaçao
         if index == 0:
-            self.translate()
+            self.transformationList.append(self.translate())
+            self.translationCounter += 1
+            self.listWidgetListaTransformacoes.addItem(f"Translação {self.translationCounter}")
         # rotaçao
         elif index == 1:
-            self.rotation()
+            self.transformationList.append(self.rotation())
+            self.rotationCounter += 1
+            self.listWidgetListaTransformacoes.addItem(f"Rotação {self.rotationCounter}")
         # escalonamento
         else:
-            self.scaling()
+            self.transformationList.append(self.scaling())
+            self.scalingCounter += 1
+            self.listWidgetListaTransformacoes.addItem(f"Escalonamento {self.translationCounter}")
 
-        print(self.item)
+    def applyTransformations(self):
+
+        for transformation in self.transformationList:
+            transformation()
+
         self.on_close()
         self.close()
 

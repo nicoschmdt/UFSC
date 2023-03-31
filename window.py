@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 import PyQt6
-from typing import List
+from typing import List, Callable
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPalette, QColor, QPainter
@@ -204,18 +204,19 @@ def translate_points(points: list[Point], offset: Point):
     return translated_points
 
 
-def translacao(object: GraphicObject, offset: Point):
-    if isinstance(object, Point):
-        translated = translate_points([object], offset)[0]
-        object.x = translated.x
-        object.y = translated.y
-    elif isinstance(object, Line):
-        start, end = translate_points([object.start, object.end], offset)
-        object.start = start
-        object.end = end
-    else:
-        object.points = translate_points(object.points, offset)
-
+def translacao(object: GraphicObject, offset: Point) -> Callable:
+    def funcao_translacao():
+        if isinstance(object, Point):
+            translated = translate_points([object], offset)[0]
+            object.x = translated.x
+            object.y = translated.y
+        elif isinstance(object, Line):
+            start, end = translate_points([object.start, object.end], offset)
+            object.start = start
+            object.end = end
+        else:
+            object.points = translate_points(object.points, offset)
+    return funcao_translacao
 
 def scaling_points(points: list[Point], scaling, center_point: Point):
     matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-center_point.x, -center_point.y, 1]]
@@ -237,18 +238,19 @@ def scaling_points(points: list[Point], scaling, center_point: Point):
 
     return scaled_points
 
-
-def escalonamento(object: GraphicObject, scaling, center_point: Point):
-    if isinstance(object, Point):
-        translated = scaling_points([object], scaling, center_point)[0]
-        object.x = translated.x
-        object.y = translated.y
-    elif isinstance(object, Line):
-        start, end = scaling_points([object.start, object.end], scaling, center_point)
-        object.start = start
-        object.end = end
-    else:
-        object.points = scaling_points(object.points, scaling, center_point)
+def escalonamento(object: GraphicObject, scaling, center_point: Point) -> Callable:
+    def funcao_escalonamento():
+        if isinstance(object, Point):
+            translated = scaling_points([object], scaling, center_point)[0]
+            object.x = translated.x
+            object.y = translated.y
+        elif isinstance(object, Line):
+            start, end = scaling_points([object.start, object.end], scaling, center_point)
+            object.start = start
+            object.end = end
+        else:
+            object.points = scaling_points(object.points, scaling, center_point)
+    return funcao_escalonamento
 
 
 def calculate_rotation(points: list[Point], reference: Point, graus):
@@ -274,14 +276,16 @@ def calculate_rotation(points: list[Point], reference: Point, graus):
     return rotated_points
 
 
-def rotacao(object: GraphicObject, reference: Point, graus):
-    if isinstance(object, Point):
-        translated = calculate_rotation([object], reference, graus)[0]
-        object.x = translated.x
-        object.y = translated.y
-    elif isinstance(object, Line):
-        start, end = calculate_rotation([object.start, object.end], reference, graus)
-        object.start = start
-        object.end = end
-    else:
-        object.points = calculate_rotation(object.points, reference, graus)
+def rotacao(object: GraphicObject, reference: Point, graus) -> Callable:
+    def funcao_rotacao():
+        if isinstance(object, Point):
+            translated = calculate_rotation([object], reference, graus)[0]
+            object.x = translated.x
+            object.y = translated.y
+        elif isinstance(object, Line):
+            start, end = calculate_rotation([object.start, object.end], reference, graus)
+            object.start = start
+            object.end = end
+        else:
+            object.points = calculate_rotation(object.points, reference, graus)
+    return funcao_rotacao
