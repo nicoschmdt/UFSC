@@ -412,7 +412,7 @@ class TransformacoesObjetoUI(QWidget):
             y *= -1
 
         point = window.Point(x, y)
-        return window.translacao(self.item.graphic, point)
+        return window.translacao(self.item, point)
 
     def scaling(self) -> Callable:
         try:
@@ -439,7 +439,7 @@ class TransformacoesObjetoUI(QWidget):
         else:
             reference_point = self.item.center_point
 
-        return window.rotacao(self.item.graphic, reference_point, graus)
+        return window.rotacao(self.item, reference_point, graus)
 
     def addTransformation(self):
         print(self.item)

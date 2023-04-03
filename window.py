@@ -207,18 +207,23 @@ def translate_points(points: list[Point], offset: Point):
     return translated_points
 
 
-def translacao(object: GraphicObject, offset: Point) -> Callable:
+def translacao(item: WorldItem, offset: Point) -> Callable:
     def funcao_translacao():
+        object = item.graphic
         if isinstance(object, Point):
             translated = translate_points([object], offset)[0]
             object.x = translated.x
             object.y = translated.y
+            points = [Point(object.x, object.y)]
         elif isinstance(object, Line):
             start, end = translate_points([object.start, object.end], offset)
             object.start = start
             object.end = end
+            points = [object.start, object.end]
         else:
             object.points = translate_points(object.points, offset)
+            points = object.points
+        item.center_point = calculate_object_center(points)
 
     return funcao_translacao
 
@@ -257,6 +262,7 @@ def escalonamento(object: GraphicObject, scaling, center_point: Point) -> Callab
         else:
             object.points = scaling_points(object.points, scaling, center_point)
 
+
     return funcao_escalonamento
 
 
@@ -286,17 +292,22 @@ def calculate_rotation(points: list[Point], reference: Point, graus):
     return rotated_points
 
 
-def rotacao(object: GraphicObject, reference: Point, graus) -> Callable:
+def rotacao(item: WorldItem, reference: Point, graus) -> Callable:
     def funcao_rotacao():
+        object = item.graphic
         if isinstance(object, Point):
             translated = calculate_rotation([object], reference, graus)[0]
             object.x = translated.x
             object.y = translated.y
+            points = [Point(object.x, object.y)]
         elif isinstance(object, Line):
             start, end = calculate_rotation([object.start, object.end], reference, graus)
             object.start = start
             object.end = end
+            points = [start, end]
         else:
             object.points = calculate_rotation(object.points, reference, graus)
+            points = object.points
+        item.center_point = calculate_object_center(points)
 
     return funcao_rotacao
