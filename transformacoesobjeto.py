@@ -423,7 +423,7 @@ class TransformacoesObjetoUI(QWidget):
 
     def rotation(self) -> Callable:
         try:
-            graus = self.plainTextEditPorcentagemEscalonamento.toPlainText()
+            graus = int(self.plainTextEdit.toPlainText())
         except ValueError:
             return
 
@@ -517,6 +517,7 @@ class TransformacoesObjetoUI(QWidget):
 
     def __init__(self, item: window.WorldItem, on_close: Callable):
         super().__init__()
+        self.transformationList = list()
         self.setupUi()
         self.setupEvents()
         self.item = item

@@ -6,6 +6,7 @@ from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPalette, QColor, QPainter
 import numpy
+import math
 
 
 @dataclass
@@ -150,6 +151,8 @@ class Canvas(QWidget):
         painter.setPen(QColor.fromString('blue'))
 
         self.viewport.draw(painter, self.world_items)
+        self.viewport.draw_line(-1000, 0, 1000, 0, painter)
+        self.viewport.draw_line(0, -1000, 0, 1000, painter)
 
     # TODO: pegar o valor do step ao inves de usar algo fixo
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
@@ -216,7 +219,9 @@ def translacao(object: GraphicObject, offset: Point) -> Callable:
             object.end = end
         else:
             object.points = translate_points(object.points, offset)
+
     return funcao_translacao
+
 
 def scaling_points(points: list[Point], scaling, center_point: Point):
     matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-center_point.x, -center_point.y, 1]]
@@ -238,6 +243,7 @@ def scaling_points(points: list[Point], scaling, center_point: Point):
 
     return scaled_points
 
+
 def escalonamento(object: GraphicObject, scaling, center_point: Point) -> Callable:
     def funcao_escalonamento():
         if isinstance(object, Point):
@@ -250,12 +256,16 @@ def escalonamento(object: GraphicObject, scaling, center_point: Point) -> Callab
             object.end = end
         else:
             object.points = scaling_points(object.points, scaling, center_point)
+
     return funcao_escalonamento
 
 
 def calculate_rotation(points: list[Point], reference: Point, graus):
-    cos = numpy.cos(graus)
-    sin = numpy.sin(graus)
+    # cos = numpy.cos(graus)
+    # sin = numpy.sin(graus)
+    cos = math.cos(graus * math.pi / 180)
+    sin = math.sin(graus * math.pi / 180)
+    # print(graus)
     matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-reference.x, -reference.y, 1]]
     matrix_scaling = [[cos, -sin, 0], [sin, cos, 0], [0, 0, 1]]
     matrix_center_pos = [[1, 0, 0], [0, 1, 0], [reference.x, reference.y, 1]]
@@ -288,4 +298,5 @@ def rotacao(object: GraphicObject, reference: Point, graus) -> Callable:
             object.end = end
         else:
             object.points = calculate_rotation(object.points, reference, graus)
+
     return funcao_rotacao
