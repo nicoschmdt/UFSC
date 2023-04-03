@@ -312,7 +312,12 @@ class MainWindow:
 
     def add_item_to_world(self, item: window.WorldItem):
         if item.name == "":
-            item.name = "Sem nome"
+            if isinstance(item.graphic, window.Point):
+                item.name = "Ponto Sem Nome"
+            elif isinstance(item.graphic, window.Line):
+                item.name = "Reta Sem Nome"
+            else:
+                item.name = "Poligono Sem Nome"
         self.graphicsViewViewport.world_items.append(item)
 
         widget = QtWidgets.QListWidgetItem()
