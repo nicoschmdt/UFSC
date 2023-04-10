@@ -115,8 +115,8 @@ class Viewport:
 
     def draw_line(self, x1: int, y1: int, x2: int, y2: int, painter: QPainter):
         # pegar x1,x2,y1,y2 e chamar algoritmo de rotação
-        window_center = Point(self.window_size.x+self.window_size.width//2,
-                              self.window_size.y+self.window_size.height//2)
+        window_center = Point(self.window_size.x + self.window_size.width // 2,
+                              self.window_size.y + self.window_size.height // 2)
 
         rotated_points = calculate_rotation([Point(x1, y1), Point(x2, y2)], window_center, self.window_angle)
 
@@ -128,6 +128,10 @@ class Viewport:
         painter.drawLine(x1, y1, x2, y2)
 
     def draw_wireframe(self, points: List[Point], painter: QPainter):
+        # check if is polygon
+        if not check_is_polygon(points):
+            raise NotAPolygon
+
         first_point = points[0]
         for point in points[1:]:
             self.draw_line(first_point.x, first_point.y, point.x, point.y, painter)
@@ -135,6 +139,9 @@ class Viewport:
         reference = points[0]
         self.draw_line(first_point.x, first_point.y, reference.x, reference.y, painter)
 
+
+class NotAPolygon(Exception):
+    pass
 
 class Canvas(QWidget):
     step: int
@@ -184,6 +191,75 @@ class Canvas(QWidget):
             super().keyPressEvent(event)
 
         self.repaint()
+
+
+def check_is_polygon(points: list[Point]):
+    size = len(points)
+    if size == 3:
+        return True
+
+    lines = []
+
+    ref_point = points[0]
+    for point in points[1:]:
+        line = Line(ref_point, point)
+        lines.append(line)
+        ref_point = point
+    lines.append(Line(ref_point, points[0]))
+
+    consider = len(points) - 3
+    for i, line in enumerate(lines):
+        index = (i + 2) % size
+        while consider > 0:
+            if intersect(line, lines[index]):
+                return False
+            consider -= 1
+            index = (index + 1) % size
+
+    return True
+
+
+def intersect(line1: Line, line2: Line):
+    o1 = orientation(line1.start, line1.end, line2.start)
+    o2 = orientation(line1.start, line1.end, line2.end)
+    o3 = orientation(line2.start, line2.end, line1.start)
+    o4 = orientation(line2.start, line2.end, line1.end)
+
+    if o1 != o2 and o3 != o4:
+        return True
+
+    if o1 == 0 and on_segment(line1, line2.start):
+        return True
+    elif o2 == 0 and on_segment(line1, line2.end):
+        return True
+    elif o3 == 0 and on_segment(line2, line1.start):
+        return True
+    elif o4 == 0 and on_segment(line2, line1.end):
+        return True
+
+    return False
+
+
+def on_segment(line: Line, point: Point):
+    point_a = line.start
+    point_b = line.end
+    if point.x <= max(point_a.x, point_b.x) and (point.x >= min(point_a.x, point_b.x)):
+        if point.y <= max(point_a.y, point_b.y) and (point.y >= min(point_a.y, point_b.y)):
+            return True
+    return False
+
+
+# 1 clock 2 counterclockwise
+def orientation(point1: Point, point2: Point, point3: Point):
+    signal = (point2.y - point1.y) * (point3.x - point2.x)
+    signal -= (point3.y - point2.y) * (point2.x - point1.x)
+
+    if signal > 0:
+        return 1
+    elif signal < 0:
+        return 2
+
+    return 0  # collinear
 
 
 def calculate_object_center(points: list[Point]):
@@ -273,7 +349,6 @@ def escalonamento(object: GraphicObject, scaling, center_point: Point) -> Callab
             object.end = end
         else:
             object.points = scaling_points(object.points, scaling, center_point)
-
 
     return funcao_escalonamento
 

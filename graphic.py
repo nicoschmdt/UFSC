@@ -366,7 +366,6 @@ class MainWindow:
         except ValueError:
             return
 
-        print(f'angle={angle}')
         self.graphicsViewViewport.viewport.set_window_angle(angle)
         self.graphicsViewViewport.repaint()
 

@@ -397,11 +397,14 @@ class IncluirObjeto(QWidget):
                 yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
                                                     f"plainTextEditYVertice{i + 1}").toPlainText()
                 vertixList.append(Point(int(xValue), int(yValue)))
-            newObject = window.WorldItem(
-                name=self.textEditInserirNome.toPlainText(),
-                center_point=Point(0,0),
-                graphic=window.Wireframe(vertixList)
-            )
+            try:
+                newObject = window.WorldItem(
+                    name=self.textEditInserirNome.toPlainText(),
+                    center_point=Point(0,0),
+                    graphic=window.Wireframe(vertixList)
+                )
+            except window.NotAPolygon:
+                self.close()
         else:
             pass
 
