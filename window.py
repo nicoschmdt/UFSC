@@ -47,6 +47,7 @@ class WorldItem:
 class Viewport:
     viewport_size: Size
     window_size: Size
+    window_angle: float = 0.0
 
     def __init__(self, x: int, y: int, width: int, height: int):
         self.viewport_size = Size(
@@ -93,6 +94,9 @@ class Viewport:
             height=height
         )
 
+    def set_window_angle(self, angle: float):
+        self.window_angle += angle
+
     def transformada_vp_y(self, y: int):
         y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))
         y_vp *= (self.viewport_size.y + self.viewport_size.height) - self.viewport_size.y
@@ -110,10 +114,17 @@ class Viewport:
         )
 
     def draw_line(self, x1: int, y1: int, x2: int, y2: int, painter: QPainter):
-        x1 = self.transformada_vp_x(x1)
-        y1 = self.transformada_vp_y(y1)
-        x2 = self.transformada_vp_x(x2)
-        y2 = self.transformada_vp_y(y2)
+        # pegar x1,x2,y1,y2 e chamar algoritmo de rotação
+        window_center = Point(self.window_size.x+self.window_size.width//2,
+                              self.window_size.y+self.window_size.height//2)
+
+        rotated_points = calculate_rotation([Point(x1, y1), Point(x2, y2)], window_center, self.window_angle)
+
+        x1 = self.transformada_vp_x(rotated_points[0].x)
+        y1 = self.transformada_vp_y(rotated_points[0].y)
+        x2 = self.transformada_vp_x(rotated_points[1].x)
+        y2 = self.transformada_vp_y(rotated_points[1].y)
+
         painter.drawLine(x1, y1, x2, y2)
 
     def draw_wireframe(self, points: List[Point], painter: QPainter):
@@ -153,6 +164,7 @@ class Canvas(QWidget):
         self.viewport.draw(painter, self.world_items)
         self.viewport.draw_line(-1000, 0, 1000, 0, painter)
         self.viewport.draw_line(0, -1000, 0, 1000, painter)
+        # self.viewport.draw_line(30, 30, 90, 90, painter)
 
     # TODO: pegar o valor do step ao inves de usar algo fixo
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
@@ -229,16 +241,16 @@ def translacao(item: WorldItem, offset: Point) -> Callable:
 
 
 def scaling_points(points: list[Point], scaling, center_point: Point):
-    matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-center_point.x, -center_point.y, 1]]
-    matrix_scaling = [[scaling, 0, 0], [0, scaling, 0], [0, 0, 1]]
-    matrix_center_pos = [[1, 0, 0], [0, 1, 0], [center_point.x, center_point.y, 1]]
+    matrix_center_neg = numpy.array([[1, 0, 0], [0, 1, 0], [-center_point.x, -center_point.y, 1]])
+    matrix_scaling = numpy.array([[scaling, 0, 0], [0, scaling, 0], [0, 0, 1]])
+    matrix_center_pos = numpy.array([[1, 0, 0], [0, 1, 0], [center_point.x, center_point.y, 1]])
+
+    scale_matrix = matrix_center_neg @ matrix_scaling @ matrix_center_pos
 
     scaled_points = []
     for point in points:
         matrix_point = [point.x, point.y, 1]
-        first = numpy.matmul(matrix_point, matrix_center_neg)
-        second = numpy.matmul(first, matrix_scaling)
-        result = numpy.matmul(second, matrix_center_pos)
+        result = numpy.matmul(matrix_point, scale_matrix)
 
         new_point = Point(
             x=result[0],
@@ -267,21 +279,19 @@ def escalonamento(object: GraphicObject, scaling, center_point: Point) -> Callab
 
 
 def calculate_rotation(points: list[Point], reference: Point, graus):
-    # cos = numpy.cos(graus)
-    # sin = numpy.sin(graus)
     cos = math.cos(graus * math.pi / 180)
     sin = math.sin(graus * math.pi / 180)
     # print(graus)
-    matrix_center_neg = [[1, 0, 0], [0, 1, 0], [-reference.x, -reference.y, 1]]
-    matrix_scaling = [[cos, -sin, 0], [sin, cos, 0], [0, 0, 1]]
-    matrix_center_pos = [[1, 0, 0], [0, 1, 0], [reference.x, reference.y, 1]]
+    matrix_center_neg = numpy.array([[1, 0, 0], [0, 1, 0], [-reference.x, -reference.y, 1]])
+    matrix_scaling = numpy.array([[cos, -sin, 0], [sin, cos, 0], [0, 0, 1]])
+    matrix_center_pos = numpy.array([[1, 0, 0], [0, 1, 0], [reference.x, reference.y, 1]])
+
+    rotation_matrix = matrix_center_neg @ matrix_scaling @ matrix_center_pos
 
     rotated_points = []
     for point in points:
         matrix_point = [point.x, point.y, 1]
-        first = numpy.matmul(matrix_point, matrix_center_neg)
-        second = numpy.matmul(first, matrix_scaling)
-        result = numpy.matmul(second, matrix_center_pos)
+        result = numpy.matmul(matrix_point, rotation_matrix)
 
         new_point = Point(
             x=result[0],

@@ -169,6 +169,7 @@ class MainWindow:
         self.pushButton_4 = QtWidgets.QPushButton(parent=self.verticalLayoutWidget_4)
         self.pushButton_4.setMaximumSize(QtCore.QSize(40, 40))
         self.pushButton_4.setObjectName("pushButton_4")
+        self.pushButton_4.clicked.connect(self.windowRotationZ)
         self.horizontalLayoutXYZ.addWidget(self.pushButton_4)
         self.verticalLayoutRotacao.addLayout(self.horizontalLayoutXYZ)
         self.verticalLayoutRotacao.setStretch(0, 1)
@@ -357,6 +358,16 @@ class MainWindow:
 
     def panRight(self):
         self.graphicsViewViewport.viewport.move_window(-10, 0)
+        self.graphicsViewViewport.repaint()
+
+    def windowRotationZ(self):
+        try:
+            angle = float(self.plainTextEditGraus.toPlainText())
+        except ValueError:
+            return
+
+        print(f'angle={angle}')
+        self.graphicsViewViewport.viewport.set_window_angle(angle)
         self.graphicsViewViewport.repaint()
 
     def openObjectCreationWindow(self):
