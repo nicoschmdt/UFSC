@@ -1,6 +1,9 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 import window
+from calculation.shapes.line import Line
+from calculation.shapes.point import Point
+from calculation.shapes.worldItem import WorldItem
 from window import Canvas
 import incluirobjeto
 from transformacoesobjeto import TransformacoesObjetoUI
@@ -23,7 +26,7 @@ class MainWindow:
         self.centralwidget.setFont(font)
         self.centralwidget.setObjectName("centralwidget")
 
-        self.toolbar = QtWidgets.QToolBar("Main toolbar", parent = self.main_window)
+        self.toolbar = QtWidgets.QToolBar("Main toolbar", parent=self.main_window)
         self.toolbar.setFixedHeight(30)
         self.toolbar.setFixedWidth(1000)
         saveAction = QtGui.QAction("Salvar", self.toolbar)
@@ -324,11 +327,11 @@ class MainWindow:
         self.setupUi()
         self.main_window.show()
 
-    def add_item_to_world(self, item: window.WorldItem):
+    def add_item_to_world(self, item: WorldItem):
         if item.name == "":
-            if isinstance(item.graphic, window.Point):
+            if isinstance(item.graphic, Point):
                 item.name = "Ponto Sem Nome"
-            elif isinstance(item.graphic, window.Line):
+            elif isinstance(item.graphic, Line):
                 item.name = "Reta Sem Nome"
             else:
                 item.name = "Poligono Sem Nome"
@@ -384,7 +387,7 @@ class MainWindow:
 
     def openObjectCreationWindow(self):
         self.objectCreationWindow = incluirobjeto.IncluirObjeto(self.add_item_to_world)
-        object: window.WorldItem = self.objectCreationWindow.getLastAddedObject()
+        object: WorldItem = self.objectCreationWindow.getLastAddedObject()
         if object is not None:
             self.add_item_to_world(object)
 
@@ -398,6 +401,7 @@ class MainWindow:
 
     def loadObjects(self):
         pass
+
 
 if __name__ == "__main__":
     import sys

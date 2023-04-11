@@ -1,5 +1,8 @@
+from calculation.shapes.line import Line
+from calculation.shapes.point import Point
+from calculation.shapes.wireframe import Wireframe
+from calculation.shapes.worldItem import GraphicObject
 
-from window import GraphicObject, Point, Line, Wireframe
 
 class OBJFileDescriptor:
 

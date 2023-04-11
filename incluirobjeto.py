@@ -1,13 +1,17 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget
 
-import window
-from window import Point
+from calculation.shapes.line import Line
+from calculation.shapes.point import Point
+from calculation.shapes.wireframe import Wireframe
+from calculation.shapes.worldItem import WorldItem
+from calculation.transformations import determine_object_center
+from common.errors import NotAPolygon
 
 
 class IncluirObjeto(QWidget):
     vertixCounter: int = 1
-    lastAddedObject: window.WorldItem = None
+    lastAddedObject: WorldItem = None
 
     def setupUi(self):
         self.setObjectName("IncluirObjeto")
@@ -366,22 +370,22 @@ class IncluirObjeto(QWidget):
 
     def createObject(self):
         index = self.tabWidget.currentIndex()
-        newObject: window.WorldItem = None
+        newObject: WorldItem = None
         if index == 0:
-            newObject = window.WorldItem(
+            newObject = WorldItem(
                 name=self.textEditInserirNome.toPlainText(),
                 center_point=Point(0,0),
-                graphic=window.Point(int(self.plainTextEditXPonto.toPlainText()),
+                graphic=Point(int(self.plainTextEditXPonto.toPlainText()),
                                      int(self.plainTextEditYPonto.toPlainText()))
             )
         elif index == 1:
-            newObject = window.WorldItem(
+            newObject = WorldItem(
                 name=self.textEditInserirNome.toPlainText(),
                 center_point=Point(0,0),
-                graphic=window.Line(
-                    start=window.Point(int(self.plainTextEditXPontoInicialReta.toPlainText()),
+                graphic=Line(
+                    start=Point(int(self.plainTextEditXPontoInicialReta.toPlainText()),
                                        int(self.plainTextEditYPontoInicialReta.toPlainText())),
-                    end=window.Point(int(self.plainTextEditXPontoFinalReta.toPlainText()),
+                    end=Point(int(self.plainTextEditXPontoFinalReta.toPlainText()),
                                      int(self.plainTextEditYPontoFinalReta.toPlainText()))
                 )
             )
@@ -398,17 +402,17 @@ class IncluirObjeto(QWidget):
                                                     f"plainTextEditYVertice{i + 1}").toPlainText()
                 vertixList.append(Point(int(xValue), int(yValue)))
             try:
-                newObject = window.WorldItem(
+                newObject = WorldItem(
                     name=self.textEditInserirNome.toPlainText(),
                     center_point=Point(0,0),
-                    graphic=window.Wireframe(vertixList)
+                    graphic=Wireframe(vertixList)
                 )
-            except window.NotAPolygon:
+            except NotAPolygon:
                 self.close()
         else:
             pass
 
-        window.determine_object_center(newObject)
+        determine_object_center(newObject)
         self.on_ok(newObject)
         self.lastAddedObject = newObject
 

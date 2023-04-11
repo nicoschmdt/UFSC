@@ -1,0 +1,2 @@
+class NotAPolygon(Exception):
+    pass
