@@ -13,17 +13,30 @@ class MainWindow:
         main_window = self.main_window
         main_window.setObjectName("MainWindow")
         main_window.resize(1000, 800)
-        main_window.setMaximumSize(QtCore.QSize(1000, 754))
-        main_window.setBaseSize(QtCore.QSize(1000, 754))
+        main_window.setMaximumSize(QtCore.QSize(1000, 784))
+        main_window.setBaseSize(QtCore.QSize(1000, 784))
         self.centralwidget = QtWidgets.QWidget(parent=main_window)
-        self.centralwidget.setMaximumSize(QtCore.QSize(1000, 754))
-        self.centralwidget.setBaseSize(QtCore.QSize(1000, 754))
+        self.centralwidget.setMaximumSize(QtCore.QSize(1000, 784))
+        self.centralwidget.setBaseSize(QtCore.QSize(1000, 784))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.centralwidget.setFont(font)
         self.centralwidget.setObjectName("centralwidget")
+
+        self.toolbar = QtWidgets.QToolBar("Main toolbar", parent = self.main_window)
+        self.toolbar.setFixedHeight(30)
+        self.toolbar.setFixedWidth(1000)
+        saveAction = QtGui.QAction("Salvar", self.toolbar)
+        saveAction.setStatusTip("Salvar objetos criados")
+        saveAction.triggered.connect(self.saveObjects)
+        self.toolbar.addAction(saveAction)
+        loadAction = QtGui.QAction("Carregar", self.toolbar)
+        loadAction.setStatusTip("Carregar objetos salvos")
+        loadAction.triggered.connect(self.loadObjects)
+        self.toolbar.addAction(loadAction)
+
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(9, 9, 1000, 711))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(9, 39, 1000, 711))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayoutCentral = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayoutCentral.setContentsMargins(0, 0, 0, 0)
@@ -380,6 +393,11 @@ class MainWindow:
         object = self.graphicsViewViewport.world_items[item_index]
         self.transformacoesObjeto = TransformacoesObjetoUI(object, on_close=self.graphicsViewViewport.repaint)
 
+    def saveObjects(self):
+        pass
+
+    def loadObjects(self):
+        pass
 
 if __name__ == "__main__":
     import sys
