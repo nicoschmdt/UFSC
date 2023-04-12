@@ -63,7 +63,7 @@ class Viewport:
         )
 
     def set_window_angle(self, angle: float):
-        self.window_angle += angle
+        self.window_angle = (self.window_angle + angle)%360
 
     def transformada_vp_y(self, y: int):
         y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))
@@ -76,7 +76,13 @@ class Viewport:
         return int(x_vp + self.viewport_size.x)
 
     def draw_point(self, x: int, y: int, painter: QPainter):
-        painter.drawPoint(x, y)
+        window_center = Point(self.window_size.x + self.window_size.width // 2,
+                              self.window_size.y + self.window_size.height // 2)
+        rotated_point = calculate_rotation([Point(x,y)], window_center, self.window_angle)
+
+        x1 = self.transformada_vp_x(rotated_point[0].x)
+        y1 = self.transformada_vp_y(rotated_point[0].y)
+        painter.drawPoint(x1, y1)
 
     def draw_line(self, x1: int, y1: int, x2: int, y2: int, painter: QPainter):
         window_center = Point(self.window_size.x + self.window_size.width // 2,
