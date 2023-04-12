@@ -1,9 +1,6 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-import window
-from calculation.shapes.line import Line
-from calculation.shapes.point import Point
-from calculation.shapes.worldItem import WorldItem
+from geometry.shapes import Point, Line, WorldItem
 from window import Canvas
 import incluirobjeto
 from transformacoesobjeto import TransformacoesObjetoUI

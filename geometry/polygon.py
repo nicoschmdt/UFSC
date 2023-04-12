@@ -1,5 +1,4 @@
-from calculation.shapes.line import Line
-from calculation.shapes.point import Point
+from geometry.shapes import Point, Line
 
 
 def is_polygon(points: list[Point]) -> bool:

@@ -2,14 +2,10 @@ from typing import List
 
 from PyQt6.QtGui import QPainter, QColor
 
-from calculation.transformations import calculate_rotation
-from calculation.polygon import is_polygon
-from calculation.shapes.line import Line
-from calculation.shapes.point import Point
-from calculation.shapes.rectangle import Rectangle
-from calculation.shapes.wireframe import Wireframe
+from geometry.transformations import calculate_rotation
+from geometry.polygon import is_polygon
+from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
 from common.errors import NotAPolygon
-from window import WorldItem
 
 
 class Viewport:

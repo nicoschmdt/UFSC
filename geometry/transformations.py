@@ -2,9 +2,7 @@ import math
 from typing import Callable, List
 
 import numpy
-from calculation.shapes.line import Line
-from calculation.shapes.point import Point
-from calculation.shapes.worldItem import WorldItem, GraphicObject
+from geometry.shapes import Point, Line, WorldItem, GraphicObject
 
 
 def translate_points(points: list[Point], offset: Point) -> List:

@@ -1,11 +1,8 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget
 
-from calculation.shapes.line import Line
-from calculation.shapes.point import Point
-from calculation.shapes.wireframe import Wireframe
-from calculation.shapes.worldItem import WorldItem
-from calculation.transformations import determine_object_center
+from geometry.shapes import Point, Line, WorldItem, Wireframe
+from geometry.transformations import determine_object_center
 from common.errors import NotAPolygon
 
 

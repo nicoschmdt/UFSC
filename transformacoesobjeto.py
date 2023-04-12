@@ -6,8 +6,8 @@ from PyQt6.QtWidgets import QWidget
 from typing import List, Callable
 
 import window
-from calculation.shapes.point import Point
-from calculation import transformations
+from geometry.shapes import Point
+from geometry import transformations
 
 
 class TransformacoesObjetoUI(QWidget):
