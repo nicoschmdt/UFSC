@@ -51,8 +51,10 @@ class Viewport:
         )
 
     def move_window(self, x: int, y: int):
-        self.window_size.x += x
-        self.window_size.y += y
+        point = calculate_rotation([Point(x, y)], Point(0, 0), -self.window_angle)
+
+        self.window_size.x += point[0].x
+        self.window_size.y += point[0].y
 
     def set_window(self, x: int, y: int, width: int, height: int):
         self.window_size = Rectangle(
@@ -63,7 +65,7 @@ class Viewport:
         )
 
     def set_window_angle(self, angle: float):
-        self.window_angle = (self.window_angle + angle)%360
+        self.window_angle = (self.window_angle + angle) % 360
 
     def transformada_vp_y(self, y: int):
         y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))
@@ -75,20 +77,19 @@ class Viewport:
         x_vp *= (self.viewport_size.x + self.viewport_size.width) - self.viewport_size.x
         return int(x_vp + self.viewport_size.x)
 
+    def get_window_center(self) -> Point:
+        return Point(self.window_size.x + self.window_size.width // 2,
+                     self.window_size.y + self.window_size.height // 2)
+
     def draw_point(self, x: int, y: int, painter: QPainter):
-        window_center = Point(self.window_size.x + self.window_size.width // 2,
-                              self.window_size.y + self.window_size.height // 2)
-        rotated_point = calculate_rotation([Point(x,y)], window_center, self.window_angle)
+        rotated_point = calculate_rotation([Point(x,y)], self.get_window_center(), self.window_angle)
 
         x1 = self.transformada_vp_x(rotated_point[0].x)
         y1 = self.transformada_vp_y(rotated_point[0].y)
         painter.drawPoint(x1, y1)
 
     def draw_line(self, x1: int, y1: int, x2: int, y2: int, painter: QPainter):
-        window_center = Point(self.window_size.x + self.window_size.width // 2,
-                              self.window_size.y + self.window_size.height // 2)
-
-        rotated_points = calculate_rotation([Point(x1, y1), Point(x2, y2)], window_center, self.window_angle)
+        rotated_points = calculate_rotation([Point(x1, y1), Point(x2, y2)], self.get_window_center(), self.window_angle)
 
         x1 = self.transformada_vp_x(rotated_points[0].x)
         y1 = self.transformada_vp_y(rotated_points[0].y)
