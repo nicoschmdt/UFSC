@@ -1,9 +1,10 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QMessageBox, QDialog, QPushButton
 
+from geometry.polygon import is_polygon
 from geometry.shapes import Point, Line, WorldItem, Wireframe
 from geometry.transformations import determine_object_center
-from common.errors import NotAPolygon
+from common.notapolygon import NotAPolygonDialog
 
 
 class IncluirObjeto(QWidget):
@@ -398,14 +399,17 @@ class IncluirObjeto(QWidget):
                 yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
                                                     f"plainTextEditYVertice{i + 1}").toPlainText()
                 vertixList.append(Point(int(xValue), int(yValue)))
-            try:
-                newObject = WorldItem(
-                    name=self.textEditInserirNome.toPlainText(),
-                    center_point=Point(0,0),
-                    graphic=Wireframe(vertixList)
-                )
-            except NotAPolygon:
+            if not is_polygon(vertixList):
+                warning = NotAPolygonDialog()
+                warning.exec()
                 self.close()
+                return
+
+            newObject = WorldItem(
+                name=self.textEditInserirNome.toPlainText(),
+                center_point=Point(0, 0),
+                graphic=Wireframe(vertixList)
+            )
         else:
             pass
 

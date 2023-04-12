@@ -1,2 +1,0 @@
-class NotAPolygon(Exception):
-    pass

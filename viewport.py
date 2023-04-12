@@ -3,9 +3,7 @@ from typing import List
 from PyQt6.QtGui import QPainter, QColor
 
 from geometry.transformations import calculate_rotation
-from geometry.polygon import is_polygon
 from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
-from common.errors import NotAPolygon
 
 
 class Viewport:
@@ -95,9 +93,6 @@ class Viewport:
         painter.drawLine(x1, y1, x2, y2)
 
     def draw_wireframe(self, points: List[Point], painter: QPainter):
-        if not is_polygon(points):
-            raise NotAPolygon
-
         first_point = points[0]
         for point in points[1:]:
             self.draw_line(first_point.x, first_point.y, point.x, point.y, painter)
