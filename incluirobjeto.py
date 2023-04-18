@@ -45,7 +45,7 @@ class IncluirObjeto(QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.textEditInserirNome.sizePolicy().hasHeightForWidth())
         self.textEditInserirNome.setSizePolicy(sizePolicy)
-        self.textEditInserirNome.setMaximumSize(QtCore.QSize(16777215, 50))
+        self.textEditInserirNome.setMaximumSize(QtCore.QSize(16777215, 30))
         self.textEditInserirNome.setObjectName("textEditInserirNome")
         self.NomeHorizontalLayout.addWidget(self.textEditInserirNome)
         self.NomeHorizontalLayout.setStretch(0, 1)
@@ -63,6 +63,7 @@ class IncluirObjeto(QWidget):
         self.tabWidget.setFont(font)
         self.tabWidget.setObjectName("tabWidget")
 
+        # Aba p/ adicionar pontos
         self.PontoTab = QtWidgets.QWidget()
         self.PontoTab.setObjectName("PontoTab")
         self.verticalLayoutWidget_2 = QtWidgets.QWidget(parent=self.PontoTab)
@@ -118,6 +119,7 @@ class IncluirObjeto(QWidget):
         self.verticalLayoutPonto.setStretch(1, 3)
         self.tabWidget.addTab(self.PontoTab, "")
 
+        # Aba p/ adicionar retas
         self.RetaTab = QtWidgets.QWidget()
         self.RetaTab.setObjectName("RetaTab")
         self.verticalLayoutWidget_3 = QtWidgets.QWidget(parent=self.RetaTab)
@@ -200,65 +202,89 @@ class IncluirObjeto(QWidget):
         self.verticalLayoutReta.setStretch(0, 1)
         self.verticalLayoutReta.setStretch(1, 1)
         self.tabWidget.addTab(self.RetaTab, "")
+
+        # Aba p/ adicionar wireframes
         self.WireframeTab = QtWidgets.QWidget()
         self.WireframeTab.setObjectName("WireframeTab")
         self.verticalLayoutWidget_4 = QtWidgets.QWidget(parent=self.WireframeTab)
-        self.verticalLayoutWidget_4.setGeometry(QtCore.QRect(9, 9, 631, 521))
+        self.verticalLayoutWidget_4.setGeometry(QtCore.QRect(9, 9, 631, 600))
         self.verticalLayoutWidget_4.setObjectName("verticalLayoutWidget_4")
         self.verticalLayoutWireframe = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_4)
-        self.verticalLayoutWireframe.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayoutWireframe.setContentsMargins(20, 0, 20, 0)
         self.verticalLayoutWireframe.setObjectName("verticalLayoutWireframe")
-        self.groupBoxVertice1 = QtWidgets.QGroupBox(parent=self.verticalLayoutWidget_4)
-        self.groupBoxVertice1.setMaximumSize(QtCore.QSize(16777215, 100))
+
+        self.verticalLayoutWidget_5 = QtWidgets.QWidget(parent=self.WireframeTab)
+        self.verticalLayoutWidget_5.setGeometry(QtCore.QRect(9, 9, 631, 560))
+        self.verticalLayoutWidget_5.setObjectName("verticalLayoutWidget_5")
+        self.verticalLayoutPontosWireframe = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_5)
+        self.verticalLayoutPontosWireframe.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayoutPontosWireframe.setObjectName("verticalLayoutPontosWireframe")
+
+        self.groupBoxVertice1 = QtWidgets.QGroupBox(parent=self.verticalLayoutWidget_5)
+        self.groupBoxVertice1.setMaximumSize(QtCore.QSize(16777215, 81))
         self.groupBoxVertice1.setAlignment(
             QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignTop)
         self.groupBoxVertice1.setObjectName("groupBoxVertice1")
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.groupBoxVertice1)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 19, 611, 81))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 10, 611, 81))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayoutVertice1 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
-        self.horizontalLayoutVertice1.setContentsMargins(50, 20, 50, 20)
+        self.horizontalLayoutVertice1.setContentsMargins(50, 10, 50, 10)
         self.horizontalLayoutVertice1.setSpacing(20)
         self.horizontalLayoutVertice1.setObjectName("horizontalLayoutVertice1")
         self.labelXVertice1 = QtWidgets.QLabel(parent=self.horizontalLayoutWidget)
         self.labelXVertice1.setObjectName("labelXVertice1")
         self.horizontalLayoutVertice1.addWidget(self.labelXVertice1)
-
         self.textEditWireframeX1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutWidget)
         self.textEditWireframeX1.setObjectName("plainTextEditXVertice1")
-        self.textEditWireframeX1.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.textEditWireframeX1.setMaximumSize(QtCore.QSize(16777215, 30))
         self.horizontalLayoutVertice1.addWidget(self.textEditWireframeX1)
-
         self.labelYVertice1 = QtWidgets.QLabel(parent=self.horizontalLayoutWidget)
         self.labelYVertice1.setObjectName("labelYVertice1")
         self.horizontalLayoutVertice1.addWidget(self.labelYVertice1)
-
         self.textEditWireframeY1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutWidget)
-        self.textEditWireframeY1.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.textEditWireframeY1.setMaximumSize(QtCore.QSize(16777215, 30))
         self.textEditWireframeY1.setObjectName("plainTextEditYVertice1")
         self.horizontalLayoutVertice1.addWidget(self.textEditWireframeY1)
-
         self.labelZVertice1 = QtWidgets.QLabel(parent=self.horizontalLayoutWidget)
         self.labelZVertice1.setEnabled(False)
         self.labelZVertice1.setObjectName("labelZVertice1")
         self.horizontalLayoutVertice1.addWidget(self.labelZVertice1)
-
         self.textEditWireframeZ1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutWidget)
         self.textEditWireframeZ1.setEnabled(False)
-        self.textEditWireframeZ1.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.textEditWireframeZ1.setMaximumSize(QtCore.QSize(16777215, 30))
         self.textEditWireframeZ1.setObjectName("plainTextEditZVertice1")
         self.horizontalLayoutVertice1.addWidget(self.textEditWireframeZ1)
 
-        self.verticalLayoutWireframe.addWidget(self.groupBoxVertice1)
+        self.verticalLayoutPontosWireframe.addWidget(self.groupBoxVertice1)
         self.pushButtonAdicionarVertice = QtWidgets.QPushButton(parent=self.verticalLayoutWidget_4)
         self.pushButtonAdicionarVertice.setObjectName("pushButtonAdicionarVertice")
+        self.pushButtonAdicionarVertice.setFixedWidth(200)
+        self.pushButtonAdicionarVertice.setFixedHeight(25)
         self.pushButtonAdicionarVertice.clicked.connect(self.addVertix)
-        self.verticalLayoutWireframe.addWidget(self.pushButtonAdicionarVertice)
+        self.verticalLayoutWireframe.addWidget(self.verticalLayoutWidget_5)
+        self.verticalLayoutWireframe.addWidget(self.pushButtonAdicionarVertice, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        self.checkBoxPreencherWireframe = QtWidgets.QRadioButton(self.verticalLayoutWidget_4)
+        self.checkBoxPreencherWireframe.setChecked(False)
+        self.checkBoxPreencherWireframe.setText("Preencher polígono")
+        self.verticalLayoutWireframe.addWidget(self.checkBoxPreencherWireframe)
+        self.verticalLayoutWireframe.setStretch(0,20)
+        self.verticalLayoutWireframe.setStretch(1,1)
+        self.verticalLayoutWireframe.setStretch(2,1)
+
+        self.addVertix()
+        self.addVertix()
+
         self.tabWidget.addTab(self.WireframeTab, "")
+
+        # Aba p/ adicionar curvas
         self.CurvasTab = QtWidgets.QWidget()
         self.CurvasTab.setEnabled(False)
         self.CurvasTab.setObjectName("CurvasTab")
         self.tabWidget.addTab(self.CurvasTab, "")
+
+        #
         self.verticalLayoutPrincipal.addWidget(self.tabWidget)
         self.horizontalLayoutCancelOk_6 = QtWidgets.QHBoxLayout()
         self.horizontalLayoutCancelOk_6.setContentsMargins(50, -1, 50, -1)
@@ -278,6 +304,7 @@ class IncluirObjeto(QWidget):
         self.pushButtonOK.setFont(font)
         self.pushButtonOK.setObjectName("pushButtonOK")
         self.horizontalLayoutCancelOk_6.addWidget(self.pushButtonOK)
+
         self.verticalLayoutPrincipal.addLayout(self.horizontalLayoutCancelOk_6)
         self.verticalLayoutPrincipal.setStretch(0, 1)
         self.verticalLayoutPrincipal.setStretch(1, 8)
@@ -289,7 +316,7 @@ class IncluirObjeto(QWidget):
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("IncluirObjeto", "Incluir Objeto"))
-        self.labelNome.setText(_translate("IncluirObjeto", "Nome"))
+        self.labelNome.setText(_translate("IncluirObjeto", "Nome:"))
         self.groupBoxCoordenadasPonto.setTitle(_translate("IncluirObjeto", "Coordenadas do Ponto"))
         self.labelXPonto.setText(_translate("IncluirObjeto", "x:"))
         self.labelYPonto.setText(_translate("IncluirObjeto", "y:"))
@@ -317,29 +344,29 @@ class IncluirObjeto(QWidget):
     def addVertix(self):
         self.vertixCounter += 1
 
-        self.groupBoxVertice2 = QtWidgets.QGroupBox(parent=self.verticalLayoutWidget_4)
-        self.groupBoxVertice2.setMaximumSize(QtCore.QSize(16777215, 100))
+        self.groupBoxVertice2 = QtWidgets.QGroupBox(parent=self.verticalLayoutWidget_5)
+        self.groupBoxVertice2.setMaximumSize(QtCore.QSize(16777215, 81))
         self.groupBoxVertice2.setAlignment(
             QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignTop)
         self.groupBoxVertice2.setObjectName(f"groupBoxVertice{self.vertixCounter}")
 
         self.horizontalLayoutWidget2 = QtWidgets.QWidget(parent=self.groupBoxVertice2)
-        self.horizontalLayoutWidget2.setGeometry(QtCore.QRect(10, 19, 611, 81))
+        self.horizontalLayoutWidget2.setGeometry(QtCore.QRect(10, 10, 611, 81))
         self.horizontalLayoutVertice2 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget2)
-        self.horizontalLayoutVertice2.setContentsMargins(50, 20, 50, 20)
+        self.horizontalLayoutVertice2.setContentsMargins(50, 10, 50, 10)
         self.horizontalLayoutVertice2.setSpacing(20)
 
         self.labelXVertice2 = QtWidgets.QLabel(parent=self.horizontalLayoutWidget2)
         self.labelXVertice2 = QtWidgets.QLabel(parent=self.horizontalLayoutWidget2)
 
         self.textEditsWireframeX2 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutWidget2)
-        self.textEditsWireframeX2.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.textEditsWireframeX2.setMaximumSize(QtCore.QSize(16777215, 30))
         self.textEditsWireframeX2.setObjectName(f"plainTextEditXVertice{self.vertixCounter}")
 
         self.labelYVertice2 = QtWidgets.QLabel(parent=self.horizontalLayoutWidget2)
 
         self.textEditsWireframeY2 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutWidget2)
-        self.textEditsWireframeY2.setMaximumSize(QtCore.QSize(4987648, 40))
+        self.textEditsWireframeY2.setMaximumSize(QtCore.QSize(4987648, 30))
         self.textEditsWireframeY2.setObjectName(f"plainTextEditYVertice{self.vertixCounter}")
 
         self.labelZVertice2 = QtWidgets.QLabel(parent=self.horizontalLayoutWidget2)
@@ -347,7 +374,7 @@ class IncluirObjeto(QWidget):
 
         self.textEditsWireframeZ2 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutWidget2)
         self.textEditsWireframeZ2.setEnabled(False)
-        self.textEditsWireframeZ2.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.textEditsWireframeZ2.setMaximumSize(QtCore.QSize(16777215, 30))
         self.textEditsWireframeZ2.setObjectName(f"plainTextEditZVertice{self.vertixCounter}")
 
         self.groupBoxVertice2.setTitle(f"Vértice {self.vertixCounter}")
@@ -362,9 +389,7 @@ class IncluirObjeto(QWidget):
         self.horizontalLayoutVertice2.addWidget(self.labelZVertice2)
         self.horizontalLayoutVertice2.addWidget(self.textEditsWireframeZ2)
 
-        self.verticalLayoutWireframe.removeWidget(self.pushButtonAdicionarVertice)
-        self.verticalLayoutWireframe.addWidget(self.groupBoxVertice2)
-        self.verticalLayoutWireframe.addWidget(self.pushButtonAdicionarVertice)
+        self.verticalLayoutPontosWireframe.addWidget(self.groupBoxVertice2)
 
     def createObject(self):
         index = self.tabWidget.currentIndex()
@@ -388,11 +413,10 @@ class IncluirObjeto(QWidget):
                 )
             )
         elif index == 2:
-            currentTab = self.tabWidget.currentWidget()
-            tabVerticalLayout = currentTab.findChild(QtWidgets.QVBoxLayout)
+            pontosWireframe = self.verticalLayoutWidget_5.findChild(QtWidgets.QVBoxLayout)
             vertixList = list()
-            for i in range(tabVerticalLayout.count() - 1):
-                groupBox = tabVerticalLayout.itemAt(i).widget()
+            for i in range(pontosWireframe.count()):
+                groupBox = pontosWireframe.itemAt(i).widget()
                 horizontalLayout = groupBox.findChild(QWidget)
                 xValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
                                                     f"plainTextEditXVertice{i + 1}").toPlainText()
