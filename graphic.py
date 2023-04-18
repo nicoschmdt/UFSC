@@ -1,29 +1,46 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-import window
+from geometry.shapes import Point, Line, WorldItem
 from window import Canvas
 import incluirobjeto
 from transformacoesobjeto import TransformacoesObjetoUI
+from objfiledescriptor import OBJFileDescriptor
+from PyQt6.QtWidgets import QDialogButtonBox
 
+import os
 
 class MainWindow:
     objectCreationWindow = None
+    OBJFileDescriptor = OBJFileDescriptor()
 
     def setupUi(self):
         main_window = self.main_window
         main_window.setObjectName("MainWindow")
         main_window.resize(1000, 800)
-        main_window.setMaximumSize(QtCore.QSize(1000, 754))
-        main_window.setBaseSize(QtCore.QSize(1000, 754))
+        main_window.setMaximumSize(QtCore.QSize(1000, 784))
+        main_window.setBaseSize(QtCore.QSize(1000, 784))
         self.centralwidget = QtWidgets.QWidget(parent=main_window)
-        self.centralwidget.setMaximumSize(QtCore.QSize(1000, 754))
-        self.centralwidget.setBaseSize(QtCore.QSize(1000, 754))
+        self.centralwidget.setMaximumSize(QtCore.QSize(1000, 784))
+        self.centralwidget.setBaseSize(QtCore.QSize(1000, 784))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.centralwidget.setFont(font)
         self.centralwidget.setObjectName("centralwidget")
+
+        self.toolbar = QtWidgets.QToolBar("Main toolbar", parent=self.main_window)
+        self.toolbar.setFixedHeight(30)
+        self.toolbar.setFixedWidth(1000)
+        saveAction = QtGui.QAction("Salvar", self.toolbar)
+        saveAction.setStatusTip("Salvar objetos criados")
+        saveAction.triggered.connect(self.saveObjects)
+        self.toolbar.addAction(saveAction)
+        loadAction = QtGui.QAction("Carregar", self.toolbar)
+        loadAction.setStatusTip("Carregar objetos salvos")
+        loadAction.triggered.connect(self.loadObjects)
+        self.toolbar.addAction(loadAction)
+
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(9, 9, 1000, 711))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(9, 39, 1000, 711))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayoutCentral = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayoutCentral.setContentsMargins(0, 0, 0, 0)
@@ -169,6 +186,7 @@ class MainWindow:
         self.pushButton_4 = QtWidgets.QPushButton(parent=self.verticalLayoutWidget_4)
         self.pushButton_4.setMaximumSize(QtCore.QSize(40, 40))
         self.pushButton_4.setObjectName("pushButton_4")
+        self.pushButton_4.clicked.connect(self.windowRotationZ)
         self.horizontalLayoutXYZ.addWidget(self.pushButton_4)
         self.verticalLayoutRotacao.addLayout(self.horizontalLayoutXYZ)
         self.verticalLayoutRotacao.setStretch(0, 1)
@@ -310,9 +328,14 @@ class MainWindow:
         self.setupUi()
         self.main_window.show()
 
-    def add_item_to_world(self, item: window.WorldItem):
+    def add_item_to_world(self, item: WorldItem):
         if item.name == "":
-            item.name = "Sem nome"
+            if isinstance(item.graphic, Point):
+                item.name = "Ponto Sem Nome"
+            elif isinstance(item.graphic, Line):
+                item.name = "Reta Sem Nome"
+            else:
+                item.name = "Poligono Sem Nome"
         self.graphicsViewViewport.world_items.append(item)
 
         widget = QtWidgets.QListWidgetItem()
@@ -354,9 +377,18 @@ class MainWindow:
         self.graphicsViewViewport.viewport.move_window(-10, 0)
         self.graphicsViewViewport.repaint()
 
+    def windowRotationZ(self):
+        try:
+            angle = float(self.plainTextEditGraus.toPlainText())
+        except ValueError:
+            return
+
+        self.graphicsViewViewport.viewport.set_window_angle(angle)
+        self.graphicsViewViewport.repaint()
+
     def openObjectCreationWindow(self):
         self.objectCreationWindow = incluirobjeto.IncluirObjeto(self.add_item_to_world)
-        object: window.WorldItem = self.objectCreationWindow.getLastAddedObject()
+        object: WorldItem = self.objectCreationWindow.getLastAddedObject()
         if object is not None:
             self.add_item_to_world(object)
 
@@ -365,6 +397,51 @@ class MainWindow:
         object = self.graphicsViewViewport.world_items[item_index]
         self.transformacoesObjeto = TransformacoesObjetoUI(object, on_close=self.graphicsViewViewport.repaint)
 
+    def createInputPathWindow(self):
+        inputPathWindow = QtWidgets.QDialog()
+        inputPathWindow.setWindowTitle("Salvar")
+        buttons = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        inputPathWindow.buttonBox = QDialogButtonBox(buttons)
+        inputPathWindow.buttonBox.accepted.connect(inputPathWindow.accept)
+        inputPathWindow.buttonBox.rejected.connect(inputPathWindow.reject)
+
+        inputPathWindow.layout = QtWidgets.QVBoxLayout()
+        inputLabel = QtWidgets.QLabel("Pasta para salvar os objetos:")
+        inputPathWindow.inputPath = QtWidgets.QPlainTextEdit()
+        inputPathWindow.inputPath.setFixedHeight(30)
+        inputPathWindow.inputPath.setPlainText("./objetos")
+        inputPathWindow.layout.addWidget(inputLabel)
+        inputPathWindow.layout.addWidget(inputPathWindow.inputPath)
+        inputPathWindow.layout.addWidget(inputPathWindow.buttonBox)
+        inputPathWindow.setLayout(inputPathWindow.layout)
+        return inputPathWindow
+
+    def saveObjects(self):
+
+        self.inputPathWindow = self.createInputPathWindow()
+        if self.inputPathWindow.exec():
+            saveFolderPath: str = self.inputPathWindow.inputPath.toPlainText()
+            if not os.path.exists(saveFolderPath):
+                os.makedirs(saveFolderPath)
+            for item in self.graphicsViewViewport.world_items:
+                objectName = item.name
+                object = item.graphic
+                result = self.OBJFileDescriptor.save(object, saveFolderPath+f"/{objectName}.obj")
+                if result:
+                    print(f"Object {objectName} saved")
+                else:
+                    print(f"Could not save object {objectName}")
+
+    def loadObjects(self):
+        self.inputPathWindow = self.createInputPathWindow()
+        if self.inputPathWindow.exec():
+            saveFolderPath: str = self.inputPathWindow.inputPath.toPlainText()
+            worldItemList = self.OBJFileDescriptor.load(saveFolderPath)
+            if len(worldItemList) == 0:
+                print("Could not load objects")
+                return
+            for item in worldItemList:
+                self.add_item_to_world(item)
 
 if __name__ == "__main__":
     import sys

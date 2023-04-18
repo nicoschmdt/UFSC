@@ -6,6 +6,8 @@ from PyQt6.QtWidgets import QWidget
 from typing import List, Callable
 
 import window
+from geometry.shapes import Point
+from geometry import transformations
 
 
 class TransformacoesObjetoUI(QWidget):
@@ -411,15 +413,15 @@ class TransformacoesObjetoUI(QWidget):
         if self.radioButtonBaixo.isChecked():
             y *= -1
 
-        point = window.Point(x, y)
-        return window.translacao(self.item.graphic, point)
+        point = Point(x, y)
+        return transformations.translate(self.item, point)
 
     def scaling(self) -> Callable:
         try:
             proportion = int(self.plainTextEditPorcentagemEscalonamento.toPlainText()) / 100
         except ValueError:
             return
-        return window.escalonamento(self.item.graphic, proportion, self.item.center_point)
+        return transformations.scale(self.item.graphic, proportion, self.item.center_point)
 
     def rotation(self) -> Callable:
         try:
@@ -428,18 +430,18 @@ class TransformacoesObjetoUI(QWidget):
             return
 
         if self.radioButtonRotacionarOrigem.isChecked():
-            reference_point = window.Point(0, 0)
+            reference_point = Point(0, 0)
         elif self.radioButtonRotacionarPonto.isChecked():
             try:
                 x = int(self.plainTextEditX.toPlainText())
                 y = int(self.plainTextEditY.toPlainText())
             except ValueError:
                 return
-            reference_point = window.Point(x, y)
+            reference_point = Point(x, y)
         else:
             reference_point = self.item.center_point
 
-        return window.rotacao(self.item.graphic, reference_point, graus)
+        return transformations.rotate(self.item, reference_point, graus)
 
     def addTransformation(self):
         print(self.item)
