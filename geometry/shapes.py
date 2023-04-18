@@ -35,3 +35,4 @@ class WorldItem:
     name: str
     center_point: Point
     graphic: GraphicObject
+    filled: bool = False

@@ -432,7 +432,8 @@ class IncluirObjeto(QWidget):
             newObject = WorldItem(
                 name=self.textEditInserirNome.toPlainText(),
                 center_point=Point(0, 0),
-                graphic=Wireframe(vertixList)
+                graphic=Wireframe(vertixList),
+                filled=self.checkBoxPreencherWireframe.isChecked()
             )
         else:
             pass

@@ -1,6 +1,7 @@
 from typing import List
 
-from PyQt6.QtGui import QPainter, QColor
+from PyQt6.QtGui import QPainter, QColor, QPolygon, QBrush
+from PyQt6.QtCore import QPoint
 
 from geometry.transformations import calculate_rotation
 from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
@@ -21,6 +22,7 @@ class Viewport:
 
     def draw(self, painter: QPainter, items: List[WorldItem]):
         painter.setPen(QColor.fromString('blue'))
+        painter.setBrush(QColor.fromString('white'))
         painter.drawRect(self.viewport_size.x, self.viewport_size.y, self.viewport_size.width,
                          self.viewport_size.height)
         for item in items:
@@ -30,7 +32,11 @@ class Viewport:
             elif isinstance(obj, Point):
                 self.draw_point(obj.x, obj.y, painter)
             elif isinstance(obj, Wireframe):
-                self.draw_wireframe(obj.points, painter)
+                if item.filled:
+                    painter.setBrush(QBrush(QColor.fromString('blue')))
+                    self.draw_filled_wireframe(obj.points, painter)
+                else:
+                    self.draw_wireframe(obj.points, painter)
 
     def zoom(self, step: int):
         new_width = int(self.window_size.width * (1 - (step / 100)))
@@ -99,3 +105,13 @@ class Viewport:
             first_point = point
         reference = points[0]
         self.draw_line(first_point.x, first_point.y, reference.x, reference.y, painter)
+
+    def draw_filled_wireframe(self, points: List[Point], painter: QPainter):
+        polygon = QPolygon()
+        for point in points:
+            rotated_point = calculate_rotation([point], self.get_window_center(), self.window_angle)
+            x = self.transformada_vp_x(rotated_point[0].x)
+            y = self.transformada_vp_y(rotated_point[0].y)
+            point = QPoint(x, y)
+            polygon.append(point)
+        painter.drawPolygon(polygon)
