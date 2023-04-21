@@ -4,7 +4,7 @@ from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPalette, QColor, QPainter
 
-from geometry.shapes import WorldItem
+from geometry.shapes import WorldItem, Point
 from viewport import Viewport
 
 
@@ -34,8 +34,8 @@ class Canvas(QWidget):
         painter.setPen(QColor.fromString('blue'))
 
         self.viewport.draw(painter, self.world_items)
-        self.viewport.draw_line(-1000, 0, 1000, 0, painter)
-        self.viewport.draw_line(0, -1000, 0, 1000, painter)
+        self.viewport.draw_line(Point(-1000, 0), Point(1000, 0), painter)
+        self.viewport.draw_line(Point(0, -1000), Point(0, 1000), painter)
         # self.viewport.draw_line(30, 30, 90, 90, painter)
 
     # TODO: pegar o valor do step ao inves de usar algo fixo

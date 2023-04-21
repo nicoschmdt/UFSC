@@ -31,9 +31,8 @@ class Viewport:
             obj = item.graphic
             if isinstance(obj, Line):
                 visible, obj = line_clipping(obj, self.window_size)
-                print(obj)
                 if visible:
-                    self.draw_line(obj.start.x, obj.start.y, obj.end.x, obj.end.y, painter)
+                    self.draw_line(obj.start, obj.end, painter)
             elif isinstance(obj, Point):
                 visible = clip_point(obj, self.window_size)
                 if visible:
@@ -95,8 +94,8 @@ class Viewport:
         y1 = self.transformada_vp_y(rotated_point[0].y)
         painter.drawPoint(x1, y1)
 
-    def draw_line(self, x1: int, y1: int, x2: int, y2: int, painter: QPainter):
-        rotated_points = calculate_rotation([Point(x1, y1), Point(x2, y2)], self.get_window_center(), self.window_angle)
+    def draw_line(self, point1: Point, point2: Point, painter: QPainter):
+        rotated_points = calculate_rotation([point1, point2], self.get_window_center(), self.window_angle)
 
         x1 = self.transformada_vp_x(rotated_points[0].x)
         y1 = self.transformada_vp_y(rotated_points[0].y)
@@ -108,10 +107,10 @@ class Viewport:
     def draw_wireframe(self, points: List[Point], painter: QPainter):
         first_point = points[0]
         for point in points[1:]:
-            self.draw_line(first_point.x, first_point.y, point.x, point.y, painter)
+            self.draw_line(first_point, point, painter)
             first_point = point
         reference = points[0]
-        self.draw_line(first_point.x, first_point.y, reference.x, reference.y, painter)
+        self.draw_line(first_point, reference, painter)
 
     def draw_filled_wireframe(self, points: List[Point], painter: QPainter):
         polygon = QPolygon()
