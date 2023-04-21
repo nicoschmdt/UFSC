@@ -3,6 +3,8 @@ from typing import List
 from PyQt6.QtGui import QPainter, QColor, QPolygon, QBrush
 from PyQt6.QtCore import QPoint
 
+from geometry.clip import clip_point
+from geometry.clipping.cohen_sutherland import line_clipping
 from geometry.transformations import calculate_rotation
 from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
 
@@ -28,9 +30,14 @@ class Viewport:
         for item in items:
             obj = item.graphic
             if isinstance(obj, Line):
-                self.draw_line(obj.start.x, obj.start.y, obj.end.x, obj.end.y, painter)
+                visible, obj = line_clipping(obj, self.window_size)
+                print(obj)
+                if visible:
+                    self.draw_line(obj.start.x, obj.start.y, obj.end.x, obj.end.y, painter)
             elif isinstance(obj, Point):
-                self.draw_point(obj.x, obj.y, painter)
+                visible = clip_point(obj, self.window_size)
+                if visible:
+                    self.draw_point(obj.x, obj.y, painter)
             elif isinstance(obj, Wireframe):
                 if item.filled:
                     painter.setBrush(QBrush(QColor.fromString('blue')))
@@ -81,8 +88,8 @@ class Viewport:
         return Point(self.window_size.x + self.window_size.width // 2,
                      self.window_size.y + self.window_size.height // 2)
 
-    def draw_point(self, x: int, y: int, painter: QPainter):
-        rotated_point = calculate_rotation([Point(x,y)], self.get_window_center(), self.window_angle)
+    def draw_point(self, x: float, y: float, painter: QPainter):
+        rotated_point = calculate_rotation([Point(x, y)], self.get_window_center(), self.window_angle)
 
         x1 = self.transformada_vp_x(rotated_point[0].x)
         y1 = self.transformada_vp_y(rotated_point[0].y)

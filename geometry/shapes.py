@@ -4,8 +4,8 @@ from typing import List
 
 @dataclass
 class Point:
-    x: int
-    y: int
+    x: float
+    y: float
 
 
 @dataclass
@@ -20,6 +20,10 @@ class Rectangle:
     y: int
     width: int
     height: int
+
+    def get_points(self) -> [Point]:
+        return [Point(self.x, self.y), Point((self.x + self.width), self.y),
+                Point((self.x + self.width), (self.y + self.height)), Point(self.x, (self.y + self.width))]
 
 
 @dataclass
