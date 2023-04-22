@@ -21,7 +21,7 @@ class Rectangle:
     width: int
     height: int
 
-    def get_points(self) -> [Point]:
+    def get_points(self) -> List[Point]:
         return [Point(self.x, self.y), Point((self.x + self.width), self.y),
                 Point((self.x + self.width), (self.y + self.height)), Point(self.x, (self.y + self.width))]
 

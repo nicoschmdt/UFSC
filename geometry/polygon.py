@@ -1,7 +1,8 @@
-from geometry.shapes import Point, Line
+from geometry.shapes import Point, Line, Wireframe
+from typing import List
+import numpy
 
-
-def is_polygon(points: list[Point]) -> bool:
+def is_polygon(points: List[Point]) -> bool:
     size = len(points)
     if size == 3:
         return True
@@ -74,3 +75,36 @@ def orientation(point1: Point, point2: Point, point3: Point) -> int:
         return 2
 
     return 0
+
+def get_concave_edges(polygon: Wireframe) -> List[List[Point]]:
+    vertices = polygon.points
+    concave_edges = list()
+    if orientation(polygon.points[0], polygon.points[1], polygon.points[2]) == 1:
+        vertices = vertices.reverse()
+    for i in range(len(vertices)-1):
+        first_vector = numpy.array([vertices[i].x, vertices[i].y, 0])
+        second_vector = numpy.array([vertices[i+1].x, vertices[i+1].y, 0])
+        result = numpy.cross(first_vector, second_vector)
+        if result[2] < 0:
+            concave_edges.append([vertices[i], vertices[i+1]])
+    first_vector = numpy.array([vertices[-1].x, vertices[-1].y, 0])
+    second_vector = numpy.array([vertices[0].x, vertices[0].y, 0])
+    result = numpy.cross(first_vector, second_vector)
+    if result[2] < 0:
+        concave_edges.append([vertices[-1], vertices[0]])
+    return concave_edges
+
+def split_polygon(polygon: Wireframe) -> List[Wireframe]:
+    concave_edges = get_concave_edges(polygon)
+    if len(concave_edges) == 0:
+        return [polygon]
+    vertices = polygon.points
+    convex_polygons = list()
+    concave_edge = concave_edges.pop(0)
+    pass
+
+def split_concave_polygon(polygon: Wireframe, concave_edge: List[Point]) -> List[Wireframe]:
+    pass
+
+def get_general_equation_of_line(point1: Point, point2: Point):
+    angular_coeff = (point2.y - point1.y)/(point2.x - point1.x)
