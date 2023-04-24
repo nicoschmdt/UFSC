@@ -38,6 +38,10 @@ class MainWindow:
         loadAction.setStatusTip("Carregar objetos salvos")
         loadAction.triggered.connect(self.loadObjects)
         self.toolbar.addAction(loadAction)
+        changeClippingAction = QtGui.QAction("Mudar clipagem", self.toolbar)
+        changeClippingAction.setStatusTip("Mudar método de clipping para retas")
+        changeClippingAction.triggered.connect(self.changeCClipping)
+        self.toolbar.addAction(changeClippingAction)
 
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(9, 39, 1000, 711))
@@ -415,6 +419,32 @@ class MainWindow:
         inputPathWindow.layout.addWidget(inputPathWindow.buttonBox)
         inputPathWindow.setLayout(inputPathWindow.layout)
         return inputPathWindow
+
+    # TODO criar evento para seleção de apenas 1 radio button por vez
+    def createChangeLineClippingWindow(self):
+        changeClippingWindow = QtWidgets.QDialog()
+        changeClippingWindow.setWindowTitle("Mudar clipagem")
+        buttons = QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        changeClippingWindow.buttonBox = QDialogButtonBox(buttons)
+        changeClippingWindow.buttonBox.accepted.connect(changeClippingWindow.accept)
+        changeClippingWindow.buttonBox.rejected.connect(changeClippingWindow.reject)
+
+        changeClippingWindow.layout = QtWidgets.QVBoxLayout()
+        changeClippingLabel = QtWidgets.QLabel("Selecionar método de clipagem desejado para retas:")
+        changeClippingWindow.radioButton1 = QtWidgets.QRadioButton()
+        changeClippingWindow.radioButton1.setText("Método 1")
+        changeClippingWindow.radioButton2 = QtWidgets.QRadioButton()
+        changeClippingWindow.radioButton2.setText("Método 2")
+        changeClippingWindow.layout.addWidget(changeClippingLabel)
+        changeClippingWindow.layout.addWidget(changeClippingWindow.radioButton1)
+        changeClippingWindow.layout.addWidget(changeClippingWindow.radioButton2)
+        changeClippingWindow.layout.addWidget(changeClippingWindow.buttonBox)
+        changeClippingWindow.setLayout(changeClippingWindow.layout)
+        return changeClippingWindow
+
+    # TODO completar
+    def changeClipping(self):
+        pass
 
     def saveObjects(self):
 
