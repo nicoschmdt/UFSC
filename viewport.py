@@ -13,7 +13,7 @@ class Viewport:
     viewport_size: Rectangle
     window_size: Rectangle
     window_angle: float = 0.0
-    clipping_algorithm: str = 'liang barsky'
+    clipping_algorithm: str = 'cohen sutherland'
 
     def __init__(self, x: int, y: int, width: int, height: int):
         self.viewport_size = Rectangle(

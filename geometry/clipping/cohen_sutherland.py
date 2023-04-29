@@ -117,4 +117,7 @@ def angular_coef(line: Line) -> float:
     start = line.start
     end = line.end
 
+    if start.y == end.y or start.x == end.x:
+        return 0
+
     return (end.y - start.y) / (end.x - start.x)
