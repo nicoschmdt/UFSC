@@ -1,3 +1,5 @@
+from geometry.clipping.cohen_sutherland import line_clipping as cs_clipping
+from geometry.clipping.liang_barsky import line_clipping as lb_clipping
 from geometry.shapes import Rectangle, Point, Line
 
 
@@ -12,8 +14,10 @@ def clip_point(point: Point, window: Rectangle) -> bool:
     return False
 
 
-def angular_coef(line: Line) -> float:
-    start = line.start
-    end = line.end
+def clip_line(line: Line, window: Rectangle, algorithm: str) -> (bool, Line):
+    if algorithm == 'cohen sutherland':
+        return cs_clipping(line, window)
+    elif algorithm == 'liang_barsky':
+        return lb_clipping(line, window)
 
-    return (end.y - start.y) / (end.x - start.x)
+    return None, None

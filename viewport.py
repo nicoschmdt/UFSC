@@ -3,7 +3,7 @@ from typing import List
 from PyQt6.QtGui import QPainter, QColor, QPolygon, QBrush
 from PyQt6.QtCore import QPoint
 
-from geometry.clip import clip_point
+from geometry.clip import clip_point, clip_line
 from geometry.clipping.cohen_sutherland import line_clipping
 from geometry.transformations import calculate_rotation
 from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
@@ -13,6 +13,7 @@ class Viewport:
     viewport_size: Rectangle
     window_size: Rectangle
     window_angle: float = 0.0
+    clipping_algorithm: str = 'liang barsky'
 
     def __init__(self, x: int, y: int, width: int, height: int):
         self.viewport_size = Rectangle(
@@ -30,7 +31,7 @@ class Viewport:
         for item in items:
             obj = item.graphic
             if isinstance(obj, Line):
-                visible, obj = line_clipping(obj, self.window_size)
+                visible, obj = clip_line(obj, self.window_size, self.clipping_algorithm)
                 if visible:
                     self.draw_line(obj.start, obj.end, painter)
             elif isinstance(obj, Point):
@@ -72,6 +73,9 @@ class Viewport:
 
     def set_window_angle(self, angle: float):
         self.window_angle = (self.window_angle + angle) % 360
+
+    def set_line_clipping_algorithm(self, algorithm: str):
+        self.clipping_algorithm = algorithm
 
     def transformada_vp_y(self, y: int):
         y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))

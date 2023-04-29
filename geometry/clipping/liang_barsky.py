@@ -1,5 +1,4 @@
 from geometry.shapes import Rectangle, Line, Point
-from geometry.clip import angular_coef
 
 
 def line_clipping(line: Line, window: Rectangle) -> (bool, Line):
@@ -36,3 +35,10 @@ def line_clipping(line: Line, window: Rectangle) -> (bool, Line):
     yn2 = line.start.y + p4 * rn2
 
     return True, Line(Point(xn1, yn1), Point(xn2, yn2))
+
+
+def angular_coef(line: Line) -> float:
+    start = line.start
+    end = line.end
+
+    return (end.y - start.y) / (end.x - start.x)

@@ -2,7 +2,6 @@ from bitarray import bitarray
 from dataclasses import dataclass
 
 from geometry.shapes import Rectangle, Point, Line
-from geometry.clip import angular_coef
 
 
 @dataclass
@@ -112,3 +111,10 @@ def accept_clipped(y: float, down: float, up: float) -> bool:
     if down <= y <= up:
         return True
     return False
+
+
+def angular_coef(line: Line) -> float:
+    start = line.start
+    end = line.end
+
+    return (end.y - start.y) / (end.x - start.x)

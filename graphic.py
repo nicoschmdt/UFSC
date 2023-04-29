@@ -40,7 +40,7 @@ class MainWindow:
         self.toolbar.addAction(loadAction)
         changeClippingAction = QtGui.QAction("Mudar clipagem", self.toolbar)
         changeClippingAction.setStatusTip("Mudar método de clipping para retas")
-        changeClippingAction.triggered.connect(self.changeCClipping)
+        changeClippingAction.triggered.connect(self.changeClipping)
         self.toolbar.addAction(changeClippingAction)
 
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=self.centralwidget)
@@ -420,7 +420,6 @@ class MainWindow:
         inputPathWindow.setLayout(inputPathWindow.layout)
         return inputPathWindow
 
-    # TODO criar evento para seleção de apenas 1 radio button por vez
     def createChangeLineClippingWindow(self):
         changeClippingWindow = QtWidgets.QDialog()
         changeClippingWindow.setWindowTitle("Mudar clipagem")
@@ -432,9 +431,9 @@ class MainWindow:
         changeClippingWindow.layout = QtWidgets.QVBoxLayout()
         changeClippingLabel = QtWidgets.QLabel("Selecionar método de clipagem desejado para retas:")
         changeClippingWindow.radioButton1 = QtWidgets.QRadioButton()
-        changeClippingWindow.radioButton1.setText("Método 1")
+        changeClippingWindow.radioButton1.setText("cohen sutherland")
         changeClippingWindow.radioButton2 = QtWidgets.QRadioButton()
-        changeClippingWindow.radioButton2.setText("Método 2")
+        changeClippingWindow.radioButton2.setText("liang barsky")
         changeClippingWindow.layout.addWidget(changeClippingLabel)
         changeClippingWindow.layout.addWidget(changeClippingWindow.radioButton1)
         changeClippingWindow.layout.addWidget(changeClippingWindow.radioButton2)
@@ -442,12 +441,20 @@ class MainWindow:
         changeClippingWindow.setLayout(changeClippingWindow.layout)
         return changeClippingWindow
 
-    # TODO completar
     def changeClipping(self):
-        pass
+        self.changeClippingWindow = self.createChangeLineClippingWindow()
+        algorithm = ''
+        if self.changeClippingWindow.exec():
+            if self.changeClippingWindow.radioButton1.isChecked():
+                algorithm = 'cohen sutherland'
+            elif self.changeClippingWindow.radioButton2.isChecked():
+                algorithm = 'liang barsky'
+
+        if algorithm:
+            self.graphicsViewViewport.viewport.set_line_clipping_algorithm(algorithm)
+
 
     def saveObjects(self):
-
         self.inputPathWindow = self.createInputPathWindow()
         if self.inputPathWindow.exec():
             saveFolderPath: str = self.inputPathWindow.inputPath.toPlainText()
