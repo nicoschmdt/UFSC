@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from geometry.shapes import Rectangle, Point, Line
 
+from typing import Tuple
 
 @dataclass
 class RegionCode:
@@ -33,7 +34,7 @@ def get_region_code(point: Point, window: Rectangle) -> RegionCode:
     return region_code
 
 
-def line_clipping(line: Line, window: Rectangle) -> (bool, Line | None):
+def line_clipping(line: Line, window: Rectangle) -> Tuple(bool, Line | None):
     region_start = get_region_code(line.start, window).to_bitarray()
     region_end = get_region_code(line.end, window).to_bitarray()
 

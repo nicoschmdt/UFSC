@@ -106,5 +106,9 @@ def split_polygon(polygon: Wireframe) -> List[Wireframe]:
 def split_concave_polygon(polygon: Wireframe, concave_edge: List[Point]) -> List[Wireframe]:
     pass
 
-def get_general_equation_of_line(point1: Point, point2: Point):
-    angular_coeff = (point2.y - point1.y)/(point2.x - point1.x)
+# ax + by + c = 0 -> y = (a/b)x + (c/b)
+def get_general_equation_coeffs_of_line(point1: Point, point2: Point):
+    a = (point1.y - point1.y)
+    b = (point2.x - point1.x)
+    c = (point1.x * point2.y) - (point2.x * point1.y)
+    return [(a/b), (c/b)]
