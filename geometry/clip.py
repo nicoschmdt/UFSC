@@ -17,7 +17,7 @@ def clip_point(point: Point, window: Rectangle) -> bool:
 def clip_line(line: Line, window: Rectangle, algorithm: str) -> (bool, Line):
     if algorithm == 'cohen sutherland':
         return cs_clipping(line, window)
-    elif algorithm == 'liang_barsky':
+    elif algorithm == 'liang barsky':
         return lb_clipping(line, window)
 
     return None, None

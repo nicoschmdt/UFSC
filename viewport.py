@@ -4,7 +4,6 @@ from PyQt6.QtGui import QPainter, QColor, QPolygon, QBrush
 from PyQt6.QtCore import QPoint
 
 from geometry.clip import clip_point, clip_line
-from geometry.clipping.cohen_sutherland import line_clipping
 from geometry.transformations import calculate_rotation
 from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
 
