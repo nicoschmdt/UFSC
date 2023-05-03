@@ -2,6 +2,7 @@ from geometry.shapes import Point, Line, Wireframe
 from typing import List
 import numpy
 
+
 def is_polygon(points: List[Point]) -> bool:
     size = len(points)
     if size == 3:
@@ -76,23 +77,25 @@ def orientation(point1: Point, point2: Point, point3: Point) -> int:
 
     return 0
 
+
 def get_concave_edges(polygon: Wireframe) -> List[List[Point]]:
     vertices = polygon.points
     concave_edges = list()
     if orientation(polygon.points[0], polygon.points[1], polygon.points[2]) == 1:
         vertices = vertices.reverse()
-    for i in range(len(vertices)-1):
+    for i in range(len(vertices) - 1):
         first_vector = numpy.array([vertices[i].x, vertices[i].y, 0])
-        second_vector = numpy.array([vertices[i+1].x, vertices[i+1].y, 0])
+        second_vector = numpy.array([vertices[i + 1].x, vertices[i + 1].y, 0])
         result = numpy.cross(first_vector, second_vector)
         if result[2] < 0:
-            concave_edges.append([vertices[i], vertices[i+1]])
+            concave_edges.append([vertices[i], vertices[i + 1]])
     first_vector = numpy.array([vertices[-1].x, vertices[-1].y, 0])
     second_vector = numpy.array([vertices[0].x, vertices[0].y, 0])
     result = numpy.cross(first_vector, second_vector)
     if result[2] < 0:
         concave_edges.append([vertices[-1], vertices[0]])
     return concave_edges
+
 
 def split_polygon(polygon: Wireframe) -> List[Wireframe]:
     concave_edges = get_concave_edges(polygon)
@@ -103,12 +106,38 @@ def split_polygon(polygon: Wireframe) -> List[Wireframe]:
     concave_edge = concave_edges.pop(0)
     pass
 
+
 def split_concave_polygon(polygon: Wireframe, concave_edge: List[Point]) -> List[Wireframe]:
     pass
+
 
 # ax + by + c = 0 -> y = (a/b)x + (c/b)
 def get_general_equation_coeffs_of_line(point1: Point, point2: Point):
     a = (point1.y - point1.y)
     b = (point2.x - point1.x)
     c = (point1.x * point2.y) - (point2.x * point1.y)
-    return [(a/b), (c/b)]
+    return [(a / b), (c / b)]
+
+
+def get_lines_from_polygon(points: List[Point]) -> List[Line]:
+    initial_point = points[0]
+    lines = []
+    for point in points[1:]:
+        lines.append(Line(initial_point, point))
+        initial_point = point
+    lines.append(Line(initial_point, points[0]))
+    return lines
+
+
+def point_inside_polygon(point: Point, polygon: Wireframe) -> bool:
+    horizontal_line = Line(point, Point(999999, point.y))
+    polygon_lines = get_lines_from_polygon(polygon.points)
+    intersect_quantity = 0
+    for polygon_line in polygon_lines:
+        if intersect(polygon_line, horizontal_line):
+            if orientation(polygon_line.start, point, polygon_line.end) == 0:
+                return on_segment(polygon_line, point)
+            intersect_quantity += 1
+    if intersect_quantity % 2 == 0:
+        return False
+    return True

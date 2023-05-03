@@ -1,20 +1,57 @@
-from geometry.polygon import polygon_intersect
 from geometry.shapes import Rectangle, Wireframe, Point, Line
 from cohen_sutherland import line_clipping
+from geometry.polygon import intersect, get_lines_from_polygon, point_inside_polygon
 
 from typing import List
+
+
+def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, Wireframe):
+    intersect_quantity = polygon_position(polygon, window)
+
+    if intersect_quantity == 0:
+        # se todos os pontos estão dentro da window e as suas linhas não se intersectam
+        if all([True if is_point_inside(point, window) else False for point in polygon.points]):
+            return True, polygon
+        # se todos os pontos da window estão dentro do poligono
+        elif all([True if point_inside_polygon(point, polygon) else False for point in window.get_points()]):
+            return True, Wireframe(window.get_points())
+        # como nenhum ponto se intersecta, se não tem nenhum dentro então todos estão fora
+        else:
+            return False, None
+
+    # agora preciso calcular caso a intersecção aconteça
+
+
+def polygon_position(polygon: Wireframe, window: Rectangle) -> int:
+    intersect_points = 0
+    window_lines = get_lines_from_polygon(window.get_points())
+    polygon_lines = get_lines_from_polygon(polygon.points)
+
+    for window_line in window_lines:
+        for polygon_line in polygon_lines:
+            if intersect(window_line, polygon_line):
+                intersect_points += 1
+
+    return intersect_points
+
+
+def is_point_inside(point: Point, window: Rectangle) -> bool:
+    if window.x <= point.x <= (window.x + window.width):
+        if window.y <= point.y <= (window.y + window.height):
+            return True
+    return False
 
 
 def polygon_clipping(polygon: Wireframe, window: Rectangle):
     window_points = window.get_points()
     polygon_coordinates = [(point.x, point.x) for point in polygon.points]
 
-     # 0 = original
+    # 0 = original
     # 1 = enter
     # 2 = exit
 
     # First step: build two lists of vertices
-    window_vertices = [((window_points[0].x, window_points[0].y), 0), ((window_points[1].x, window_points[1].y), 0), 
+    window_vertices = [((window_points[0].x, window_points[0].y), 0), ((window_points[1].x, window_points[1].y), 0),
                        ((window_points[2].x, window_points[2].y), 0), ((window_points[3].x, window_points[3].y), 0)]
     object_vertices = [(coordinate, 0) for coordinate in polygon_coordinates]
 
@@ -24,14 +61,14 @@ def polygon_clipping(polygon: Wireframe, window: Rectangle):
     for index in range(number_points):
         p0 = polygon_coordinates[index]
         p1 = polygon_coordinates[(index + 1) % number_points]
-        
+
         line = Line(Point(p0[0], p0[1]), Point(p1[0], p1[1]))
 
         (is_visible, new_line) = line_clipping(line, window)
-        
+
         new_p0 = (new_line.start.x, new_line.start.y)
         new_p1 = (new_line.end.x, new_line.end.y)
-    
+
         if is_visible:
             if new_p1 != p1:
                 # Exit point
@@ -87,6 +124,7 @@ def polygon_clipping(polygon: Wireframe, window: Rectangle):
     # print(f"Coordinates after weiler_atherton={coordinates}")
     return True, coordinates
 
+
 def get_window_index(window_vertices, point, code):
     x, y = point
     # The index from window vertices list must be the
@@ -109,6 +147,7 @@ def get_window_index(window_vertices, point, code):
         index = window_vertices.index(((-1, -1), 0))
         window_vertices.insert(index, (point, code))
     return window_vertices
+
 
 def get_lines_from_polygon(polygon: List[Point]) -> List[Line]:
     lines = []
