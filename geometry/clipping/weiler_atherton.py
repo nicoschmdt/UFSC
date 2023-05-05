@@ -1,5 +1,5 @@
 from geometry.shapes import Rectangle, Wireframe, Point, Line
-from cohen_sutherland import line_clipping
+from geometry.clipping.liang_barsky import line_clipping
 from geometry.polygon import intersect, get_lines_from_polygon, point_inside_polygon
 
 from typing import List
@@ -21,7 +21,7 @@ def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe
 
     # agora preciso calcular caso a intersecção aconteça
     # tuplas indicando se o ponto está dentro ou fora da window
-    polygon_points = [(point, True) if is_point_inside(point, window) else False for point in polygon.points]
+    polygon_points = [(point, True) if is_point_inside(point, window) else (point, False) for point in polygon.points]
     polygon_points.append(polygon_points[0])
 
     wireframes = []
@@ -43,7 +43,7 @@ def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe
             elif point_outside:
                 point_outside = False
                 line = Line(polygon_point_checked, polygon_point)
-                line = line_clipping(line, window)
+                _, line = line_clipping(line, window)
                 new_polygon_points.append(line.start)
                 new_polygon_points.append(line.end)
                 outside_in = 1
@@ -53,8 +53,8 @@ def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe
         elif not point_outside and point_outside is not None:
             point_outside = True
             line = Line(polygon_point, polygon_point_checked)
-            line = line_clipping(line, window)
-            new_polygon_points.append(line.end)
+            _, line = line_clipping(line, window)
+            new_polygon_points.append(line.start)
             if outside_in == 0:
                 inside_out = True
             elif outside_in == 1:
@@ -62,12 +62,17 @@ def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe
             # ainda preciso ldiar com o preenchimento das quinas mas vejo depois
             wireframes.append(Wireframe(new_polygon_points))
             new_polygon_points = []
+        else:
+            point_outside = True
 
         polygon_point_checked = polygon_point
 
     if inside_out:
         # adicionar pontos restantes no primeiro wireframe da lista
-        pass
+        for point in new_polygon_points:
+            wireframes[0].points.append(point)
+
+    return True, wireframes
 
 
 def polygon_position(polygon: Wireframe, window: Rectangle) -> int:

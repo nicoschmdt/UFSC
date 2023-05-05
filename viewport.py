@@ -4,6 +4,7 @@ from PyQt6.QtGui import QPainter, QColor, QPolygon, QBrush
 from PyQt6.QtCore import QPoint
 
 from geometry.clip import clip_point, clip_line
+from geometry.clipping.weiler_atherton import polygon_clip
 from geometry.transformations import calculate_rotation
 from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
 
@@ -38,11 +39,15 @@ class Viewport:
                 if visible:
                     self.draw_point(obj.x, obj.y, painter)
             elif isinstance(obj, Wireframe):
-                if item.filled:
-                    painter.setBrush(QBrush(QColor.fromString('blue')))
-                    self.draw_filled_wireframe(obj.points, painter)
-                else:
-                    self.draw_wireframe(obj.points, painter)
+                visible, obj = polygon_clip(obj, self.window_size)
+                if visible:
+                    if item.filled:
+                        painter.setBrush(QBrush(QColor.fromString('blue')))
+                        for wireframe in obj:
+                            self.draw_filled_wireframe(wireframe.points, painter)
+                    else:
+                        for wireframe in obj:
+                            self.draw_wireframe(wireframe.points, painter)
 
     def zoom(self, step: int):
         new_width = int(self.window_size.width * (1 - (step / 100)))
