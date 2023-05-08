@@ -2,27 +2,21 @@ from geometry.shapes import Rectangle, Wireframe, Point, Line
 from geometry.clipping.liang_barsky import line_clipping
 from geometry.polygon import intersect, get_lines_from_polygon, point_inside_polygon
 
-from typing import List
+from typing import List, Set
 
 
 def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe]):
-    intersect_quantity = polygon_position(polygon, window)
+    number_of_intersections, lines_intersecting = intersect_quantity(polygon, window)
+    if number_of_intersections == 0:
+        return polygon_not_intersecting(polygon, window)
 
-    if intersect_quantity == 0:
-        # se todos os pontos estão dentro da window e as suas linhas não se intersectam
-        if all([True if is_point_inside(point, window) else False for point in polygon.points]):
-            return True, [polygon]
-        # se todos os pontos da window estão dentro do poligono
-        elif all([True if point_inside_polygon(point, polygon) else False for point in window.get_points()]):
-            return True, [Wireframe(window.get_points())]
-        # como nenhum ponto se intersecta, se não tem nenhum dentro então todos estão fora
-        else:
-            return False, None
-
-    # agora preciso calcular caso a intersecção aconteça
     # tuplas indicando se o ponto está dentro ou fora da window
     polygon_points = [(point, True) if is_point_inside(point, window) else (point, False) for point in polygon.points]
     polygon_points.append(polygon_points[0])
+
+    # verificação se todos os pontos estão fora
+    if not any(point_inside for (_, point_inside) in polygon_points):
+        return get_intersecting_polygons(polygon, window, lines_intersecting)
 
     wireframes = []
     new_polygon_points = []
@@ -60,6 +54,9 @@ def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe
             elif outside_in == 1:
                 outside_in = 0
             # ainda preciso ldiar com o preenchimento das quinas mas vejo depois
+            for window_point in window.get_points():
+                if point_inside_polygon(window_point, polygon):
+                    new_polygon_points.insert(0, window_point)
             wireframes.append(Wireframe(new_polygon_points))
             new_polygon_points = []
         else:
@@ -75,17 +72,75 @@ def polygon_clip(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe
     return True, wireframes
 
 
-def polygon_position(polygon: Wireframe, window: Rectangle) -> int:
+def get_intersecting_polygons(polygon: Wireframe, window: Rectangle, intersected_lines: Set[Line]) -> (bool, List[Wireframe]):
+    wireframes = []
+
+    if not any([True if point_inside_polygon(point, polygon) else False for point in window.get_points()]) and len(intersected_lines):
+        new_wireframe = [new_line for _, new_line in (line_clipping(line, window) for line in intersected_lines)]
+        return True, [Wireframe(new_wireframe)]
+
+    for polygon_line in intersected_lines:
+        _, new_line = line_clipping(polygon_line, window)
+        start = new_line.start
+        end = new_line.end
+        wireframe = [new_line]
+        if start.x == window.x or start.x == (window.x + window.width):
+            # paralelo horizontal
+            if end.x == window.x or end.x == (window.x + window.width):
+                for window_point in window.get_points():
+                    if point_inside_polygon(window_point, polygon):
+                        wireframe.append(window_point)
+                wireframes.append(Wireframe(wireframe))
+                continue
+            elif end.y == window.y:
+                pass
+            elif end.y == (window.y + window.height):
+                pass
+        elif start.y == window.y or start.y == (window.y + window.height):
+            # paralelo vertical
+            if end.y == window.y or end.y == (window.y + window.height):
+                for window_point in window.get_points():
+                    if point_inside_polygon(window_point, polygon):
+                        wireframe.append(window_point)
+                continue
+            elif end.x == window.x:
+                pass
+            elif end.x == (window.x + window.width):
+                pass
+        else:
+            # nenhum ponto da window está dentro do poligono
+            pass
+
+
+    return True, wireframes
+
+
+
+
+def polygon_not_intersecting(polygon: Wireframe, window: Rectangle) -> (bool, List[Wireframe]):
+    # se todos os pontos estão dentro da window e as suas linhas não se intersectam
+    if all([True if is_point_inside(point, window) else False for point in polygon.points]):
+        return True, [polygon]
+    # se todos os pontos da window estão dentro do poligono
+    elif all([True if point_inside_polygon(point, polygon) else False for point in window.get_points()]):
+        return True, [Wireframe(window.get_points())]
+    # como nenhum ponto se intersecta, se não tem nenhum dentro então todos estão fora
+    return False, None
+
+
+def intersect_quantity(polygon: Wireframe, window: Rectangle) -> (int, Set[Line]):
     intersect_points = 0
     window_lines = get_lines_from_polygon(window.get_points())
     polygon_lines = get_lines_from_polygon(polygon.points)
+    intersected_lines = set()
 
     for window_line in window_lines:
         for polygon_line in polygon_lines:
             if intersect(window_line, polygon_line):
                 intersect_points += 1
+                intersected_lines.add(polygon_line)
 
-    return intersect_points
+    return intersect_points, intersected_lines
 
 
 def is_point_inside(point: Point, window: Rectangle) -> bool:
@@ -202,27 +257,10 @@ def get_window_index(window_vertices, point, code):
     return window_vertices
 
 
-def get_lines_from_polygon(polygon: List[Point]) -> List[Line]:
-    lines = []
-    initial_point = polygon[0]
-    for point in polygon[1:]:
-        lines.append(Line(initial_point, point))
-        initial_point = point
-    lines.append(Line(initial_point, polygon[0]))
-    return lines
-
 # algorithm: Given polygon A(window) as the clipping region and polygon B as the subject polygon to be clipped,
 # the algorithm consists of the following steps:
 #
-# [x] List the vertices of the clipping-region polygon A and those of the subject polygon B.
-# Label the listed vertices of subject polygon B as either inside or outside of clipping region A.
 # Find all the polygon intersections and insert them into both lists, linking the lists at the intersections.
 # Generate a list of "inbound" intersections – the intersections where the vector from the intersection to the subsequent
 # vertex of subject polygon B begins inside the clipping region.
 # Follow each intersection clockwise around the linked lists until the start position is found.
-#
-# If there are no intersections then one of three conditions must be true:
-#
-#     A is inside B – return A for clipping, B for merging.
-#     B is inside A – return B for clipping, A for merging.
-#     A and B do not overlap – return None for clipping or A & B for merging

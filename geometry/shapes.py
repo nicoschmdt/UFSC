@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from typing import List
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Point:
     x: float
     y: float
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Line:
     start: Point
     end: Point
