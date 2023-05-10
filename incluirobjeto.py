@@ -280,9 +280,77 @@ class IncluirObjeto(QWidget):
 
         # Aba p/ adicionar curvas
         self.CurvasTab = QtWidgets.QWidget()
-        self.CurvasTab.setEnabled(False)
+        self.CurvasTab.setEnabled(True)
         self.CurvasTab.setObjectName("CurvasTab")
-        self.tabWidget.addTab(self.CurvasTab, "")
+        
+        self.verticalLayoutWidget_6 = QtWidgets.QWidget(parent=self.CurvasTab)
+        self.verticalLayoutWidget_6.setGeometry(QtCore.QRect(9, 9, 631, 600))
+        self.verticalLayoutWidget_6.setObjectName("verticalLayoutWidget_6")
+        self.verticalLayoutCurvas = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_6)
+        self.verticalLayoutCurvas.setContentsMargins(20, 0, 20, 0)
+        self.verticalLayoutCurvas.setObjectName("verticalLayoutCurvas")
+
+        self.verticalLayoutWidget_7 = QtWidgets.QWidget(parent=self.CurvasTab)
+        self.verticalLayoutWidget_7.setGeometry(QtCore.QRect(9, 9, 631, 560))
+        self.verticalLayoutWidget_7.setObjectName("verticalLayoutWidget_7")
+        self.verticalLayoutPontosCurva = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_7)
+        self.verticalLayoutPontosCurva.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayoutPontosCurva.setObjectName("verticalLayoutPontosCurva")
+
+        self.groupBoxPonto1 = QtWidgets.QGroupBox(parent=self.verticalLayoutWidget_7)
+        self.groupBoxPonto1.setMaximumSize(QtCore.QSize(16777215, 81))
+        self.groupBoxPonto1.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignTop)
+        self.groupBoxPonto1.setObjectName("groupBoxPonto1")
+        self.groupBoxPonto1.setTitle("Ponto 1")
+        self.horizontalLayoutPontoWidget = QtWidgets.QWidget(parent=self.groupBoxPonto1)
+        self.horizontalLayoutPontoWidget.setGeometry(QtCore.QRect(10, 10, 611, 81))
+        self.horizontalLayoutPontoWidget.setObjectName("horizontalLayoutPontoWidget")
+        self.horizontalLayoutPonto1 = QtWidgets.QHBoxLayout(self.horizontalLayoutPontoWidget)
+        self.horizontalLayoutPonto1.setContentsMargins(50, 10, 50, 10)
+        self.horizontalLayoutPonto1.setSpacing(20)
+        self.horizontalLayoutPonto1.setObjectName("horizontalLayoutPonto1")
+        self.labelXPonto1 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget)
+        self.labelXPonto1.setObjectName("labelXPonto1")
+        self.labelXPonto1.setText("x1:")
+        self.horizontalLayoutPonto1.addWidget(self.labelXPonto1)
+        self.textEditCurvaX1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget)
+        self.textEditCurvaX1.setObjectName("textEditCurvaX1")
+        self.textEditCurvaX1.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.horizontalLayoutPonto1.addWidget(self.textEditCurvaX1)
+        self.labelYPonto1 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget)
+        self.labelYPonto1.setText("y1:")
+        self.labelYPonto1.setObjectName("labelYPonto1")
+        self.horizontalLayoutPonto1.addWidget(self.labelYPonto1)
+        self.textEditCurvaY1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget)
+        self.textEditCurvaY1.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.textEditCurvaY1.setObjectName("textEditCurvaY1")
+        self.horizontalLayoutPonto1.addWidget(self.textEditCurvaY1)
+        self.labelZPonto1 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget)
+        self.labelZPonto1.setEnabled(False)
+        self.labelZPonto1.setObjectName("labelZPonto1")
+        self.labelZPonto1.setText("z1:")
+        self.horizontalLayoutPonto1.addWidget(self.labelZPonto1)
+        self.textEditCurvaZ1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget)
+        self.textEditCurvaZ1.setEnabled(False)
+        self.textEditCurvaZ1.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.textEditCurvaZ1.setObjectName("textEditCurvaZ1")
+        self.horizontalLayoutPonto1.addWidget(self.textEditCurvaZ1)
+
+        self.verticalLayoutPontosCurva.addWidget(self.groupBoxPonto1)
+        self.pushButtonAdicionarPonto = QtWidgets.QPushButton(parent=self.verticalLayoutWidget_6)
+        self.pushButtonAdicionarPonto.setObjectName("pushButtonAdicionarPonto")
+        self.pushButtonAdicionarPonto.setText("Adicionar ponto")
+        self.pushButtonAdicionarPonto.setFixedWidth(200)
+        self.pushButtonAdicionarPonto.setFixedHeight(25)
+        self.pushButtonAdicionarPonto.clicked.connect(self.addPointToCurve)
+        self.verticalLayoutCurvas.addWidget(self.verticalLayoutWidget_7)
+        self.verticalLayoutCurvas.addWidget(self.pushButtonAdicionarPonto, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        self.verticalLayoutCurvas.setStretch(0,20)
+        self.verticalLayoutCurvas.setStretch(1,1)
+        
+        self.tabWidget.addTab(self.CurvasTab, "Curva")
 
         #
         self.verticalLayoutPrincipal.addWidget(self.tabWidget)
@@ -390,6 +458,9 @@ class IncluirObjeto(QWidget):
         self.horizontalLayoutVertice2.addWidget(self.textEditsWireframeZ2)
 
         self.verticalLayoutPontosWireframe.addWidget(self.groupBoxVertice2)
+
+    def addPointToCurve(self):
+        pass
 
     def createObject(self):
         index = self.tabWidget.currentIndex()
