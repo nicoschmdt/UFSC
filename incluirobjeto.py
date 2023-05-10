@@ -9,6 +9,7 @@ from common.notapolygon import NotAPolygonDialog
 
 class IncluirObjeto(QWidget):
     vertixCounter: int = 1
+    curvePointCounter: int = 1
     lastAddedObject: WorldItem = None
 
     def setupUi(self):
@@ -315,7 +316,7 @@ class IncluirObjeto(QWidget):
         self.labelXPonto1.setText("x1:")
         self.horizontalLayoutPonto1.addWidget(self.labelXPonto1)
         self.textEditCurvaX1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget)
-        self.textEditCurvaX1.setObjectName("textEditCurvaX1")
+        self.textEditCurvaX1.setObjectName("plainTextEditXPonto1")
         self.textEditCurvaX1.setMaximumSize(QtCore.QSize(16777215, 30))
         self.horizontalLayoutPonto1.addWidget(self.textEditCurvaX1)
         self.labelYPonto1 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget)
@@ -324,7 +325,7 @@ class IncluirObjeto(QWidget):
         self.horizontalLayoutPonto1.addWidget(self.labelYPonto1)
         self.textEditCurvaY1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget)
         self.textEditCurvaY1.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.textEditCurvaY1.setObjectName("textEditCurvaY1")
+        self.textEditCurvaY1.setObjectName("plainTextEditYPonto1")
         self.horizontalLayoutPonto1.addWidget(self.textEditCurvaY1)
         self.labelZPonto1 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget)
         self.labelZPonto1.setEnabled(False)
@@ -334,7 +335,7 @@ class IncluirObjeto(QWidget):
         self.textEditCurvaZ1 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget)
         self.textEditCurvaZ1.setEnabled(False)
         self.textEditCurvaZ1.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.textEditCurvaZ1.setObjectName("textEditCurvaZ1")
+        self.textEditCurvaZ1.setObjectName("plainTextEditZPonto1")
         self.horizontalLayoutPonto1.addWidget(self.textEditCurvaZ1)
 
         self.verticalLayoutPontosCurva.addWidget(self.groupBoxPonto1)
@@ -460,7 +461,54 @@ class IncluirObjeto(QWidget):
         self.verticalLayoutPontosWireframe.addWidget(self.groupBoxVertice2)
 
     def addPointToCurve(self):
-        pass
+        self.curvePointCounter += 1
+
+        self.groupBoxPonto2 = QtWidgets.QGroupBox(parent=self.verticalLayoutWidget_7)
+        self.groupBoxPonto2.setMaximumSize(QtCore.QSize(16777215, 81))
+        self.groupBoxPonto2.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeading | QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignTop)
+        self.groupBoxPonto2.setObjectName(f"groupBoxVertice{self.curvePointCounter}")
+
+        self.horizontalLayoutPontoWidget2 = QtWidgets.QWidget(parent=self.groupBoxPonto2)
+        self.horizontalLayoutPontoWidget2.setGeometry(QtCore.QRect(10, 10, 611, 81))
+        self.horizontalLayoutPonto2 = QtWidgets.QHBoxLayout(self.horizontalLayoutPontoWidget2)
+        self.horizontalLayoutPonto2.setContentsMargins(50, 10, 50, 10)
+        self.horizontalLayoutPonto2.setSpacing(20)
+
+        self.labelXPonto2 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget2)
+        self.labelXPonto2 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget2)
+
+        self.textEditsPontoX2 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget2)
+        self.textEditsPontoX2.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.textEditsPontoX2.setObjectName(f"plainTextEditXPonto{self.curvePointCounter}")
+
+        self.labelYPonto2 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget2)
+
+        self.textEditsPontoY2 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget2)
+        self.textEditsPontoY2.setMaximumSize(QtCore.QSize(4987648, 30))
+        self.textEditsPontoY2.setObjectName(f"plainTextEditYPonto{self.curvePointCounter}")
+
+        self.labelZPonto2 = QtWidgets.QLabel(parent=self.horizontalLayoutPontoWidget2)
+        self.labelZPonto2.setEnabled(False)
+
+        self.textEditsPontoZ2 = QtWidgets.QPlainTextEdit(parent=self.horizontalLayoutPontoWidget2)
+        self.textEditsPontoZ2.setEnabled(False)
+        self.textEditsPontoZ2.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.textEditsPontoZ2.setObjectName(f"plainTextEditZPonto{self.curvePointCounter}")
+
+        self.groupBoxPonto2.setTitle(f"Ponto {self.curvePointCounter}")
+        self.labelXPonto2.setText(f"x{self.curvePointCounter}:")
+        self.labelYPonto2.setText(f"y{self.curvePointCounter}:")
+        self.labelZPonto2.setText(f"z{self.curvePointCounter}:")
+
+        self.horizontalLayoutPonto2.addWidget(self.labelXPonto2)
+        self.horizontalLayoutPonto2.addWidget(self.textEditsPontoX2)
+        self.horizontalLayoutPonto2.addWidget(self.labelYPonto2)
+        self.horizontalLayoutPonto2.addWidget(self.textEditsPontoY2)
+        self.horizontalLayoutPonto2.addWidget(self.labelZPonto2)
+        self.horizontalLayoutPonto2.addWidget(self.textEditsPontoZ2)
+
+        self.verticalLayoutPontosCurva.addWidget(self.groupBoxPonto2)
 
     def createObject(self):
         index = self.tabWidget.currentIndex()
@@ -507,6 +555,17 @@ class IncluirObjeto(QWidget):
                 filled=self.checkBoxPreencherWireframe.isChecked()
             )
         else:
+            pontosCurva = self.verticalLayoutWidget_7.findChild(QtWidgets.QVBoxLayout)
+            pointList = list()
+            for i in range(pontosCurva.count()):
+                groupBox = pontosCurva.itemAt(i).widget()
+                horizontalLayout = groupBox.findChild(QWidget)
+                xValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
+                                                    f"plainTextEditXPonto{i + 1}").toPlainText()
+                yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
+                                                    f"plainTextEditYPonto{i + 1}").toPlainText()
+                pointList.append(Point(int(xValue), int(yValue)))
+            # TODO Completar criação de curva
             pass
 
         determine_object_center(newObject)
