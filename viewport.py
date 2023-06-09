@@ -1,12 +1,14 @@
+from dataclasses import astuple
 from typing import List
 
+import numpy
 from PyQt6.QtGui import QPainter, QColor, QPolygon, QBrush
 from PyQt6.QtCore import QPoint
 
 from geometry.clip import clip_point, clip_line
 from geometry.clipping.weiler_atherton import polygon_clip
 from geometry.transformations import calculate_rotation
-from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
+from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem, BezierCurve
 
 
 class Viewport:
@@ -129,3 +131,28 @@ class Viewport:
             point = QPoint(x, y)
             polygon.append(point)
         painter.drawPolygon(polygon)
+
+    def draw_bezier(self, curve: BezierCurve, painter: QPainter):
+        steps = 100
+        step_size = 1/steps
+
+        x = list(map(astuple, [curve.p1, curve.p2, curve.p3, curve.p4]))
+        points = numpy.array(x)
+        bezier_matrix = numpy.array([
+            [-1, 3, -3, 1],
+            [3, -6, 3, 0],
+            [-3, 3, 0, 0],
+            [1, 0, 0, 0]])
+        first_point = curve.p1
+
+        for i in range(1, steps):
+            t = i*step_size
+            T = numpy.array([t**3, t**2, t, 1])
+
+            bezier_curve = T @ bezier_matrix @ points
+            second_point = Point(bezier_curve[0], bezier_curve[1])
+            draw_line, line = clip_line(Line(first_point, second_point), self.window_size, self.clipping_algorithm)
+            if draw_line:
+                self.draw_line(line.start, line.end, painter)
+
+            first_point = second_point
