@@ -2,7 +2,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget, QMessageBox, QDialog, QPushButton
 
 from geometry.polygon import is_polygon
-from geometry.shapes import Point, Line, WorldItem, Wireframe
+from geometry.shapes import Point, Line, WorldItem, Wireframe, BezierCurve
 from geometry.transformations import determine_object_center
 from common.notapolygon import NotAPolygonDialog
 
@@ -565,8 +565,17 @@ class IncluirObjeto(QWidget):
                 yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
                                                     f"plainTextEditYPonto{i + 1}").toPlainText()
                 pointList.append(Point(int(xValue), int(yValue)))
-            # TODO Completar criação de curva
-            pass
+
+            newObject = WorldItem(
+                name=self.textEditInserirNome.toPlainText(),
+                center_point=Point(0, 0),
+                graphic=BezierCurve(
+                    pointList[0],
+                    pointList[1],
+                    pointList[2],
+                    pointList[3]
+                )
+            )
 
         determine_object_center(newObject)
         self.on_ok(newObject)

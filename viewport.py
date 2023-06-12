@@ -1,4 +1,6 @@
+import collections
 from dataclasses import astuple
+from itertools import islice
 from typing import List
 
 import numpy
@@ -8,7 +10,7 @@ from PyQt6.QtCore import QPoint
 from geometry.clip import clip_point, clip_line
 from geometry.clipping.weiler_atherton import polygon_clip
 from geometry.transformations import calculate_rotation
-from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem, BezierCurve
+from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem, BezierCurve, BSplineCurve
 
 
 class Viewport:
@@ -50,6 +52,8 @@ class Viewport:
                     else:
                         for wireframe in obj:
                             self.draw_wireframe(wireframe.points, painter)
+            elif isinstance(obj, BezierCurve):
+                self.draw_bezier(obj, painter)
 
     def zoom(self, step: int):
         new_width = int(self.window_size.width * (1 - (step / 100)))
@@ -134,7 +138,7 @@ class Viewport:
 
     def draw_bezier(self, curve: BezierCurve, painter: QPainter):
         steps = 100
-        step_size = 1/steps
+        step_size = 1 / steps
 
         x = list(map(astuple, [curve.p1, curve.p2, curve.p3, curve.p4]))
         points = numpy.array(x)
@@ -146,8 +150,8 @@ class Viewport:
         first_point = curve.p1
 
         for i in range(1, steps):
-            t = i*step_size
-            T = numpy.array([t**3, t**2, t, 1])
+            t = i * step_size
+            T = numpy.array([t ** 3, t ** 2, t, 1])
 
             bezier_curve = T @ bezier_matrix @ points
             second_point = Point(bezier_curve[0], bezier_curve[1])
@@ -156,3 +160,57 @@ class Viewport:
                 self.draw_line(line.start, line.end, painter)
 
             first_point = second_point
+
+    def draw_bsplines(self, curve: BSplineCurve, painter: QPainter):
+        b_spline_base_matrix = (1 / 6) * numpy.array([
+            [-1, 3, -3, 1],
+            [3, -6, 3, 0],
+            [-3, 0, 3, 0],
+            [1, 4, 1, 0]])
+
+        # fwd diffs
+        delta = 0.01
+        delta3 = delta ** 3
+        delta2 = delta ** 2
+
+        initial_differences = numpy.array([
+            [0, 0, 0, 1],
+            [delta3, delta2, delta, 0],
+            [6 * delta3, 2 * delta2, 0, 0],
+            [6 * delta3, 0, 0, 0]
+        ])
+
+        for points in sliding_window(curve.points, 4):
+            points_x = numpy.array([point.x for point in points])
+            points_y = numpy.array([point.y for point in points])
+            # points = numpy.array(list(map(astuple, [*points])))
+
+            # segmento bspline
+            # cx = inverse_bspline @ points
+            Cx = b_spline_base_matrix @ points_x
+            Cy = b_spline_base_matrix @ points_y
+
+            # D = (initial_differences @ cx).T
+            Dx = initial_differences @ Cx
+            Dy = initial_differences @ Cy
+            initial_point = Point(Dx[0], Dy[0])
+
+            for i in range(int(1/delta)):
+                Dx += numpy.append(Dx[1:], 0)
+                Dy += numpy.append(Dy[1:], 0)
+                next_point = Point(Dx[0], Dy[0])
+                self.draw_line(initial_point, next_point, painter)
+                initial_point = next_point
+            # D = [[x, dx, dx2, dx3], + [[dx, dx2, dx3, 0],
+            #      [y, dy, dy2, dy3]]    [dx, dx2, dx3, 0]]
+
+
+def sliding_window(iterable, n):
+    # sliding_window('ABCDEFG', 4) --> ABCD BCDE CDEF DEFG
+    it = iter(iterable)
+    window = collections.deque(islice(it, n), maxlen=n)
+    if len(window) == n:
+        yield tuple(window)
+    for x in it:
+        window.append(x)
+        yield tuple(window)
