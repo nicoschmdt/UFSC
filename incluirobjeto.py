@@ -2,7 +2,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget, QMessageBox, QDialog, QPushButton
 
 from geometry.polygon import is_polygon
-from geometry.shapes import Point, Line, WorldItem, Wireframe
+from geometry.shapes import Point, Line, WorldItem, Wireframe, BezierCurve
 from geometry.transformations import determine_object_center
 from common.notapolygon import NotAPolygonDialog
 
@@ -339,17 +339,48 @@ class IncluirObjeto(QWidget):
         self.horizontalLayoutPonto1.addWidget(self.textEditCurvaZ1)
 
         self.verticalLayoutPontosCurva.addWidget(self.groupBoxPonto1)
-        self.pushButtonAdicionarPonto = QtWidgets.QPushButton(parent=self.verticalLayoutWidget_6)
+        
+        
+        self.horizontalLayoutAddPontoWidget = QtWidgets.QWidget(parent=self.groupBoxPonto1)
+        self.horizontalLayoutAddPontoWidget.setGeometry(QtCore.QRect(10, 10, 611, 81))
+        self.horizontalLayoutAddPontoWidget.setObjectName("horizontalLayoutAddPontoWidget")
+        self.horizontalLayoutAddPonto = QtWidgets.QHBoxLayout(self.horizontalLayoutAddPontoWidget)
+        self.horizontalLayoutAddPonto.setContentsMargins(50, 10, 50, 10)
+        self.horizontalLayoutAddPonto.setSpacing(20)
+        self.horizontalLayoutAddPonto.setObjectName("horizontalLayoutAddPonto")
+        
+        self.radioButtonBezier = QtWidgets.QRadioButton(parent=self.horizontalLayoutAddPontoWidget)
+        self.radioButtonBezier.setObjectName("radioButtonBezier")
+        self.radioButtonBezier.setText("Curva de Bezier")
+        self.radioButtonBezier.setChecked(False)
+        self.radioButtonBezier.clicked.connect(self.removeAddPointToCurve)
+        self.horizontalLayoutAddPonto.addWidget(self.radioButtonBezier)
+
+        self.radioButtonBSplines = QtWidgets.QRadioButton(parent=self.horizontalLayoutAddPontoWidget)
+        self.radioButtonBSplines.setObjectName("radioButtonBSplines")
+        self.radioButtonBSplines.setText("Curva BSplines")
+        self.radioButtonBSplines.setChecked(False)
+        self.radioButtonBSplines.clicked.connect(self.enableAddPointToCurve)
+        self.horizontalLayoutAddPonto.addWidget(self.radioButtonBSplines)
+
+        self.pushButtonAdicionarPonto = QtWidgets.QPushButton(parent=self.horizontalLayoutAddPontoWidget)
         self.pushButtonAdicionarPonto.setObjectName("pushButtonAdicionarPonto")
         self.pushButtonAdicionarPonto.setText("Adicionar ponto")
         self.pushButtonAdicionarPonto.setFixedWidth(200)
         self.pushButtonAdicionarPonto.setFixedHeight(25)
         self.pushButtonAdicionarPonto.clicked.connect(self.addPointToCurve)
+        self.horizontalLayoutAddPonto.addWidget(self.pushButtonAdicionarPonto)
+
+
         self.verticalLayoutCurvas.addWidget(self.verticalLayoutWidget_7)
-        self.verticalLayoutCurvas.addWidget(self.pushButtonAdicionarPonto, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.verticalLayoutCurvas.addWidget(self.horizontalLayoutAddPontoWidget)
 
         self.verticalLayoutCurvas.setStretch(0,20)
         self.verticalLayoutCurvas.setStretch(1,1)
+        
+        self.addPointToCurve()
+        self.addPointToCurve()
+        self.addPointToCurve()
         
         self.tabWidget.addTab(self.CurvasTab, "Curva")
 
@@ -510,6 +541,14 @@ class IncluirObjeto(QWidget):
 
         self.verticalLayoutPontosCurva.addWidget(self.groupBoxPonto2)
 
+    def removeAddPointToCurve(self):
+        self.pushButtonAdicionarPonto.setEnabled(False)
+        # self.pushButtonAdicionarPonto.setHidden(True)
+        
+    def enableAddPointToCurve(self):
+        self.pushButtonAdicionarPonto.setEnabled(True)
+        # self.pushButtonAdicionarPonto.setHidden(False)
+
     def createObject(self):
         index = self.tabWidget.currentIndex()
         newObject: WorldItem = None
@@ -565,8 +604,17 @@ class IncluirObjeto(QWidget):
                 yValue = horizontalLayout.findChild(QtWidgets.QPlainTextEdit,
                                                     f"plainTextEditYPonto{i + 1}").toPlainText()
                 pointList.append(Point(int(xValue), int(yValue)))
-            # TODO Completar criação de curva
-            pass
+
+            newObject = WorldItem(
+                name=self.textEditInserirNome.toPlainText(),
+                center_point=Point(0, 0),
+                graphic=BezierCurve(
+                    pointList[0],
+                    pointList[1],
+                    pointList[2],
+                    pointList[3]
+                )
+            )
 
         determine_object_center(newObject)
         self.on_ok(newObject)

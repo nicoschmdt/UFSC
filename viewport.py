@@ -1,16 +1,23 @@
+import collections
+from dataclasses import astuple
+from itertools import islice
 from typing import List
 
+import numpy
 from PyQt6.QtGui import QPainter, QColor, QPolygon, QBrush
 from PyQt6.QtCore import QPoint
 
+from geometry.clip import clip_point, clip_line
+from geometry.clipping.weiler_atherton import polygon_clip
 from geometry.transformations import calculate_rotation
-from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem
+from geometry.shapes import Point, Line, Rectangle, Wireframe, WorldItem, BezierCurve, BSplineCurve
 
 
 class Viewport:
     viewport_size: Rectangle
     window_size: Rectangle
     window_angle: float = 0.0
+    clipping_algorithm: str = 'cohen sutherland'
 
     def __init__(self, x: int, y: int, width: int, height: int):
         self.viewport_size = Rectangle(
@@ -28,15 +35,25 @@ class Viewport:
         for item in items:
             obj = item.graphic
             if isinstance(obj, Line):
-                self.draw_line(obj.start.x, obj.start.y, obj.end.x, obj.end.y, painter)
+                visible, obj = clip_line(obj, self.window_size, self.clipping_algorithm)
+                if visible:
+                    self.draw_line(obj.start, obj.end, painter)
             elif isinstance(obj, Point):
-                self.draw_point(obj.x, obj.y, painter)
+                visible = clip_point(obj, self.window_size)
+                if visible:
+                    self.draw_point(obj.x, obj.y, painter)
             elif isinstance(obj, Wireframe):
-                if item.filled:
-                    painter.setBrush(QBrush(QColor.fromString('blue')))
-                    self.draw_filled_wireframe(obj.points, painter)
-                else:
-                    self.draw_wireframe(obj.points, painter)
+                visible, obj = polygon_clip(obj, self.window_size)
+                if visible:
+                    if item.filled:
+                        painter.setBrush(QBrush(QColor.fromString('blue')))
+                        for wireframe in obj:
+                            self.draw_filled_wireframe(wireframe.points, painter)
+                    else:
+                        for wireframe in obj:
+                            self.draw_wireframe(wireframe.points, painter)
+            elif isinstance(obj, BezierCurve):
+                self.draw_bezier(obj, painter)
 
     def zoom(self, step: int):
         new_width = int(self.window_size.width * (1 - (step / 100)))
@@ -67,6 +84,9 @@ class Viewport:
     def set_window_angle(self, angle: float):
         self.window_angle = (self.window_angle + angle) % 360
 
+    def set_line_clipping_algorithm(self, algorithm: str):
+        self.clipping_algorithm = algorithm
+
     def transformada_vp_y(self, y: int):
         y_vp = 1 - ((y - self.window_size.y) / ((self.window_size.height + self.window_size.y) - self.window_size.y))
         y_vp *= (self.viewport_size.y + self.viewport_size.height) - self.viewport_size.y
@@ -81,15 +101,15 @@ class Viewport:
         return Point(self.window_size.x + self.window_size.width // 2,
                      self.window_size.y + self.window_size.height // 2)
 
-    def draw_point(self, x: int, y: int, painter: QPainter):
-        rotated_point = calculate_rotation([Point(x,y)], self.get_window_center(), self.window_angle)
+    def draw_point(self, x: float, y: float, painter: QPainter):
+        rotated_point = calculate_rotation([Point(x, y)], self.get_window_center(), self.window_angle)
 
         x1 = self.transformada_vp_x(rotated_point[0].x)
         y1 = self.transformada_vp_y(rotated_point[0].y)
         painter.drawPoint(x1, y1)
 
-    def draw_line(self, x1: int, y1: int, x2: int, y2: int, painter: QPainter):
-        rotated_points = calculate_rotation([Point(x1, y1), Point(x2, y2)], self.get_window_center(), self.window_angle)
+    def draw_line(self, point1: Point, point2: Point, painter: QPainter):
+        rotated_points = calculate_rotation([point1, point2], self.get_window_center(), self.window_angle)
 
         x1 = self.transformada_vp_x(rotated_points[0].x)
         y1 = self.transformada_vp_y(rotated_points[0].y)
@@ -101,10 +121,10 @@ class Viewport:
     def draw_wireframe(self, points: List[Point], painter: QPainter):
         first_point = points[0]
         for point in points[1:]:
-            self.draw_line(first_point.x, first_point.y, point.x, point.y, painter)
+            self.draw_line(first_point, point, painter)
             first_point = point
         reference = points[0]
-        self.draw_line(first_point.x, first_point.y, reference.x, reference.y, painter)
+        self.draw_line(first_point, reference, painter)
 
     def draw_filled_wireframe(self, points: List[Point], painter: QPainter):
         polygon = QPolygon()
@@ -115,3 +135,82 @@ class Viewport:
             point = QPoint(x, y)
             polygon.append(point)
         painter.drawPolygon(polygon)
+
+    def draw_bezier(self, curve: BezierCurve, painter: QPainter):
+        steps = 100
+        step_size = 1 / steps
+
+        x = list(map(astuple, [curve.p1, curve.p2, curve.p3, curve.p4]))
+        points = numpy.array(x)
+        bezier_matrix = numpy.array([
+            [-1, 3, -3, 1],
+            [3, -6, 3, 0],
+            [-3, 3, 0, 0],
+            [1, 0, 0, 0]])
+        first_point = curve.p1
+
+        for i in range(1, steps):
+            t = i * step_size
+            T = numpy.array([t ** 3, t ** 2, t, 1])
+
+            bezier_curve = T @ bezier_matrix @ points
+            second_point = Point(bezier_curve[0], bezier_curve[1])
+            draw_line, line = clip_line(Line(first_point, second_point), self.window_size, self.clipping_algorithm)
+            if draw_line:
+                self.draw_line(line.start, line.end, painter)
+
+            first_point = second_point
+
+    def draw_bsplines(self, curve: BSplineCurve, painter: QPainter):
+        b_spline_base_matrix = (1 / 6) * numpy.array([
+            [-1, 3, -3, 1],
+            [3, -6, 3, 0],
+            [-3, 0, 3, 0],
+            [1, 4, 1, 0]])
+
+        # fwd diffs
+        delta = 0.01
+        delta3 = delta ** 3
+        delta2 = delta ** 2
+
+        initial_differences = numpy.array([
+            [0, 0, 0, 1],
+            [delta3, delta2, delta, 0],
+            [6 * delta3, 2 * delta2, 0, 0],
+            [6 * delta3, 0, 0, 0]
+        ])
+
+        for points in sliding_window(curve.points, 4):
+            points_x = numpy.array([point.x for point in points])
+            points_y = numpy.array([point.y for point in points])
+            # points = numpy.array(list(map(astuple, [*points])))
+
+            # segmento bspline
+            # cx = inverse_bspline @ points
+            Cx = b_spline_base_matrix @ points_x
+            Cy = b_spline_base_matrix @ points_y
+
+            # D = (initial_differences @ cx).T
+            Dx = initial_differences @ Cx
+            Dy = initial_differences @ Cy
+            initial_point = Point(Dx[0], Dy[0])
+
+            for i in range(int(1/delta)):
+                Dx += numpy.append(Dx[1:], 0)
+                Dy += numpy.append(Dy[1:], 0)
+                next_point = Point(Dx[0], Dy[0])
+                self.draw_line(initial_point, next_point, painter)
+                initial_point = next_point
+            # D = [[x, dx, dx2, dx3], + [[dx, dx2, dx3, 0],
+            #      [y, dy, dy2, dy3]]    [dx, dx2, dx3, 0]]
+
+
+def sliding_window(iterable, n):
+    # sliding_window('ABCDEFG', 4) --> ABCD BCDE CDEF DEFG
+    it = iter(iterable)
+    window = collections.deque(islice(it, n), maxlen=n)
+    if len(window) == n:
+        yield tuple(window)
+    for x in it:
+        window.append(x)
+        yield tuple(window)

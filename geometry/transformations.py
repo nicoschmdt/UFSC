@@ -2,7 +2,7 @@ import math
 from typing import Callable, List
 
 import numpy
-from geometry.shapes import Point, Line, WorldItem, GraphicObject
+from geometry.shapes import Point, Line, WorldItem, GraphicObject, BezierCurve
 
 
 def translate_points(points: list[Point], offset: Point) -> List:
@@ -136,5 +136,7 @@ def determine_object_center(item: WorldItem):
         item.center_point = shape_item
     elif isinstance(shape_item, Line):
         item.center_point = calculate_object_center([shape_item.start, shape_item.end])
+    elif isinstance(shape_item, BezierCurve):
+        item.center_point = calculate_object_center([shape_item.p1, shape_item.p4])
     else:
         item.center_point = calculate_object_center(shape_item.points)
