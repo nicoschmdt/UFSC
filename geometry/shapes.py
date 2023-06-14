@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from typing import List
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Point:
-    x: int
-    y: int
+    x: float
+    y: float
 
 
-@dataclass
+@dataclass(frozen=True, eq=True)
 class Line:
     start: Point
     end: Point
@@ -21,13 +21,30 @@ class Rectangle:
     width: int
     height: int
 
+    def get_points(self) -> List[Point]:
+        return [Point(self.x, self.y), Point((self.x + self.width), self.y),
+                Point((self.x + self.width), (self.y + self.height)), Point(self.x, (self.y + self.width))]
+
 
 @dataclass
 class Wireframe:
     points: List[Point]
 
 
-GraphicObject = Point | Line | Wireframe
+@dataclass
+class BezierCurve:
+    p1: Point
+    p2: Point
+    p3: Point
+    p4: Point
+
+
+@dataclass
+class BSplineCurve:
+    points: List[Point]
+
+
+GraphicObject = Point | Line | Wireframe | BezierCurve
 
 
 @dataclass
@@ -35,3 +52,4 @@ class WorldItem:
     name: str
     center_point: Point
     graphic: GraphicObject
+    filled: bool = False
