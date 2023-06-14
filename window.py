@@ -46,7 +46,7 @@ class Canvas(QWidget):
         if draw_y:
             self.viewport.draw_line(y_axis.start, y_axis.end, painter)
 
-        #create triangle
+        # create triangle
         def simulate(points: list[Point]) -> None:
             poly = Wireframe(points)
             painter.setPen(QPen(QColor.fromString('red'), 1))
@@ -58,21 +58,6 @@ class Canvas(QWidget):
 
         # simulate([Point(1, 1), Point(1, 33), Point(33, 33)])
         # simulate([Point(p.x + 50, p.y) for p in [Point(10, -10), Point(10, 30), Point(30, -5), Point(50, 30), Point(50, -10)]])
-        # painter.setPen(QPen(QColor.fromString('red'), 1))
-        # self.viewport.draw_bezier(
-        #     curve=BezierCurve(Point(0, 40), Point(10, 60), Point(20, 100), Point(10, 50)),
-        #     painter=painter
-        # )
-        painter.setPen(QPen(QColor.fromString('blue'), 1))
-        self.viewport.draw_bezier(
-            curve=BezierCurve(Point(4, 4), Point(4, 14), Point(16, -8), Point(16, 4)),
-            painter=painter
-        )
-        self.viewport.draw_bsplines(
-            curve=BSplineCurve([Point(50, 0), Point(0, 20), Point(0, 80), Point(50, 100), Point(100, 80), Point(100, 20), Point(50, 0), Point(0, 20), Point(0, 80)]),
-            painter=painter
-        )
-        # self.viewport.draw_line(30, 30, 90, 90, painter)
 
     # TODO: pegar o valor do step ao inves de usar algo fixo
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:

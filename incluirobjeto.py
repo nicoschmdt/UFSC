@@ -2,7 +2,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QWidget, QMessageBox, QDialog, QPushButton
 
 from geometry.polygon import is_polygon
-from geometry.shapes import Point, Line, WorldItem, Wireframe, BezierCurve
+from geometry.shapes import Point, Line, WorldItem, Wireframe, BezierCurve, BSplineCurve
 from geometry.transformations import determine_object_center
 from common.notapolygon import NotAPolygonDialog
 
@@ -359,7 +359,7 @@ class IncluirObjeto(QWidget):
         self.radioButtonBSplines = QtWidgets.QRadioButton(parent=self.horizontalLayoutAddPontoWidget)
         self.radioButtonBSplines.setObjectName("radioButtonBSplines")
         self.radioButtonBSplines.setText("Curva BSplines")
-        self.radioButtonBSplines.setChecked(False)
+        self.radioButtonBSplines.setChecked(True)
         self.radioButtonBSplines.clicked.connect(self.enableAddPointToCurve)
         self.horizontalLayoutAddPonto.addWidget(self.radioButtonBSplines)
 
@@ -605,15 +605,20 @@ class IncluirObjeto(QWidget):
                                                     f"plainTextEditYPonto{i + 1}").toPlainText()
                 pointList.append(Point(int(xValue), int(yValue)))
 
-            newObject = WorldItem(
-                name=self.textEditInserirNome.toPlainText(),
-                center_point=Point(0, 0),
-                graphic=BezierCurve(
+            if self.radioButtonBezier.isChecked():
+                curve = BezierCurve(
                     pointList[0],
                     pointList[1],
                     pointList[2],
                     pointList[3]
                 )
+            else:
+                curve = BSplineCurve(pointList)
+
+            newObject = WorldItem(
+                name=self.textEditInserirNome.toPlainText(),
+                center_point=Point(0, 0),
+                graphic=curve
             )
 
         determine_object_center(newObject)

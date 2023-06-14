@@ -54,6 +54,8 @@ class Viewport:
                             self.draw_wireframe(wireframe.points, painter)
             elif isinstance(obj, BezierCurve):
                 self.draw_bezier(obj, painter)
+            elif isinstance(obj, BSplineCurve):
+                self.draw_bsplines(obj, painter)
 
     def zoom(self, step: int):
         new_width = int(self.window_size.width * (1 - (step / 100)))
@@ -183,14 +185,11 @@ class Viewport:
         for points in sliding_window(curve.points, 4):
             points_x = numpy.array([point.x for point in points])
             points_y = numpy.array([point.y for point in points])
-            # points = numpy.array(list(map(astuple, [*points])))
 
             # segmento bspline
-            # cx = inverse_bspline @ points
             Cx = b_spline_base_matrix @ points_x
             Cy = b_spline_base_matrix @ points_y
 
-            # D = (initial_differences @ cx).T
             Dx = initial_differences @ Cx
             Dy = initial_differences @ Cy
             initial_point = Point(Dx[0], Dy[0])
@@ -199,14 +198,14 @@ class Viewport:
                 Dx += numpy.append(Dx[1:], 0)
                 Dy += numpy.append(Dy[1:], 0)
                 next_point = Point(Dx[0], Dy[0])
-                self.draw_line(initial_point, next_point, painter)
+
+                draw_line, line = clip_line(Line(initial_point, next_point), self.window_size, self.clipping_algorithm)
+                if draw_line:
+                    self.draw_line(line.start, line.end, painter)
                 initial_point = next_point
-            # D = [[x, dx, dx2, dx3], + [[dx, dx2, dx3, 0],
-            #      [y, dy, dy2, dy3]]    [dx, dx2, dx3, 0]]
 
 
 def sliding_window(iterable, n):
-    # sliding_window('ABCDEFG', 4) --> ABCD BCDE CDEF DEFG
     it = iter(iterable)
     window = collections.deque(islice(it, n), maxlen=n)
     if len(window) == n:
