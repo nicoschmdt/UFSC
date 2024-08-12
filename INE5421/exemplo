@@ -1,0 +1,6 @@
+program exemplo ;
+var A , B : integer ;
+begin
+    read A ;
+    B := A / 25 ;
+end
